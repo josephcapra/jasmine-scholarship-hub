@@ -1,0 +1,10 @@
+{
+  "name": "jasmine-scholarship-hub",
+  "version": "1.0.0",
+  "description": "Jasmine's Scholarship Hub - AI-powered scholarship discovery and application assistant",
+  "private": true,
+  "dependencies": {
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.6.0"
+  }
+}
