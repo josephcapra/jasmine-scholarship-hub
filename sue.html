@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jasmine's Progress - Mom's View</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👩‍👧</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --pink: #ec4899;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: white;
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 1.5rem; margin-bottom: 4px; }
+    .header .sub { opacity: 0.9; font-size: 0.9rem; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .card-title { font-weight: 800; font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stat {
+      text-align: center;
+      padding: 16px;
+      background: linear-gradient(135deg, #ede9fe, #fce7f3);
+      border-radius: 12px;
+    }
+    .stat .num { font-size: 2rem; font-weight: 800; color: var(--purple); }
+    .stat .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+    .progress-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .progress-item:last-child { border-bottom: none; }
+    .progress-bar { flex: 1; margin: 0 16px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 4px; }
+    .reward-card {
+      background: linear-gradient(135deg, var(--gold), #fbbf24);
+      color: #78350f;
+    }
+    .reward-balance { font-size: 2.5rem; font-weight: 800; text-align: center; margin: 16px 0; }
+    .reward-history { font-size: 0.85rem; }
+    .reward-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+    .reward-item:last-child { border-bottom: none; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--purple), var(--pink)); color: white; }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #fbbf24); color: #78350f; }
+    .message-area { margin-top: 12px; }
+    .message-area textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+      margin-bottom: 12px;
+    }
+    .login-card {
+      max-width: 400px;
+      margin: 50px auto;
+      text-align: center;
+    }
+    .login-card .logo { font-size: 4rem; margin-bottom: 16px; }
+    .login-card input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .activity-log { font-size: 0.85rem; max-height: 200px; overflow-y: auto; }
+    .activity-item { padding: 8px 0; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; }
+    .badge { font-size: 0.7rem; padding: 4px 8px; border-radius: 8px; font-weight: 700; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-purple { background: #ede9fe; color: var(--purple); }
+    #app { display: none; }
+    #login { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Login -->
+  <div id="login">
+    <div class="card login-card">
+      <div class="logo">👩‍👧</div>
+      <h1 style="color: var(--purple); margin-bottom: 8px;">Mom's Dashboard</h1>
+      <p style="color: var(--muted); margin-bottom: 24px;">Track Jasmine's scholarship progress</p>
+      <input type="email" id="login-email" placeholder="Your email">
+      <input type="password" id="login-password" placeholder="Password">
+      <button class="btn btn-primary" onclick="login()">Sign In</button>
+      <p style="margin-top: 16px; font-size: 0.8rem; color: var(--muted);">Only Mom can access</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="container">
+    <div class="header">
+      <h1>👩‍👧 Jasmine's Progress</h1>
+      <div class="sub">Mom's Dashboard - Real-time tracking</div>
+    </div>
+
+    <!-- Preview Student View Button -->
+    <button onclick="previewStudentView()" style="
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    ">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="9" r="7"/><path d="M9 6v6M6 9h6"/>
+      </svg>
+      Preview Student View
+    </button>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid" style="margin-bottom: 16px;">
+      <div class="stat">
+        <div class="num" id="stat-streak">0</div>
+        <div class="label">Day Streak</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="stat-essays">0</div>
+        <div class="label">Essays</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="stat-scholarships">0</div>
+        <div class="label">Tracked</div>
+      </div>
+    </div>
+
+    <!-- Parent Rewards Control -->
+    <div class="card reward-card">
+      <div class="card-title">💰 Parent Rewards</div>
+
+      <!-- Toggle to show on Jasmine's app -->
+      <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.3); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+        <div>
+          <div style="font-weight: 700;">Show to Jasmine</div>
+          <div style="font-size: 0.8rem; opacity: 0.8;">Display rewards on her app</div>
+        </div>
+        <label style="position: relative; width: 50px; height: 28px;">
+          <input type="checkbox" id="rewards-enabled" onchange="toggleRewardsVisibility()" style="opacity: 0; width: 0; height: 0;">
+          <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.2); border-radius: 28px; transition: 0.3s;"></span>
+          <span id="toggle-slider" style="position: absolute; height: 22px; width: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s;"></span>
+        </label>
+      </div>
+
+      <div class="reward-balance">$<span id="reward-balance">0.00</span></div>
+      <p style="text-align: center; font-size: 0.85rem; margin-bottom: 16px;">Financial rewards for scholarship work</p>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" style="background: white; color: #78350f; flex: 1;" onclick="openRewardModal()">➕ Add Reward</button>
+        <button class="btn" style="background: rgba(0,0,0,0.1); color: #78350f; flex: 1;" onclick="resetRewards()">🔄 Reset</button>
+      </div>
+    </div>
+
+    <!-- Reward Programs -->
+    <div class="card">
+      <div class="card-title">🎯 Reward Programs</div>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 16px;">Motivate Jasmine with automatic rewards for reaching milestones</p>
+
+      <div id="reward-programs-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Populated by JS -->
+      </div>
+
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+        <p style="font-size: 0.8rem; font-weight: 700; color: var(--purple); margin-bottom: 8px;">💡 Add Custom Reward</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <input type="text" id="custom-program-trigger" placeholder="Trigger (e.g., Complete 3 essays)" style="flex: 1; min-width: 150px; padding: 10px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 0.85rem;">
+          <input type="number" id="custom-program-amount" placeholder="$" style="width: 70px; padding: 10px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 0.85rem;">
+          <button class="btn btn-primary" style="padding: 10px 16px; width: auto;" onclick="addCustomRewardProgram()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Essay Progress -->
+    <div class="card">
+      <div class="card-title">📝 Essay Progress</div>
+      <div id="essay-progress">
+        <div class="progress-item">
+          <span>Mom's Journey</span>
+          <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+          <span class="badge badge-purple">0%</span>
+        </div>
+        <div class="progress-item">
+          <span>Career Goals</span>
+          <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+          <span class="badge badge-purple">0%</span>
+        </div>
+        <div class="progress-item">
+          <span>Arts & Photography</span>
+          <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+          <span class="badge badge-purple">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="card">
+      <div class="card-title">📊 Recent Activity</div>
+      <div class="activity-log" id="activity-log">
+        <div class="activity-item">
+          <span>Logged in</span>
+          <span style="color: var(--muted);">Just now</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Encouragement -->
+    <div class="card">
+      <div class="card-title">💜 Send Encouragement</div>
+      <div class="message-area">
+        <textarea id="encouragement-message" placeholder="Write a message for Jasmine..."></textarea>
+        <button class="btn btn-primary" onclick="sendEncouragement()">💌 Send Message</button>
+      </div>
+    </div>
+
+    <!-- Reward History -->
+    <div class="card">
+      <div class="card-title">📜 Reward History</div>
+      <div class="reward-history" id="reward-history">
+        <p style="color: var(--muted); text-align: center;">No rewards yet</p>
+      </div>
+    </div>
+
+    <!-- Scholarship Management -->
+    <div class="card">
+      <div class="card-title">🎓 Manage Scholarships</div>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">Add new scholarships or update existing ones with intel</p>
+      <button class="btn btn-primary" onclick="openScholarshipManager()">➕ Add Scholarship</button>
+      <div id="parent-scholarship-list" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- Reward Modal -->
+  <div id="reward-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 400px; margin: 20px;">
+      <div class="card-title">➕ Add Reward</div>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 16px;">Reward Jasmine for her scholarship work (max $30/week)</p>
+      <input type="number" id="reward-amount" placeholder="Amount ($)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; font-size: 1.2rem;">
+      <input type="text" id="reward-reason" placeholder="Reason (e.g., Completed essay)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" style="background: #e5e7eb; color: var(--text);" onclick="closeRewardModal()">Cancel</button>
+        <button class="btn btn-gold" onclick="addReward()">💰 Add Reward</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scholarship Manager Modal -->
+  <div id="scholarship-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; overflow-y: auto; padding: 20px;">
+    <div class="card" style="max-width: 500px; margin: 20px auto;">
+      <div class="card-title">🎓 Add/Edit Scholarship</div>
+      <input type="hidden" id="edit-scholarship-id">
+      <input type="text" id="sch-name" placeholder="Scholarship Name *" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <input type="text" id="sch-org" placeholder="Organization" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <input type="text" id="sch-amount" placeholder="Amount (e.g., $5,000 - $10,000)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <input type="date" id="sch-deadline" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <select id="sch-priority" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+        <option value="A">Priority A (High)</option>
+        <option value="B">Priority B (Medium)</option>
+        <option value="C">Priority C (Lower)</option>
+      </select>
+      <select id="sch-tier" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+        <option value="1">Tier 1 - Low Hanging Fruit</option>
+        <option value="2">Tier 2 - Strong Personal Advantage</option>
+        <option value="3">Tier 3 - Serious Competition</option>
+        <option value="4">Tier 4 - Reach</option>
+      </select>
+      <textarea id="sch-notes" placeholder="Notes & Intel (strategy, tips, what to emphasize)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; min-height: 80px;"></textarea>
+      <textarea id="sch-action" placeholder="Next Action (what Jasmine should do)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; min-height: 60px;"></textarea>
+      <input type="text" id="sch-advantage" placeholder="Competitive Advantage (why she'll win)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <input type="url" id="sch-url" placeholder="Official URL" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px;">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+          <input type="checkbox" id="sch-essay"> Essay
+        </label>
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+          <input type="checkbox" id="sch-rec"> Recommendation
+        </label>
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+          <input type="checkbox" id="sch-transcript"> Transcript
+        </label>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" style="flex: 1; background: #e5e7eb; color: var(--text);" onclick="closeScholarshipManager()">Cancel</button>
+        <button class="btn btn-primary" style="flex: 1;" onclick="saveScholarship()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_WEEKLY_REWARD = 30;
+
+    let rewardData = JSON.parse(localStorage.getItem('jasmine_rewards') || '{"balance":0,"history":[]}');
+
+    function login() {
+      const email = document.getElementById('login-email').value.toLowerCase();
+      const password = document.getElementById('login-password').value;
+
+      if (!email) {
+        alert('Please enter your email');
+        return;
+      }
+
+      // Password check for parent access
+      if (password !== 'paradiserealtyfla') {
+        alert('Incorrect password');
+        return;
+      }
+
+      sessionStorage.setItem('parent_logged_in', 'true');
+      sessionStorage.setItem('parent_email', email);
+
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadData();
+    }
+
+    function loadData() {
+      // Load Jasmine's data from localStorage (shared with her app)
+      const essayTypes = ['veteran', 'career', 'community', 'arts', 'challenge', 'financial'];
+      const targets = { veteran: 500, career: 500, community: 400, arts: 500, challenge: 400, financial: 300 };
+
+      let completedEssays = 0;
+      const progressHtml = [];
+
+      essayTypes.forEach(type => {
+        const saved = localStorage.getItem(`essay_${type}`);
+        let pct = 0;
+        if (saved) {
+          const words = saved.trim().split(/\s+/).filter(w => w.length > 0).length;
+          pct = Math.min(100, Math.round((words / targets[type]) * 100));
+          if (pct >= 100) completedEssays++;
+        }
+
+        const names = {
+          veteran: "Mom's Journey",
+          career: "Career Goals",
+          community: "Community Service",
+          arts: "Arts & Photography",
+          challenge: "Challenge",
+          financial: "Financial"
+        };
+
+        progressHtml.push(`
+          <div class="progress-item">
+            <span>${names[type]}</span>
+            <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+            <span class="badge ${pct >= 100 ? 'badge-green' : 'badge-purple'}">${pct}%</span>
+          </div>
+        `);
+      });
+
+      document.getElementById('essay-progress').innerHTML = progressHtml.join('');
+      document.getElementById('stat-essays').textContent = completedEssays;
+
+      // Login Streak (tracked from Jasmine's logins)
+      const loginData = JSON.parse(localStorage.getItem('jasmine_logins') || '{"streak":0}');
+      document.getElementById('stat-streak').textContent = loginData.streak || 0;
+
+      // Scholarships count
+      document.getElementById('stat-scholarships').textContent = window.JASMINE_SCHOLARSHIPS?.length || 13;
+
+      // Rewards
+      updateRewardDisplay();
+      loadRewardSettings();
+
+      // Reward programs
+      loadRewardPrograms();
+
+      // Activity log
+      loadActivityLog();
+    }
+
+    function loadActivityLog() {
+      const log = JSON.parse(localStorage.getItem('jasmine_activity_log') || '[]');
+      const html = log.slice(0, 10).map(item => `
+        <div class="activity-item">
+          <span>${item.action}</span>
+          <span style="color: var(--muted);">${new Date(item.timestamp).toLocaleDateString()}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('activity-log').innerHTML = html || '<p style="color: var(--muted);">No recent activity</p>';
+    }
+
+    function updateRewardDisplay() {
+      document.getElementById('reward-balance').textContent = rewardData.balance.toFixed(2);
+
+      const historyHtml = rewardData.history.slice(0, 10).map(item => `
+        <div class="reward-item">
+          <span>+$${item.amount.toFixed(2)} - ${item.reason}</span>
+          <span>${new Date(item.date).toLocaleDateString()}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('reward-history').innerHTML = historyHtml || '<p style="color: var(--muted); text-align: center;">No rewards yet</p>';
+    }
+
+    function openRewardModal() {
+      document.getElementById('reward-modal').style.display = 'flex';
+    }
+
+    function closeRewardModal() {
+      document.getElementById('reward-modal').style.display = 'none';
+    }
+
+    function addReward() {
+      const amount = parseFloat(document.getElementById('reward-amount').value);
+      const reason = document.getElementById('reward-reason').value || 'Scholarship work';
+
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
+
+      // Check weekly limit
+      const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      const weeklyTotal = rewardData.history
+        .filter(r => new Date(r.date).getTime() > weekAgo)
+        .reduce((sum, r) => sum + r.amount, 0);
+
+      if (weeklyTotal + amount > MAX_WEEKLY_REWARD) {
+        alert(`Weekly limit is $${MAX_WEEKLY_REWARD}. You've already given $${weeklyTotal.toFixed(2)} this week.`);
+        return;
+      }
+
+      rewardData.balance += amount;
+      rewardData.history.unshift({
+        amount,
+        reason,
+        date: new Date().toISOString()
+      });
+
+      localStorage.setItem('jasmine_rewards', JSON.stringify(rewardData));
+      updateRewardDisplay();
+      closeRewardModal();
+
+      document.getElementById('reward-amount').value = '';
+      document.getElementById('reward-reason').value = '';
+
+      // Log activity
+      logActivity(`Received $${amount.toFixed(2)} reward: ${reason}`);
+
+      // Update shared reward settings
+      const rewardSettings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
+      rewardSettings.balance = rewardData.balance;
+      rewardSettings.history = rewardData.history;
+      localStorage.setItem('jasmine_reward_settings', JSON.stringify(rewardSettings));
+    }
+
+    function toggleRewardsVisibility() {
+      const checkbox = document.getElementById('rewards-enabled');
+      const slider = document.getElementById('toggle-slider');
+      const rewardSettings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
+
+      rewardSettings.enabled = checkbox.checked;
+      rewardSettings.balance = rewardData.balance;
+      rewardSettings.history = rewardData.history;
+      localStorage.setItem('jasmine_reward_settings', JSON.stringify(rewardSettings));
+
+      // Update toggle visual
+      if (checkbox.checked) {
+        slider.style.transform = 'translateX(22px)';
+        slider.parentElement.previousElementSibling.style.background = '#10b981';
+      } else {
+        slider.style.transform = 'translateX(0)';
+        slider.parentElement.previousElementSibling.style.background = 'rgba(0,0,0,0.2)';
+      }
+    }
+
+    function loadRewardSettings() {
+      const rewardSettings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
+      const checkbox = document.getElementById('rewards-enabled');
+      const slider = document.getElementById('toggle-slider');
+
+      checkbox.checked = rewardSettings.enabled;
+      if (rewardSettings.enabled) {
+        slider.style.transform = 'translateX(22px)';
+        slider.parentElement.previousElementSibling.style.background = '#10b981';
+      }
+    }
+
+    function resetRewards() {
+      if (!confirm('Reset all rewards to $0? This cannot be undone.')) return;
+
+      rewardData = { balance: 0, history: [] };
+      localStorage.setItem('jasmine_rewards', JSON.stringify(rewardData));
+
+      const rewardSettings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
+      rewardSettings.balance = 0;
+      rewardSettings.history = [];
+      localStorage.setItem('jasmine_reward_settings', JSON.stringify(rewardSettings));
+
+      updateRewardDisplay();
+    }
+
+    function sendEncouragement() {
+      const message = document.getElementById('encouragement-message').value.trim();
+      if (!message) {
+        alert('Please write a message');
+        return;
+      }
+
+      const encouragements = JSON.parse(localStorage.getItem('parent_encouragements') || '[]');
+      encouragements.unshift({
+        message,
+        from: 'Mom & Daddy Dog',
+        date: new Date().toISOString()
+      });
+
+      localStorage.setItem('parent_encouragements', JSON.stringify(encouragements));
+      document.getElementById('encouragement-message').value = '';
+
+      alert('Message sent! Jasmine will see it next time she opens the app 💜');
+      logActivity('Sent encouragement message');
+    }
+
+    function logActivity(action) {
+      const log = JSON.parse(localStorage.getItem('jasmine_activity_log') || '[]');
+      log.unshift({ action, timestamp: new Date().toISOString() });
+      localStorage.setItem('jasmine_activity_log', JSON.stringify(log.slice(0, 50)));
+      loadActivityLog();
+    }
+
+    // ========================================
+    // REWARD PROGRAMS
+    // ========================================
+    const PRESET_REWARD_PROGRAMS = [
+      {
+        id: 'streak-3',
+        emoji: '🔥',
+        title: '3-Day Streak',
+        description: 'Log an update 3 days in a row',
+        amount: 5,
+        trigger: 'streak',
+        threshold: 3,
+        tip: 'Builds consistent work habits'
+      },
+      {
+        id: 'streak-7',
+        emoji: '⚡',
+        title: '7-Day Streak',
+        description: 'A full week of daily progress',
+        amount: 15,
+        trigger: 'streak',
+        threshold: 7,
+        tip: 'Major commitment milestone'
+      },
+      {
+        id: 'first-essay',
+        emoji: '📝',
+        title: 'First Essay Complete',
+        description: 'Finish any essay draft',
+        amount: 10,
+        trigger: 'essays',
+        threshold: 1,
+        tip: 'Gets the ball rolling'
+      },
+      {
+        id: 'essays-3',
+        emoji: '✍️',
+        title: '3 Essays Done',
+        description: 'Complete 3 scholarship essays',
+        amount: 20,
+        trigger: 'essays',
+        threshold: 3,
+        tip: 'Serious progress reward'
+      },
+      {
+        id: 'essays-5',
+        emoji: '🏆',
+        title: '5 Essays Done',
+        description: 'Half the battle won',
+        amount: 30,
+        trigger: 'essays',
+        threshold: 5,
+        tip: 'Major milestone celebration'
+      },
+      {
+        id: 'first-submit',
+        emoji: '🚀',
+        title: 'First Submission',
+        description: 'Submit first scholarship application',
+        amount: 15,
+        trigger: 'submissions',
+        threshold: 1,
+        tip: 'Taking real action'
+      },
+      {
+        id: 'profile-complete',
+        emoji: '👤',
+        title: 'Profile 100%',
+        description: 'Complete all profile sections',
+        amount: 10,
+        trigger: 'profile',
+        threshold: 100,
+        tip: 'Foundation for all applications'
+      },
+      {
+        id: 'docs-upload',
+        emoji: '📄',
+        title: 'Documents Ready',
+        description: 'Upload transcript & 2 documents',
+        amount: 5,
+        trigger: 'documents',
+        threshold: 3,
+        tip: 'Prepared for any app'
+      }
+    ];
+
+    function loadRewardPrograms() {
+      const activePrograms = JSON.parse(localStorage.getItem('jasmine_reward_programs') || '[]');
+      const customPrograms = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      const container = document.getElementById('reward-programs-list');
+
+      let html = '<p style="font-size: 0.8rem; font-weight: 700; color: var(--muted); margin-bottom: 8px;">Suggested Programs</p>';
+
+      html += PRESET_REWARD_PROGRAMS.map(prog => {
+        const isActive = activePrograms.includes(prog.id);
+        const wasAwarded = JSON.parse(localStorage.getItem('jasmine_program_awards') || '[]').includes(prog.id);
+
+        return `
+          <div onclick="toggleRewardProgram('${prog.id}')" style="
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            background: ${isActive ? 'linear-gradient(135deg, #ede9fe, #fce7f3)' : '#f8fafc'};
+            border: 2px solid ${isActive ? 'var(--purple)' : '#e5e7eb'};
+            border-radius: 12px; cursor: pointer; transition: all 0.2s;
+            ${wasAwarded ? 'opacity: 0.5;' : ''}
+          ">
+            <div style="font-size: 1.5rem;">${prog.emoji}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                ${prog.title}
+                ${wasAwarded ? '<span style="font-size: 0.7rem; background: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 4px;">Awarded!</span>' : ''}
+              </div>
+              <div style="font-size: 0.8rem; color: var(--muted);">${prog.description}</div>
+              <div style="font-size: 0.75rem; color: var(--purple); margin-top: 2px;">💡 ${prog.tip}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 800; color: var(--gold);">$${prog.amount}</div>
+              <div style="font-size: 0.7rem; color: ${isActive ? 'var(--green)' : 'var(--muted)'};">
+                ${isActive ? '✓ Active' : 'Tap to enable'}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (customPrograms.length > 0) {
+        html += '<p style="font-size: 0.8rem; font-weight: 700; color: var(--muted); margin: 16px 0 8px;">Your Custom Programs</p>';
+        html += customPrograms.map((prog, i) => {
+          const wasAwarded = JSON.parse(localStorage.getItem('jasmine_program_awards') || '[]').includes(`custom-${i}`);
+          return `
+            <div style="
+              display: flex; align-items: center; gap: 12px; padding: 12px;
+              background: linear-gradient(135deg, #fef3c7, #fde68a);
+              border: 2px solid #d97706;
+              border-radius: 12px;
+              ${wasAwarded ? 'opacity: 0.5;' : ''}
+            ">
+              <div style="font-size: 1.5rem;">⭐</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 0.9rem; color: #78350f;">${prog.trigger}</div>
+                ${wasAwarded ? '<span style="font-size: 0.7rem; background: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 4px;">Awarded!</span>' : ''}
+              </div>
+              <div style="font-weight: 800; color: #78350f;">$${prog.amount}</div>
+              <button onclick="event.stopPropagation(); removeCustomProgram(${i})" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1.2rem;">×</button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = html;
+    }
+
+    function toggleRewardProgram(programId) {
+      const awarded = JSON.parse(localStorage.getItem('jasmine_program_awards') || '[]');
+      if (awarded.includes(programId)) {
+        alert('This reward was already awarded! Cannot re-enable.');
+        return;
+      }
+
+      let activePrograms = JSON.parse(localStorage.getItem('jasmine_reward_programs') || '[]');
+
+      if (activePrograms.includes(programId)) {
+        activePrograms = activePrograms.filter(id => id !== programId);
+        logActivity(`Disabled reward program: ${programId}`);
+      } else {
+        activePrograms.push(programId);
+        const prog = PRESET_REWARD_PROGRAMS.find(p => p.id === programId);
+        logActivity(`Enabled reward program: ${prog?.title || programId}`);
+      }
+
+      localStorage.setItem('jasmine_reward_programs', JSON.stringify(activePrograms));
+      loadRewardPrograms();
+    }
+
+    function addCustomRewardProgram() {
+      const trigger = document.getElementById('custom-program-trigger').value.trim();
+      const amount = parseFloat(document.getElementById('custom-program-amount').value);
+
+      if (!trigger) {
+        alert('Please enter what triggers this reward');
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid dollar amount');
+        return;
+      }
+
+      const customPrograms = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      customPrograms.push({ trigger, amount });
+      localStorage.setItem('jasmine_custom_programs', JSON.stringify(customPrograms));
+
+      document.getElementById('custom-program-trigger').value = '';
+      document.getElementById('custom-program-amount').value = '';
+
+      logActivity(`Created custom reward: $${amount} for "${trigger}"`);
+      loadRewardPrograms();
+    }
+
+    function removeCustomProgram(index) {
+      if (!confirm('Remove this custom reward program?')) return;
+
+      const customPrograms = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      customPrograms.splice(index, 1);
+      localStorage.setItem('jasmine_custom_programs', JSON.stringify(customPrograms));
+
+      loadRewardPrograms();
+    }
+
+    // ========================================
+    // SCHOLARSHIP MANAGEMENT
+    // ========================================
+    function getCustomScholarships() {
+      return JSON.parse(localStorage.getItem('jasmine_custom_scholarships') || '[]');
+    }
+
+    function saveCustomScholarships(list) {
+      localStorage.setItem('jasmine_custom_scholarships', JSON.stringify(list));
+      loadParentScholarshipList();
+    }
+
+    function loadParentScholarshipList() {
+      const custom = getCustomScholarships();
+      const built = window.JASMINE_SCHOLARSHIPS || [];
+      const all = [...built, ...custom];
+
+      const html = all.map((s, i) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+          <div>
+            <div style="font-weight: 700;">${s.name}</div>
+            <div style="font-size: 0.8rem; color: var(--green);">${s.amount || 'TBD'}</div>
+            <div style="font-size: 0.75rem; color: var(--muted);">Deadline: ${s.deadline ? new Date(s.deadline).toLocaleDateString() : 'TBD'}</div>
+          </div>
+          <div style="display: flex; gap: 4px;">
+            ${s.isCustom ? `
+              <button onclick="editScholarship('${s.id}')" style="padding: 4px 8px; border: none; background: #ede9fe; color: var(--purple); border-radius: 6px; cursor: pointer; font-size: 0.75rem;">✏️</button>
+              <button onclick="deleteScholarship('${s.id}')" style="padding: 4px 8px; border: none; background: #fee2e2; color: #dc2626; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">🗑️</button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('parent-scholarship-list').innerHTML = html || '<p style="color: var(--muted);">No scholarships yet</p>';
+    }
+
+    function openScholarshipManager(id = null) {
+      document.getElementById('edit-scholarship-id').value = '';
+      document.getElementById('sch-name').value = '';
+      document.getElementById('sch-org').value = '';
+      document.getElementById('sch-amount').value = '';
+      document.getElementById('sch-deadline').value = '';
+      document.getElementById('sch-priority').value = 'A';
+      document.getElementById('sch-tier').value = '2';
+      document.getElementById('sch-notes').value = '';
+      document.getElementById('sch-action').value = '';
+      document.getElementById('sch-advantage').value = '';
+      document.getElementById('sch-url').value = '';
+      document.getElementById('sch-essay').checked = false;
+      document.getElementById('sch-rec').checked = false;
+      document.getElementById('sch-transcript').checked = false;
+
+      if (id) {
+        const custom = getCustomScholarships();
+        const s = custom.find(x => x.id === id);
+        if (s) {
+          document.getElementById('edit-scholarship-id').value = s.id;
+          document.getElementById('sch-name').value = s.name || '';
+          document.getElementById('sch-org').value = s.organization || '';
+          document.getElementById('sch-amount').value = s.amount || '';
+          document.getElementById('sch-deadline').value = s.deadline || '';
+          document.getElementById('sch-priority').value = s.priority || 'A';
+          document.getElementById('sch-tier').value = s.tier || '2';
+          document.getElementById('sch-notes').value = s.notes || '';
+          document.getElementById('sch-action').value = s.action || '';
+          document.getElementById('sch-advantage').value = s.competitive_advantage || '';
+          document.getElementById('sch-url').value = s.url || '';
+          document.getElementById('sch-essay').checked = s.essay || false;
+          document.getElementById('sch-rec').checked = s.recommendation || false;
+          document.getElementById('sch-transcript').checked = s.transcript || false;
+        }
+      }
+
+      document.getElementById('scholarship-modal').style.display = 'block';
+    }
+
+    function closeScholarshipManager() {
+      document.getElementById('scholarship-modal').style.display = 'none';
+    }
+
+    function saveScholarship() {
+      const name = document.getElementById('sch-name').value.trim();
+      if (!name) {
+        alert('Please enter a scholarship name');
+        return;
+      }
+
+      const editId = document.getElementById('edit-scholarship-id').value;
+      const scholarship = {
+        id: editId || 'custom-' + Date.now(),
+        name: name,
+        organization: document.getElementById('sch-org').value.trim(),
+        amount: document.getElementById('sch-amount').value.trim(),
+        deadline: document.getElementById('sch-deadline').value,
+        priority: document.getElementById('sch-priority').value,
+        tier: parseInt(document.getElementById('sch-tier').value),
+        notes: document.getElementById('sch-notes').value.trim(),
+        action: document.getElementById('sch-action').value.trim(),
+        competitive_advantage: document.getElementById('sch-advantage').value.trim(),
+        url: document.getElementById('sch-url').value.trim(),
+        essay: document.getElementById('sch-essay').checked,
+        recommendation: document.getElementById('sch-rec').checked,
+        transcript: document.getElementById('sch-transcript').checked,
+        isCustom: true,
+        status: 'not_started'
+      };
+
+      let custom = getCustomScholarships();
+      if (editId) {
+        custom = custom.map(s => s.id === editId ? scholarship : s);
+      } else {
+        custom.push(scholarship);
+      }
+
+      saveCustomScholarships(custom);
+      closeScholarshipManager();
+      alert('Scholarship saved! Jasmine will see it in her app. 🎓');
+      logActivity(`Added/updated scholarship: ${name}`);
+    }
+
+    function editScholarship(id) {
+      openScholarshipManager(id);
+    }
+
+    function deleteScholarship(id) {
+      if (!confirm('Delete this scholarship?')) return;
+      let custom = getCustomScholarships();
+      custom = custom.filter(s => s.id !== id);
+      saveCustomScholarships(custom);
+      logActivity('Deleted a scholarship');
+    }
+
+    // Preview student view without counting as student login
+    function previewStudentView() {
+      sessionStorage.setItem('parent_preview_mode', 'true');
+      window.open('index.html?preview=parent', '_blank');
+    }
+
+    // Check if already logged in (session)
+    if (sessionStorage.getItem('parent_logged_in')) {
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadData();
+      loadParentScholarshipList();
+    }
+  </script>
+  <script src="scholarships-data.js"></script>
+</body>
+</html>

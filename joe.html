@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jasmine's Progress - Parent View</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👨‍👧</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --pink: #ec4899;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    #app { display: none; height: 100vh; position: relative; }
+
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .login-card .logo { font-size: 4rem; margin-bottom: 16px; }
+    .login-card input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--purple), var(--pink)); color: white; }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #fbbf24); color: #78350f; }
+
+    /* Student view iframe */
+    #student-frame {
+      width: 100%;
+      height: calc(100vh - 60px);
+      border: none;
+    }
+
+    /* Parent banner */
+    .parent-banner {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .parent-banner h2 { font-size: 1rem; font-weight: 700; }
+    .parent-banner .controls { display: flex; gap: 8px; }
+    .parent-banner button {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .parent-banner button:hover { background: rgba(255,255,255,0.3); }
+
+    /* Floating reward panel */
+    .reward-panel {
+      position: fixed;
+      right: 0;
+      top: 60px;
+      bottom: 0;
+      width: 380px;
+      max-width: 90vw;
+      background: white;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .reward-panel.open { transform: translateX(0); }
+
+    .panel-header {
+      background: linear-gradient(135deg, var(--gold), #fbbf24);
+      color: #78350f;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .panel-header h3 { font-size: 1.1rem; font-weight: 800; }
+    .panel-close {
+      background: rgba(0,0,0,0.1);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .panel-content { padding: 16px; }
+
+    .reward-balance-card {
+      background: linear-gradient(135deg, var(--gold), #fbbf24);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      color: #78350f;
+      margin-bottom: 16px;
+    }
+    .reward-balance { font-size: 3rem; font-weight: 800; }
+
+    .card {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    .reward-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.85rem;
+    }
+    .reward-item:last-child { border-bottom: none; }
+
+    .add-reward-form { display: flex; flex-direction: column; gap: 10px; }
+    .add-reward-form input, .add-reward-form select {
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .add-reward-form .row { display: flex; gap: 8px; }
+    .add-reward-form .row input { flex: 1; }
+
+    .preset-rewards { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .preset-btn {
+      background: #ede9fe;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--purple);
+      font-weight: 600;
+    }
+    .preset-btn:hover { background: #ddd6fe; }
+
+    .program-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .program-item.active { border-color: var(--purple); background: #ede9fe; }
+    .program-item .emoji { font-size: 1.3rem; }
+    .program-item .info { flex: 1; }
+    .program-item .title { font-weight: 700; font-size: 0.85rem; }
+    .program-item .desc { font-size: 0.75rem; color: var(--muted); }
+    .program-item .amount { font-weight: 800; color: var(--gold); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .toggle-label { font-weight: 600; font-size: 0.9rem; }
+    .toggle-sub { font-size: 0.75rem; color: var(--muted); }
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 28px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #d1d5db;
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+    .toggle-slider:before {
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    input:checked + .toggle-slider { background: var(--green); }
+    input:checked + .toggle-slider:before { transform: translateX(22px); }
+
+    /* Overlay */
+    .panel-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 99;
+    }
+    .panel-overlay.active { opacity: 1; pointer-events: auto; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login -->
+  <div id="login">
+    <div class="login-card">
+      <div class="logo">👨‍👧</div>
+      <h1 style="color: var(--purple); margin-bottom: 8px;">Parent Dashboard</h1>
+      <p style="color: var(--muted); margin-bottom: 24px;">View Jasmine's full app with parent controls</p>
+      <input type="email" id="login-email" placeholder="Your email" value="joe@josephcapra.com">
+      <input type="password" id="login-password" placeholder="Password">
+      <button class="btn btn-primary" onclick="login()">Sign In</button>
+      <p style="margin-top: 16px; font-size: 0.8rem; color: var(--muted);">Only authorized parents can access</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app">
+    <!-- Parent Banner -->
+    <div class="parent-banner">
+      <h2>👨‍👧 Parent View — Jasmine's App</h2>
+      <div class="controls">
+        <button onclick="toggleRewardPanel()">💰 Rewards</button>
+        <button onclick="logout()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Student View (iframe) -->
+    <iframe id="student-frame" src="index.html?parent=true"></iframe>
+
+    <!-- Overlay -->
+    <div class="panel-overlay" onclick="closeRewardPanel()"></div>
+
+    <!-- Reward Panel -->
+    <div class="reward-panel" id="reward-panel">
+      <div class="panel-header">
+        <h3>💰 Parent Rewards</h3>
+        <button class="panel-close" onclick="closeRewardPanel()">×</button>
+      </div>
+
+      <div class="panel-content">
+        <!-- Show to Jasmine Toggle -->
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Show to Jasmine</div>
+            <div class="toggle-sub">Display rewards on her app</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="rewards-enabled" onchange="toggleRewardsVisibility()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="reward-balance-card">
+          <div style="font-size: 0.9rem; font-weight: 600;">Current Balance</div>
+          <div class="reward-balance">$<span id="reward-balance">0.00</span></div>
+          <div style="font-size: 0.8rem; margin-top: 8px;">Financial rewards for scholarship work</div>
+        </div>
+
+        <!-- Quick Add -->
+        <div class="card">
+          <div class="card-title">➕ Quick Add Reward</div>
+          <div class="preset-rewards">
+            <button class="preset-btn" onclick="quickAdd(5, 'Good progress')">+$5</button>
+            <button class="preset-btn" onclick="quickAdd(10, 'Essay work')">+$10</button>
+            <button class="preset-btn" onclick="quickAdd(15, 'Completed task')">+$15</button>
+            <button class="preset-btn" onclick="quickAdd(20, 'Major milestone')">+$20</button>
+          </div>
+          <div class="add-reward-form">
+            <div class="row">
+              <input type="number" id="reward-amount" placeholder="Amount ($)">
+              <input type="text" id="reward-reason" placeholder="Reason">
+            </div>
+            <button class="btn btn-gold" onclick="addReward()">💰 Add Custom Reward</button>
+          </div>
+        </div>
+
+        <!-- Automatic Programs -->
+        <div class="card">
+          <div class="card-title">🎯 Automatic Reward Programs</div>
+          <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px;">Tap to enable/disable automatic rewards</p>
+          <div id="programs-list"></div>
+
+          <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 0.8rem; font-weight: 600; color: var(--purple); margin-bottom: 8px;">Add Custom Program</p>
+            <div class="add-reward-form">
+              <input type="text" id="custom-trigger" placeholder="Trigger (e.g., Complete 3 essays)">
+              <div class="row">
+                <input type="number" id="custom-amount" placeholder="$">
+                <button class="btn btn-primary" style="flex: 1;" onclick="addCustomProgram()">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incentives -->
+        <div class="card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+          <div class="card-title" style="color: #92400e;">🎁 Custom Incentives</div>
+          <p style="font-size: 0.8rem; color: #78350f; margin-bottom: 12px;">Goals that appear on Jasmine's app</p>
+          <button class="btn" style="background: #92400e; color: white; margin-bottom: 12px;" onclick="openIncentiveModal()">➕ Add Incentive</button>
+          <div id="incentives-list"></div>
+        </div>
+
+        <!-- History -->
+        <div class="card">
+          <div class="card-title">📜 Reward History</div>
+          <div id="reward-history" style="max-height: 200px; overflow-y: auto;">
+            <p style="color: var(--muted); text-align: center; font-size: 0.85rem;">No rewards yet</p>
+          </div>
+          <button class="btn" style="margin-top: 12px; background: #fee2e2; color: #dc2626;" onclick="resetRewards()">🔄 Reset All Rewards</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incentive Modal -->
+  <div id="incentive-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; padding: 20px; overflow-y: auto;">
+    <div class="login-card" style="margin: 40px auto; background: linear-gradient(135deg, #fef3c7, #fde68a); max-width: 450px;">
+      <div style="font-size: 2rem; margin-bottom: 8px;">🎁</div>
+      <h2 style="color: #92400e; margin-bottom: 16px;">Create Incentive</h2>
+      <p style="color: #78350f; font-size: 0.85rem; margin-bottom: 20px;">This will show on Jasmine's app to motivate her!</p>
+
+      <select id="incentive-type" style="width: 100%; padding: 12px; border: 2px solid #d97706; border-radius: 12px; margin-bottom: 12px;">
+        <option value="deadline">📅 Apply by Date</option>
+        <option value="progress">📊 Reach Progress %</option>
+        <option value="complete">✅ Complete Application</option>
+        <option value="essays">📝 Complete X Essays</option>
+        <option value="custom">⭐ Custom Goal</option>
+      </select>
+
+      <input type="text" id="incentive-goal" placeholder="Goal description" style="width: 100%; padding: 12px; border: 2px solid #d97706; border-radius: 12px; margin-bottom: 12px;">
+
+      <select id="incentive-reward-type" style="width: 100%; padding: 12px; border: 2px solid #d97706; border-radius: 12px; margin-bottom: 12px;">
+        <option value="money">💰 Money Reward</option>
+        <option value="event">🎉 Event/Experience</option>
+        <option value="item">🎁 Item/Gift</option>
+      </select>
+
+      <input type="text" id="incentive-reward" placeholder="Reward (e.g., $10 or Movie Night)" style="width: 100%; padding: 12px; border: 2px solid #d97706; border-radius: 12px; margin-bottom: 12px;">
+
+      <input type="date" id="incentive-deadline" style="width: 100%; padding: 12px; border: 2px solid #d97706; border-radius: 12px; margin-bottom: 16px;">
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" style="flex: 1; background: white; color: #92400e;" onclick="closeIncentiveModal()">Cancel</button>
+        <button class="btn" style="flex: 1; background: #92400e; color: white;" onclick="saveIncentive()">🎁 Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_WEEKLY_REWARD = 30;
+    let rewardData = JSON.parse(localStorage.getItem('jasmine_rewards') || '{"balance":0,"history":[]}');
+
+    // Preset reward programs
+    const PRESET_PROGRAMS = [
+      { id: 'streak-3', emoji: '🔥', title: '3-Day Streak', desc: 'Log in 3 days in a row', amount: 5 },
+      { id: 'streak-7', emoji: '⚡', title: '7-Day Streak', desc: 'A full week of daily progress', amount: 15 },
+      { id: 'first-essay', emoji: '📝', title: 'First Essay', desc: 'Complete any essay draft', amount: 10 },
+      { id: 'essays-3', emoji: '✍️', title: '3 Essays', desc: 'Complete 3 scholarship essays', amount: 20 },
+      { id: 'first-submit', emoji: '🚀', title: 'First Submit', desc: 'Submit first application', amount: 15 },
+      { id: 'profile-100', emoji: '👤', title: 'Profile 100%', desc: 'Complete all profile sections', amount: 10 }
+    ];
+
+    function login() {
+      const email = document.getElementById('login-email').value.toLowerCase();
+      const password = document.getElementById('login-password').value;
+
+      if (!email) {
+        alert('Please enter your email');
+        return;
+      }
+
+      if (password !== 'paradiserealtyfla') {
+        alert('Incorrect password');
+        return;
+      }
+
+      sessionStorage.setItem('parent_logged_in', 'true');
+      sessionStorage.setItem('parent_email', email);
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadData();
+    }
+
+    function logout() {
+      sessionStorage.removeItem('parent_logged_in');
+      sessionStorage.removeItem('parent_email');
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login').style.display = 'flex';
+    }
+
+    function loadData() {
+      updateRewardDisplay();
+      loadRewardSettings();
+      loadPrograms();
+      loadIncentives();
+    }
+
+    // Reward Panel
+    function toggleRewardPanel() {
+      const panel = document.getElementById('reward-panel');
+      const overlay = document.querySelector('.panel-overlay');
+      panel.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    function closeRewardPanel() {
+      document.getElementById('reward-panel').classList.remove('open');
+      document.querySelector('.panel-overlay').classList.remove('active');
+    }
+
+    // Rewards
+    function updateRewardDisplay() {
+      document.getElementById('reward-balance').textContent = rewardData.balance.toFixed(2);
+
+      const historyHtml = rewardData.history.slice(0, 15).map(item => `
+        <div class="reward-item">
+          <span>+$${item.amount.toFixed(2)} - ${item.reason}</span>
+          <span style="color: var(--muted);">${new Date(item.date).toLocaleDateString()}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('reward-history').innerHTML = historyHtml || '<p style="color: var(--muted); text-align: center; font-size: 0.85rem;">No rewards yet</p>';
+    }
+
+    function quickAdd(amount, reason) {
+      document.getElementById('reward-amount').value = amount;
+      document.getElementById('reward-reason').value = reason;
+      addReward();
+    }
+
+    function addReward() {
+      const amount = parseFloat(document.getElementById('reward-amount').value);
+      const reason = document.getElementById('reward-reason').value || 'Scholarship work';
+
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
+
+      // Check weekly limit
+      const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      const weeklyTotal = rewardData.history
+        .filter(r => new Date(r.date).getTime() > weekAgo)
+        .reduce((sum, r) => sum + r.amount, 0);
+
+      if (weeklyTotal + amount > MAX_WEEKLY_REWARD) {
+        alert(`Weekly limit is $${MAX_WEEKLY_REWARD}. You've already given $${weeklyTotal.toFixed(2)} this week.`);
+        return;
+      }
+
+      rewardData.balance += amount;
+      rewardData.history.unshift({
+        amount,
+        reason,
+        date: new Date().toISOString()
+      });
+
+      localStorage.setItem('jasmine_rewards', JSON.stringify(rewardData));
+
+      // Sync with student app format
+      const settings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
+      settings.balance = rewardData.balance;
+      settings.history = rewardData.history;
+      localStorage.setItem('jasmine_reward_settings', JSON.stringify(settings));
+
+      updateRewardDisplay();
+
+      document.getElementById('reward-amount').value = '';
+      document.getElementById('reward-reason').value = '';
+    }
+
+    function toggleRewardsVisibility() {
+      const enabled = document.getElementById('rewards-enabled').checked;
+
+      const settings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
+      settings.enabled = enabled;
+      settings.balance = rewardData.balance;
+      settings.history = rewardData.history;
+      localStorage.setItem('jasmine_reward_settings', JSON.stringify(settings));
+    }
+
+    function loadRewardSettings() {
+      const settings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false}');
+      document.getElementById('rewards-enabled').checked = settings.enabled;
+    }
+
+    function resetRewards() {
+      if (!confirm('Reset all rewards to $0? This cannot be undone.')) return;
+
+      rewardData = { balance: 0, history: [] };
+      localStorage.setItem('jasmine_rewards', JSON.stringify(rewardData));
+
+      const settings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{}');
+      settings.balance = 0;
+      settings.history = [];
+      localStorage.setItem('jasmine_reward_settings', JSON.stringify(settings));
+
+      updateRewardDisplay();
+    }
+
+    // Programs
+    function loadPrograms() {
+      const active = JSON.parse(localStorage.getItem('jasmine_reward_programs') || '[]');
+      const awarded = JSON.parse(localStorage.getItem('jasmine_program_awards') || '[]');
+      const custom = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      const customAmounts = JSON.parse(localStorage.getItem('jasmine_program_amounts') || '{}');
+
+      let html = PRESET_PROGRAMS.map(prog => {
+        const isActive = active.includes(prog.id);
+        const wasAwarded = awarded.includes(prog.id);
+        const currentAmount = customAmounts[prog.id] || prog.amount;
+        return `
+          <div class="program-item ${isActive ? 'active' : ''}" style="${wasAwarded ? 'opacity: 0.5;' : ''}">
+            <div class="emoji" onclick="toggleProgram('${prog.id}')" style="cursor: pointer;">${prog.emoji}</div>
+            <div class="info" onclick="toggleProgram('${prog.id}')" style="cursor: pointer;">
+              <div class="title">${prog.title} ${wasAwarded ? '<span style="font-size: 0.7rem; background: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 4px;">Awarded</span>' : ''}</div>
+              <div class="desc">${prog.desc}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="color: var(--gold); font-weight: 700;">$</span>
+              <input type="number" value="${currentAmount}"
+                onchange="updateProgramAmount('${prog.id}', this.value)"
+                onclick="event.stopPropagation()"
+                style="width: 50px; padding: 6px 8px; border: 2px solid ${isActive ? 'var(--purple)' : '#e5e7eb'}; border-radius: 8px; font-weight: 700; color: var(--gold); text-align: center; font-size: 0.9rem;"
+                ${wasAwarded ? 'disabled' : ''}>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (custom.length > 0) {
+        html += custom.map((c, i) => `
+          <div class="program-item active" style="background: #fef3c7; border-color: #d97706;">
+            <div class="emoji">⭐</div>
+            <div class="info">
+              <div class="title" style="color: #78350f;">${c.trigger}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="color: #78350f; font-weight: 700;">$</span>
+              <input type="number" value="${c.amount}"
+                onchange="updateCustomProgramAmount(${i}, this.value)"
+                onclick="event.stopPropagation()"
+                style="width: 50px; padding: 6px 8px; border: 2px solid #d97706; border-radius: 8px; font-weight: 700; color: #78350f; text-align: center; font-size: 0.9rem;">
+            </div>
+            <button onclick="event.stopPropagation(); removeCustomProgram(${i})" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 1.2rem;">×</button>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('programs-list').innerHTML = html;
+    }
+
+    function updateProgramAmount(id, value) {
+      const amount = parseFloat(value);
+      if (isNaN(amount) || amount < 0) return;
+
+      const customAmounts = JSON.parse(localStorage.getItem('jasmine_program_amounts') || '{}');
+      customAmounts[id] = amount;
+      localStorage.setItem('jasmine_program_amounts', JSON.stringify(customAmounts));
+    }
+
+    function updateCustomProgramAmount(index, value) {
+      const amount = parseFloat(value);
+      if (isNaN(amount) || amount < 0) return;
+
+      const custom = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      if (custom[index]) {
+        custom[index].amount = amount;
+        localStorage.setItem('jasmine_custom_programs', JSON.stringify(custom));
+      }
+    }
+
+    function toggleProgram(id) {
+      const awarded = JSON.parse(localStorage.getItem('jasmine_program_awards') || '[]');
+      if (awarded.includes(id)) {
+        alert('This reward was already awarded!');
+        return;
+      }
+
+      let active = JSON.parse(localStorage.getItem('jasmine_reward_programs') || '[]');
+      if (active.includes(id)) {
+        active = active.filter(x => x !== id);
+      } else {
+        active.push(id);
+      }
+      localStorage.setItem('jasmine_reward_programs', JSON.stringify(active));
+      loadPrograms();
+    }
+
+    function addCustomProgram() {
+      const trigger = document.getElementById('custom-trigger').value.trim();
+      const amount = parseFloat(document.getElementById('custom-amount').value);
+
+      if (!trigger || isNaN(amount) || amount <= 0) {
+        alert('Please enter trigger and amount');
+        return;
+      }
+
+      const custom = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      custom.push({ trigger, amount });
+      localStorage.setItem('jasmine_custom_programs', JSON.stringify(custom));
+
+      document.getElementById('custom-trigger').value = '';
+      document.getElementById('custom-amount').value = '';
+      loadPrograms();
+    }
+
+    function removeCustomProgram(i) {
+      if (!confirm('Remove this program?')) return;
+      const custom = JSON.parse(localStorage.getItem('jasmine_custom_programs') || '[]');
+      custom.splice(i, 1);
+      localStorage.setItem('jasmine_custom_programs', JSON.stringify(custom));
+      loadPrograms();
+    }
+
+    // Incentives
+    function loadIncentives() {
+      const incentives = JSON.parse(localStorage.getItem('jasmine_incentives') || '[]');
+      const list = document.getElementById('incentives-list');
+
+      if (incentives.length === 0) {
+        list.innerHTML = '<p style="color: #78350f; font-size: 0.8rem; text-align: center;">No incentives yet</p>';
+        return;
+      }
+
+      list.innerHTML = incentives.map((inc, i) => {
+        const pending = inc.completedAt && !inc.claimed;
+        const claimed = inc.claimed;
+        return `
+          <div style="background: white; border-radius: 10px; padding: 10px; margin-bottom: 8px; ${pending ? 'border: 2px solid #f59e0b;' : ''} ${claimed ? 'opacity: 0.6;' : ''}">
+            <div style="font-weight: 700; color: #78350f; font-size: 0.9rem;">${inc.goal}</div>
+            <div style="font-size: 0.8rem; color: #92400e;">🎁 ${inc.reward}</div>
+            ${inc.deadline ? `<div style="font-size: 0.75rem; color: #a16207;">📅 ${new Date(inc.deadline).toLocaleDateString()}</div>` : ''}
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              ${pending ? `<button onclick="confirmIncentive(${i})" style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">✓ Confirm</button>` : ''}
+              ${claimed ? `<span style="font-size: 0.75rem; color: #065f46;">✓ Claimed</span>` : ''}
+              <button onclick="deleteIncentive(${i})" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.9rem;">×</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openIncentiveModal() {
+      document.getElementById('incentive-type').value = 'deadline';
+      document.getElementById('incentive-goal').value = '';
+      document.getElementById('incentive-reward-type').value = 'money';
+      document.getElementById('incentive-reward').value = '';
+      document.getElementById('incentive-deadline').value = '';
+      document.getElementById('incentive-modal').style.display = 'block';
+    }
+
+    function closeIncentiveModal() {
+      document.getElementById('incentive-modal').style.display = 'none';
+    }
+
+    function saveIncentive() {
+      const type = document.getElementById('incentive-type').value;
+      const goal = document.getElementById('incentive-goal').value.trim();
+      const rewardType = document.getElementById('incentive-reward-type').value;
+      const reward = document.getElementById('incentive-reward').value.trim();
+      const deadline = document.getElementById('incentive-deadline').value;
+
+      if (!goal || !reward) {
+        alert('Please fill in goal and reward');
+        return;
+      }
+
+      const incentives = JSON.parse(localStorage.getItem('jasmine_incentives') || '[]');
+      incentives.push({
+        type,
+        goal,
+        rewardType,
+        reward,
+        deadline: deadline || null,
+        createdAt: new Date().toISOString(),
+        claimed: false
+      });
+      localStorage.setItem('jasmine_incentives', JSON.stringify(incentives));
+
+      closeIncentiveModal();
+      loadIncentives();
+    }
+
+    function confirmIncentive(i) {
+      const incentives = JSON.parse(localStorage.getItem('jasmine_incentives') || '[]');
+      incentives[i].claimed = true;
+      incentives[i].claimedAt = new Date().toISOString();
+      localStorage.setItem('jasmine_incentives', JSON.stringify(incentives));
+
+      // If it's a money reward, add to balance
+      const reward = incentives[i].reward;
+      if (reward.includes('$')) {
+        const amount = parseFloat(reward.replace(/[^0-9.]/g, ''));
+        if (!isNaN(amount) && amount > 0) {
+          rewardData.balance += amount;
+          rewardData.history.unshift({
+            amount,
+            reason: `Incentive: ${incentives[i].goal}`,
+            date: new Date().toISOString()
+          });
+          localStorage.setItem('jasmine_rewards', JSON.stringify(rewardData));
+          updateRewardDisplay();
+        }
+      }
+
+      loadIncentives();
+    }
+
+    function deleteIncentive(i) {
+      if (!confirm('Delete this incentive?')) return;
+      const incentives = JSON.parse(localStorage.getItem('jasmine_incentives') || '[]');
+      incentives.splice(i, 1);
+      localStorage.setItem('jasmine_incentives', JSON.stringify(incentives));
+      loadIncentives();
+    }
+
+    // Auto-login if already logged in
+    if (sessionStorage.getItem('parent_logged_in') === 'true') {
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadData();
+    }
+  </script>
+</body>
+</html>

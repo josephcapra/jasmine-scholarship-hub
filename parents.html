@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent Dashboard - Jasmine's Progress</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --jazz-purple: #7c3aed;
+      --jazz-purple-dark: #5b21b6;
+      --jazz-pink: #ec4899;
+      --jazz-gold: #f59e0b;
+      --jazz-teal: #14b8a6;
+      --jazz-green: #10b981;
+      --bg: #faf5ff;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+      padding: 30px 20px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+    .header p { opacity: 0.9; font-size: 0.95rem; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .icon { font-size: 2rem; margin-bottom: 8px; }
+    .stat-card .number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+    }
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-card.highlight {
+      background: linear-gradient(135deg, var(--jazz-gold), #fbbf24);
+      color: #78350f;
+    }
+    .stat-card.highlight .number { color: #78350f; }
+    .stat-card.highlight .label { color: #92400e; }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .progress-item:last-child { border-bottom: none; }
+    .progress-item .name { font-weight: 600; }
+    .progress-item .status {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+    .status-complete { background: #d1fae5; color: #065f46; }
+    .status-progress { background: #fef3c7; color: #92400e; }
+    .status-notstarted { background: #f3f4f6; color: #6b7280; }
+
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e5e7eb;
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 16px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--jazz-purple);
+    }
+    .timeline-item .date {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .timeline-item .action {
+      font-weight: 600;
+    }
+
+    .encouragement {
+      background: linear-gradient(135deg, var(--jazz-gold), #fbbf24);
+      border-radius: 16px;
+      padding: 20px;
+      color: #78350f;
+      margin-bottom: 16px;
+    }
+    .encouragement .title {
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+    }
+    .btn-secondary {
+      background: var(--card);
+      color: var(--jazz-purple);
+      border: 2px solid var(--jazz-purple);
+    }
+
+    .deadline-alert {
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 12px;
+    }
+    .deadline-alert .title {
+      font-weight: 700;
+      color: #991b1b;
+    }
+    .deadline-alert .detail {
+      font-size: 0.85rem;
+      color: #7f1d1d;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>💜 Jasmine's Progress</h1>
+    <p>Parent Dashboard - Track her scholarship journey</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card highlight">
+      <div class="icon">🔥</div>
+      <div class="number" id="streak">3</div>
+      <div class="label">Day Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon">📝</div>
+      <div class="number" id="essays">2</div>
+      <div class="label">Essays Started</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon">🎓</div>
+      <div class="number" id="scholarships">3</div>
+      <div class="label">Scholarships Tracked</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon">🏆</div>
+      <div class="number" id="badges">2</div>
+      <div class="label">Badges Earned</div>
+    </div>
+  </div>
+
+  <div class="deadline-alert" id="deadline-alert" style="display: none;">
+    <div class="title">⚠️ Upcoming Deadline!</div>
+    <div class="detail" id="deadline-detail"></div>
+  </div>
+
+  <div class="encouragement">
+    <div class="title">💜 Send Encouragement</div>
+    <p style="margin-bottom: 12px;">A quick message from Mom & Daddy Dog can make her day!</p>
+    <button class="btn btn-secondary" style="background: white;" onclick="sendEncouragement()">
+      💌 Send Message to Jasmine
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📝 Essay Progress</div>
+    <div id="essay-progress">
+      <div class="progress-item">
+        <span class="name">Mom's Journey</span>
+        <span class="status status-notstarted">Not Started</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Career Goals</span>
+        <span class="status status-notstarted">Not Started</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Community Service</span>
+        <span class="status status-notstarted">Not Started</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Arts & Photography</span>
+        <span class="status status-notstarted">Not Started</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Challenge Overcome</span>
+        <span class="status status-notstarted">Not Started</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Financial Value</span>
+        <span class="status status-notstarted">Not Started</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Recent Activity</div>
+    <div class="timeline" id="activity-timeline">
+      <div class="timeline-item">
+        <div class="date">Today</div>
+        <div class="action">Opened the app</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">Yesterday</div>
+        <div class="action">Added VFW scholarship to tracker</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2 days ago</div>
+        <div class="action">Started using the app! 🎉</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 Her Goals This Week</div>
+    <div id="goals-list">
+      <div class="progress-item">
+        <span class="name">Complete 1 essay draft</span>
+        <span class="status status-progress">In Progress</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Research 3 new scholarships</span>
+        <span class="status status-progress">In Progress</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">Update photography resume</span>
+        <span class="status status-complete">Done! ✓</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="emailWeeklyReport()">
+    📧 Email Me Weekly Reports
+  </button>
+
+  <button class="btn btn-secondary" onclick="window.location.href='/jasmine/'">
+    📱 Open Jasmine's App
+  </button>
+
+  <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 20px;">
+    Progress syncs automatically from Jasmine's app 💜
+  </p>
+
+  <script>
+    // Load progress from localStorage (shared with main app)
+    function loadProgress() {
+      const data = localStorage.getItem('jasmine_scholarship_data');
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed.streak) {
+          document.getElementById('streak').textContent = parsed.streak;
+        }
+      }
+
+      // Check essay progress
+      const essays = ['veteran', 'career', 'community', 'arts', 'challenge', 'financial'];
+      const essayNames = ["Mom's Journey", 'Career Goals', 'Community Service', 'Arts & Photography', 'Challenge Overcome', 'Financial Value'];
+      let startedCount = 0;
+
+      const progressEl = document.getElementById('essay-progress');
+      progressEl.innerHTML = '';
+
+      essays.forEach((essay, i) => {
+        const saved = localStorage.getItem(`essay_${essay}`);
+        let status, statusClass;
+
+        if (saved) {
+          const words = saved.trim().split(/\s+/).length;
+          if (words > 400) {
+            status = 'Draft Ready';
+            statusClass = 'status-complete';
+          } else {
+            status = `${words} words`;
+            statusClass = 'status-progress';
+          }
+          startedCount++;
+        } else {
+          status = 'Not Started';
+          statusClass = 'status-notstarted';
+        }
+
+        progressEl.innerHTML += `
+          <div class="progress-item">
+            <span class="name">${essayNames[i]}</span>
+            <span class="status ${statusClass}">${status}</span>
+          </div>
+        `;
+      });
+
+      document.getElementById('essays').textContent = startedCount;
+
+      // Check deadline
+      const vfwDeadline = new Date('2026-10-31');
+      const now = new Date();
+      const daysUntil = Math.floor((vfwDeadline - now) / (1000 * 60 * 60 * 24));
+
+      if (daysUntil < 30) {
+        document.getElementById('deadline-alert').style.display = 'block';
+        document.getElementById('deadline-detail').textContent =
+          `VFW Voice of Democracy deadline is in ${daysUntil} days!`;
+      }
+    }
+
+    function sendEncouragement() {
+      const messages = [
+        "We're SO proud of you! Keep going! 💜",
+        "You've got this, superstar! 🌟",
+        "Every scholarship you apply for shows your dedication!",
+        "Carnegie Hall was just the beginning! 🎓",
+        "Your hard work inspires us every day!"
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+
+      // Store encouragement for Jasmine to see
+      const encouragements = JSON.parse(localStorage.getItem('parent_encouragements') || '[]');
+      encouragements.push({ message: msg, date: new Date().toISOString() });
+      localStorage.setItem('parent_encouragements', JSON.stringify(encouragements));
+
+      alert('Message sent to Jasmine! 💜\n\n"' + msg + '"');
+    }
+
+    async function emailWeeklyReport() {
+      alert('Weekly progress reports will be emailed to you every Sunday! 📧');
+      // Would register for weekly emails via API
+    }
+
+    // Initialize
+    loadProgress();
+  </script>
+</body>
+</html>
