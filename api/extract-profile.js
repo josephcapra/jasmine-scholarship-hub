@@ -266,7 +266,8 @@ Extract as much as you can find. Be accurate - don't make up information. For ar
           }
         ],
         max_tokens: 2000,
-        temperature: 0.3
+        temperature: 0.3,
+        store: false
       });
     } else {
       // Use text-based extraction
@@ -277,7 +278,8 @@ Extract as much as you can find. Be accurate - don't make up information. For ar
           { role: 'user', content: `Extract profile information from this document (${fileName}):\n\n${textContent.substring(0, 10000)}` }
         ],
         max_tokens: 2000,
-        temperature: 0.3
+        temperature: 0.3,
+        store: false
       });
     }
 

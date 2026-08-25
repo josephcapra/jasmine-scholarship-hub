@@ -126,7 +126,8 @@ Return ONLY the JSON array, no other text.`;
             { role: 'user', content: userPrompt }
           ],
           max_tokens: 8000,
-          temperature: 0.7
+          temperature: 0.7,
+        store: false
         })
       });
 

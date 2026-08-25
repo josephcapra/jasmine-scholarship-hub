@@ -67,7 +67,8 @@ Be accurate. If uncertain, use "other" with low confidence.`;
             }
           ],
           max_tokens: 300,
-          temperature: 0.3
+          temperature: 0.3,
+        store: false
         })
       });
     } else {

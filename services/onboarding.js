@@ -1,7 +1,7 @@
 /**
  * Onboarding Wizard - Standalone module
  * Shows for first-time users to collect profile data
- * Does NOT modify existing navigation or sections
+ * Includes age verification and consent for legal compliance
  */
 
 const Onboarding = (function() {
@@ -9,14 +9,31 @@ const Onboarding = (function() {
 
   const STORAGE_KEY = 'jasmine_onboarding_complete';
   const PROFILE_KEY = 'jasmine_student_profile';
+  const CONSENT_KEY = 'jasmine_consent';
 
-  // Simplified wizard: just uploads, then go to profile screen
   const STEPS = [
     {
       id: 'welcome',
       title: "Welcome to Your Scholarship Hub! 🌟",
-      subtitle: "Upload your documents and we'll extract your profile info automatically",
+      subtitle: "Let's get you set up to find scholarships and plan for college",
       fields: []
+    },
+    {
+      id: 'age',
+      title: 'First, Let\'s Verify Your Age',
+      subtitle: 'This app is designed for students age 14 and older',
+      fields: [
+        { id: 'birthMonth', type: 'select', label: 'Birth Month', required: true, options: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] },
+        { id: 'birthYear', type: 'select', label: 'Birth Year', required: true, options: generateYearOptions() }
+      ]
+    },
+    {
+      id: 'consent',
+      title: 'Privacy & Terms',
+      subtitle: 'Please review and accept to continue',
+      fields: [
+        { id: 'privacyConsent', type: 'consent' }
+      ]
     },
     {
       id: 'resume',
@@ -44,13 +61,19 @@ const Onboarding = (function() {
     }
   ];
 
+  function generateYearOptions() {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let y = currentYear - 13; y >= currentYear - 22; y--) {
+      years.push(y.toString());
+    }
+    return years;
+  }
+
   let currentStep = 0;
   let formData = {};
 
   function shouldShow() {
-    // Only auto-show if user has NEVER seen the wizard
-    // Once they've clicked through once, never auto-show again
-    // They can still manually trigger via "Run Full Profile Setup"
     if (localStorage.getItem(STORAGE_KEY) === 'true') return false;
     if (localStorage.getItem('jasmine_wizard_seen') === 'true') return false;
     return true;
@@ -58,18 +81,25 @@ const Onboarding = (function() {
 
   function getProfile() {
     try {
-      // Merge from both storage keys - knowledge_vault has extracted data
       const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
       const vault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
-      // Vault data takes priority (more recently extracted)
       return { ...profile, ...vault };
     } catch (e) {
       return {};
     }
   }
 
+  function calculateAge(birthMonth, birthYear) {
+    const monthIndex = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].indexOf(birthMonth);
+    const birthDate = new Date(parseInt(birthYear), monthIndex, 1);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0) age--;
+    return age;
+  }
+
   function show(manual = false) {
-    // Mark that user has seen the wizard (prevents future auto-popup)
     if (!manual) {
       localStorage.setItem('jasmine_wizard_seen', 'true');
     }
@@ -78,7 +108,6 @@ const Onboarding = (function() {
     currentStep = 0;
     formData = getProfile();
 
-    // Create overlay
     const overlay = document.createElement('div');
     overlay.id = 'onboarding-overlay';
     overlay.innerHTML = '<div id="onboarding-container"></div>';
@@ -110,21 +139,19 @@ const Onboarding = (function() {
 
         <div class="ob-actions">
           ${!isFirst ? `<button class="ob-btn ob-btn-secondary" onclick="Onboarding.prev()">← Back</button>` : '<div></div>'}
-          <button class="ob-btn ob-btn-primary" onclick="Onboarding.next()">
+          <button class="ob-btn ob-btn-primary" id="ob-next-btn" onclick="Onboarding.next()">
             ${isLast ? 'Finish Setup →' : isFirst ? 'Get Started →' : 'Continue →'}
           </button>
         </div>
 
-        ${!isFirst ? `<button class="ob-skip" onclick="Onboarding.skip()">Skip for now</button>` : ''}
+        ${(!isFirst && currentStep > 2) ? `<button class="ob-skip" onclick="Onboarding.skip()">Skip for now</button>` : ''}
       </div>
     `;
 
-    // Restore values
     step.fields.forEach(f => {
       const el = document.getElementById('ob-' + f.id);
       if (el && formData[f.id]) {
-        if (f.type === 'toggle') {
-          // handled separately
+        if (f.type === 'toggle' || f.type === 'consent') {
         } else {
           el.value = formData[f.id];
         }
@@ -173,15 +200,46 @@ const Onboarding = (function() {
             </div>
           </div>`;
 
-      case 'chips':
+      case 'consent':
+        const isAccepted = formData.privacyAccepted && formData.termsAccepted;
         return `
-          <div class="ob-chips">
-            ${f.options.map(o => `
-              <button type="button" class="ob-chip ${(formData[f.id] || []).includes(o.value) ? 'selected' : ''}"
-                onclick="Onboarding.toggleChip('${f.id}', '${o.value}')">
-                ${o.label}
-              </button>
-            `).join('')}
+          <div class="ob-consent-section">
+            <div class="ob-consent-box">
+              <div class="ob-consent-header">Your Privacy Matters</div>
+              <ul class="ob-consent-list">
+                <li>✓ We do NOT sell your personal information</li>
+                <li>✓ We do NOT use your data for targeted advertising</li>
+                <li>✓ AI helps you write - YOU remain the author</li>
+                <li>✓ Your data is stored securely and you can delete it anytime</li>
+              </ul>
+            </div>
+
+            <div class="ob-consent-checks">
+              <label class="ob-checkbox-label" onclick="Onboarding.toggleConsent('privacy')">
+                <div class="ob-checkbox ${formData.privacyAccepted ? 'checked' : ''}" id="ob-privacy-check">
+                  ${formData.privacyAccepted ? '✓' : ''}
+                </div>
+                <span>I have read and agree to the <a href="privacy.html" target="_blank" onclick="event.stopPropagation()">Privacy Policy</a></span>
+              </label>
+
+              <label class="ob-checkbox-label" onclick="Onboarding.toggleConsent('terms')">
+                <div class="ob-checkbox ${formData.termsAccepted ? 'checked' : ''}" id="ob-terms-check">
+                  ${formData.termsAccepted ? '✓' : ''}
+                </div>
+                <span>I agree to the <a href="terms.html" target="_blank" onclick="event.stopPropagation()">Terms of Service</a></span>
+              </label>
+
+              <label class="ob-checkbox-label" onclick="Onboarding.toggleConsent('age')">
+                <div class="ob-checkbox ${formData.ageConfirmed ? 'checked' : ''}" id="ob-age-check">
+                  ${formData.ageConfirmed ? '✓' : ''}
+                </div>
+                <span>I confirm I am 14 years of age or older</span>
+              </label>
+            </div>
+
+            <div class="ob-consent-minor-note">
+              If you are under 18, a parent or guardian should be aware of and consent to your use of this app.
+            </div>
           </div>`;
 
       case 'resumeUpload':
@@ -237,6 +295,17 @@ const Onboarding = (function() {
     }
   }
 
+  function toggleConsent(type) {
+    if (type === 'privacy') {
+      formData.privacyAccepted = !formData.privacyAccepted;
+    } else if (type === 'terms') {
+      formData.termsAccepted = !formData.termsAccepted;
+    } else if (type === 'age') {
+      formData.ageConfirmed = !formData.ageConfirmed;
+    }
+    render();
+  }
+
   async function handleResumeUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -245,7 +314,6 @@ const Onboarding = (function() {
     status.innerHTML = '<div class="ob-loading">Analyzing your resume with AI... 🔍</div>';
 
     try {
-      // Convert file to base64 for AI extraction
       const reader = new FileReader();
       const fileData = await new Promise((resolve, reject) => {
         reader.onload = () => resolve(reader.result);
@@ -253,7 +321,6 @@ const Onboarding = (function() {
         reader.readAsDataURL(file);
       });
 
-      // Call AI extraction API
       const response = await fetch('/api/extract-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -269,7 +336,6 @@ const Onboarding = (function() {
         const data = await response.json();
         console.log('Extraction result:', data);
         if (data.profile && Object.keys(data.profile).length > 0) {
-          // Merge extracted profile into formData
           Object.entries(data.profile).forEach(([key, value]) => {
             if (value && !formData[key]) {
               formData[key] = value;
@@ -278,13 +344,10 @@ const Onboarding = (function() {
           formData.resumeUploaded = true;
           console.log('formData after merge:', JSON.stringify(formData));
 
-          // Save to localStorage immediately so data persists - save to BOTH keys for compatibility
           localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
-          // Also sync to jasmine_knowledge_vault so profile displays immediately
           const existingVault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
           const mergedVault = { ...existingVault, ...data.profile };
           localStorage.setItem('jasmine_knowledge_vault', JSON.stringify(mergedVault));
-          console.log('Saved to both storage keys, vault now:', JSON.stringify(mergedVault));
 
           const p = data.profile;
           status.innerHTML = `
@@ -298,191 +361,25 @@ const Onboarding = (function() {
             </div>
           `;
 
-          // Update button state
           const btn = document.querySelector('.ob-resume-btn');
           if (btn) btn.classList.add('uploaded');
           return;
         }
       }
 
-      // Fallback to basic text extraction if AI fails
-      const text = await extractTextFromFile(file);
-      if (text) {
-        const parsed = parseResumeText(text);
-        Object.assign(formData, parsed);
-        formData.resumeUploaded = true;
-        formData.resumeText = text;
-
-        // Save to localStorage immediately - save to BOTH keys
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
-        const existingVault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
-        const mergedVault = { ...existingVault, ...parsed };
-        localStorage.setItem('jasmine_knowledge_vault', JSON.stringify(mergedVault));
-
-        status.innerHTML = `
-          <div class="ob-success">
-            ✓ Found: ${parsed.firstName || ''} ${parsed.lastName || ''}<br>
-            ${parsed.school ? '✓ School: ' + parsed.school + '<br>' : ''}
-            ${parsed.achievements?.length ? '✓ ' + parsed.achievements.length + ' achievements detected<br>' : ''}
-            <small>We'll pre-fill your profile with this info!</small>
-          </div>
-        `;
-
-        const btn = document.querySelector('.ob-resume-btn');
-        if (btn) btn.classList.add('uploaded');
-      } else {
-        // PDF/DOC files can't be text-extracted locally, but API should have handled them
-        status.innerHTML = '<div class="ob-success">✓ Resume saved! Fill in your details on the next screens.</div>';
-        formData.resumeUploaded = true;
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
-        const btn = document.querySelector('.ob-resume-btn');
-        if (btn) btn.classList.add('uploaded');
-      }
+      formData.resumeUploaded = true;
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
+      status.innerHTML = '<div class="ob-success">✓ Resume saved! Please fill in your details manually.</div>';
+      const btn = document.querySelector('.ob-resume-btn');
+      if (btn) btn.classList.add('uploaded');
     } catch (e) {
       console.error('Resume upload error:', e);
-      // Still mark as uploaded so user can proceed
       formData.resumeUploaded = true;
       localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
       status.innerHTML = '<div class="ob-success">✓ Resume saved! Please fill in your details manually.</div>';
       const btn = document.querySelector('.ob-resume-btn');
       if (btn) btn.classList.add('uploaded');
     }
-  }
-
-  async function extractTextFromFile(file) {
-    const type = file.type;
-    const name = file.name.toLowerCase();
-
-    if (name.endsWith('.txt') || type === 'text/plain') {
-      return await file.text();
-    }
-
-    if (name.endsWith('.pdf') || type === 'application/pdf') {
-      // For PDF, we'll store the file and try to extract basic info
-      // Full PDF parsing would require a library
-      const reader = new FileReader();
-      return new Promise((resolve) => {
-        reader.onload = () => {
-          // Try to extract text from PDF (basic approach)
-          const text = extractTextFromPDFBuffer(reader.result);
-          resolve(text);
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    }
-
-    // For DOC/DOCX, store for later and prompt manual entry
-    formData.resumeFile = file;
-    return null;
-  }
-
-  function extractTextFromPDFBuffer(buffer) {
-    // Basic PDF text extraction - looks for text between parentheses
-    try {
-      const bytes = new Uint8Array(buffer);
-      let text = '';
-      let inText = false;
-      let current = '';
-
-      for (let i = 0; i < bytes.length; i++) {
-        const char = String.fromCharCode(bytes[i]);
-        if (char === '(' && !inText) {
-          inText = true;
-          current = '';
-        } else if (char === ')' && inText) {
-          inText = false;
-          if (current.length > 2) text += current + ' ';
-        } else if (inText) {
-          if (bytes[i] >= 32 && bytes[i] < 127) {
-            current += char;
-          }
-        }
-      }
-      return text.trim() || null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function parseResumeText(text) {
-    const data = {};
-    const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
-
-    // Try to extract name (usually first line or near top)
-    const namePatterns = [
-      /^([A-Z][a-z]+)\s+([A-Z][a-z]+)$/,
-      /^([A-Z][a-z]+)\s+[A-Z]\.?\s+([A-Z][a-z]+)$/
-    ];
-    for (const line of lines.slice(0, 5)) {
-      for (const pattern of namePatterns) {
-        const match = line.match(pattern);
-        if (match) {
-          data.firstName = match[1];
-          data.lastName = match[2];
-          break;
-        }
-      }
-      if (data.firstName) break;
-    }
-
-    // Try to extract email
-    const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+)/);
-    if (emailMatch) data.email = emailMatch[1];
-
-    // Try to extract school
-    const schoolPatterns = [
-      /(?:high school|hs):\s*(.+)/i,
-      /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+High\s+School)/i,
-      /(?:education|school)[\s:]+([A-Z][^,\n]+)/i
-    ];
-    for (const pattern of schoolPatterns) {
-      const match = text.match(pattern);
-      if (match) {
-        data.school = match[1].trim();
-        break;
-      }
-    }
-
-    // Try to extract GPA
-    const gpaMatch = text.match(/GPA[:\s]+([0-9]\.[0-9]+)/i);
-    if (gpaMatch) data.gpa = gpaMatch[1];
-
-    // Try to extract graduation year
-    const yearMatch = text.match(/(?:class of|graduation|grad)[:\s]+(\d{4})/i) ||
-                      text.match(/(\d{4})\s*(?:graduate|graduation)/i);
-    if (yearMatch) data.graduationYear = yearMatch[1];
-
-    // Extract achievements/activities
-    data.achievements = [];
-    const achievementKeywords = ['award', 'honor', 'scholar', 'president', 'captain', 'leader', 'volunteer', 'national', 'state', 'first place', 'winner'];
-    for (const line of lines) {
-      const lower = line.toLowerCase();
-      if (achievementKeywords.some(k => lower.includes(k)) && line.length > 10 && line.length < 200) {
-        data.achievements.push(line);
-      }
-    }
-    data.achievements = data.achievements.slice(0, 5);
-
-    // Detect interests from keywords
-    data.interests = [];
-    const interestMap = {
-      arts: ['art', 'paint', 'draw', 'design', 'photo', 'visual'],
-      music: ['music', 'band', 'orchestra', 'choir', 'instrument', 'piano', 'guitar'],
-      writing: ['writ', 'journal', 'newspaper', 'editor', 'publish', 'author'],
-      stem: ['science', 'math', 'engineer', 'computer', 'robot', 'code', 'program', 'research'],
-      business: ['business', 'entrepreneur', 'market', 'finance', 'econom'],
-      sports: ['athlet', 'sport', 'team', 'varsity', 'captain', 'basketball', 'football', 'soccer', 'swim', 'track'],
-      service: ['volunteer', 'community', 'service', 'nonprofit', 'charity', 'help'],
-      leadership: ['president', 'leader', 'captain', 'officer', 'director', 'founder']
-    };
-    const textLower = text.toLowerCase();
-    for (const [interest, keywords] of Object.entries(interestMap)) {
-      if (keywords.some(k => textLower.includes(k))) {
-        data.interests.push(interest);
-      }
-    }
-
-    return data;
   }
 
   function skipResume() {
@@ -494,7 +391,7 @@ const Onboarding = (function() {
     const step = STEPS[currentStep];
     step.fields.forEach(f => {
       const el = document.getElementById('ob-' + f.id);
-      if (el && f.type !== 'toggle' && f.type !== 'chips') {
+      if (el && f.type !== 'toggle' && f.type !== 'chips' && f.type !== 'consent') {
         formData[f.id] = el.value;
       }
     });
@@ -503,10 +400,43 @@ const Onboarding = (function() {
   function next() {
     collectValues();
 
-    // Validate required fields
     const step = STEPS[currentStep];
+
+    // Age verification
+    if (step.id === 'age') {
+      const month = formData.birthMonth;
+      const year = formData.birthYear;
+      if (!month || !year) {
+        alert('Please select your birth month and year.');
+        return;
+      }
+      const age = calculateAge(month, year);
+      formData.calculatedAge = age;
+      if (age < 14) {
+        showAgeBlocker();
+        return;
+      }
+    }
+
+    // Consent validation
+    if (step.id === 'consent') {
+      if (!formData.privacyAccepted || !formData.termsAccepted || !formData.ageConfirmed) {
+        alert('Please accept all required items to continue.');
+        return;
+      }
+      // Record consent
+      const consent = {
+        privacyVersion: '1.0',
+        termsVersion: '1.0',
+        timestamp: new Date().toISOString(),
+        ageConfirmed: true
+      };
+      localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+    }
+
+    // Required field validation
     for (const f of step.fields) {
-      if (f.required && !formData[f.id]) {
+      if (f.required && !formData[f.id] && f.type !== 'consent') {
         alert('Please fill in: ' + f.label);
         return;
       }
@@ -518,6 +448,26 @@ const Onboarding = (function() {
     } else {
       complete();
     }
+  }
+
+  function showAgeBlocker() {
+    const container = document.getElementById('onboarding-container');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="ob-card">
+        <h2 class="ob-title">We're Sorry</h2>
+        <p class="ob-subtitle" style="margin-bottom: 24px;">
+          This app is currently available only to students age 14 and older.
+        </p>
+        <div style="background: #fef2f2; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+          <p style="margin: 0; color: #991b1b;">
+            We take privacy seriously, especially for younger users. Please check back when you're 14, or ask a parent to help you find age-appropriate scholarship resources.
+          </p>
+        </div>
+        <button class="ob-btn ob-btn-secondary" style="width: 100%;" onclick="Onboarding.close()">Close</button>
+      </div>
+    `;
   }
 
   function prev() {
@@ -534,17 +484,6 @@ const Onboarding = (function() {
     if (el) el.classList.toggle('active', formData[fieldId]);
   }
 
-  function toggleChip(fieldId, value) {
-    if (!formData[fieldId]) formData[fieldId] = [];
-    const idx = formData[fieldId].indexOf(value);
-    if (idx >= 0) {
-      formData[fieldId].splice(idx, 1);
-    } else {
-      formData[fieldId].push(value);
-    }
-    render();
-  }
-
   function skip() {
     if (confirm('You can complete your profile later. Skip for now?')) {
       localStorage.setItem(STORAGE_KEY, 'true');
@@ -558,14 +497,12 @@ const Onboarding = (function() {
     localStorage.setItem(STORAGE_KEY, 'true');
     localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
 
-    // Sync to knowledge vault for immediate profile display
     const existingVault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
     const mergedVault = { ...existingVault, ...formData };
     localStorage.setItem('jasmine_knowledge_vault', JSON.stringify(mergedVault));
 
     close();
 
-    // Navigate to Profile section and refresh it
     if (typeof window.switchSection === 'function') {
       window.switchSection('profile');
     }
@@ -577,6 +514,53 @@ const Onboarding = (function() {
   function close() {
     const overlay = document.getElementById('onboarding-overlay');
     if (overlay) overlay.remove();
+  }
+
+  function handleMultiUpload(event, fieldId, category) {
+    const files = event.target.files;
+    if (!files.length) return;
+
+    if (!formData[fieldId]) formData[fieldId] = [];
+
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`${file.name} is too large (max 10MB)`);
+        continue;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        formData[fieldId].push({
+          name: file.name,
+          type: file.type,
+          dataUrl: reader.result,
+          category: category
+        });
+
+        const docs = JSON.parse(localStorage.getItem('jasmine_documents') || '[]');
+        docs.push({
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+          title: file.name.replace(/\.[^/.]+$/, ''),
+          type: file.type,
+          category: category,
+          dataUrl: reader.result,
+          uploadedAt: new Date().toISOString()
+        });
+        localStorage.setItem('jasmine_documents', JSON.stringify(docs));
+
+        render();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    event.target.value = '';
+  }
+
+  function removeUploadedFile(fieldId, index) {
+    if (formData[fieldId] && formData[fieldId][index]) {
+      formData[fieldId].splice(index, 1);
+      render();
+    }
   }
 
   function injectStyles() {
@@ -608,31 +592,6 @@ const Onboarding = (function() {
         font-size: 1rem; font-family: inherit;
       }
       .ob-field input:focus, .ob-field select:focus { outline: none; border-color: #7c3aed; }
-      .ob-toggle {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 12px 14px; background: #f9fafb; border-radius: 10px; cursor: pointer;
-      }
-      .ob-toggle-label { font-weight: 600; }
-      .ob-toggle-desc { font-size: 0.8rem; color: #6b7280; }
-      .ob-switch {
-        width: 44px; height: 26px; background: #d1d5db; border-radius: 13px;
-        position: relative; transition: background 0.2s;
-      }
-      .ob-switch.active { background: #7c3aed; }
-      .ob-knob {
-        width: 20px; height: 20px; background: white; border-radius: 50%;
-        position: absolute; top: 3px; left: 3px; transition: transform 0.2s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      }
-      .ob-switch.active .ob-knob { transform: translateX(18px); }
-      .ob-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-      .ob-chip {
-        padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 20px;
-        background: white; cursor: pointer; font-size: 0.9rem; font-family: inherit;
-        transition: all 0.2s;
-      }
-      .ob-chip:hover { border-color: #7c3aed; }
-      .ob-chip.selected { border-color: #7c3aed; background: #ede9fe; }
       .ob-actions { display: flex; justify-content: space-between; gap: 12px; }
       .ob-btn {
         padding: 14px 24px; border-radius: 12px; font-size: 1rem; font-weight: 700;
@@ -647,6 +606,31 @@ const Onboarding = (function() {
         display: block; width: 100%; text-align: center; margin-top: 16px;
         background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 0.9rem;
       }
+      .ob-consent-section { text-align: left; }
+      .ob-consent-box {
+        background: #ede9fe; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+      }
+      .ob-consent-header { font-weight: 700; margin-bottom: 12px; color: #5b21b6; }
+      .ob-consent-list { margin: 0; padding-left: 0; list-style: none; }
+      .ob-consent-list li { margin-bottom: 8px; font-size: 0.95rem; }
+      .ob-consent-checks { display: flex; flex-direction: column; gap: 12px; }
+      .ob-checkbox-label {
+        display: flex; align-items: flex-start; gap: 12px; cursor: pointer;
+        padding: 12px; background: #f9fafb; border-radius: 10px;
+      }
+      .ob-checkbox-label:hover { background: #f3f4f6; }
+      .ob-checkbox {
+        width: 24px; height: 24px; min-width: 24px; border: 2px solid #d1d5db;
+        border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: bold; color: white; background: white;
+      }
+      .ob-checkbox.checked { background: #7c3aed; border-color: #7c3aed; }
+      .ob-checkbox-label span { font-size: 0.95rem; line-height: 1.4; }
+      .ob-checkbox-label a { color: #7c3aed; text-decoration: underline; }
+      .ob-consent-minor-note {
+        margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 8px;
+        font-size: 0.85rem; color: #92400e;
+      }
       .ob-resume-section { text-align: center; }
       .ob-resume-btn {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -660,7 +644,6 @@ const Onboarding = (function() {
       .ob-resume-status { margin-top: 16px; text-align: left; }
       .ob-loading { color: #7c3aed; padding: 12px; background: #ede9fe; border-radius: 10px; }
       .ob-success { color: #065f46; padding: 12px; background: #d1fae5; border-radius: 10px; line-height: 1.6; }
-      .ob-error { color: #dc2626; padding: 12px; background: #fee2e2; border-radius: 10px; }
       .ob-skip-resume {
         margin-top: 20px; background: none; border: none; color: #6b7280;
         cursor: pointer; font-size: 0.95rem; text-decoration: underline;
@@ -688,86 +671,19 @@ const Onboarding = (function() {
     document.head.appendChild(style);
   }
 
-  // Handle multi-file upload (for report cards, awards, etc.)
-  function handleMultiUpload(event, fieldId, category) {
-    const files = event.target.files;
-    if (!files.length) return;
-
-    // Initialize array if needed
-    if (!formData[fieldId]) formData[fieldId] = [];
-
-    // Process each file
-    for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) {
-        alert(`${file.name} is too large (max 10MB)`);
-        continue;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Add to formData
-        formData[fieldId].push({
-          name: file.name,
-          type: file.type,
-          dataUrl: reader.result,
-          category: category
-        });
-
-        // Save to localStorage documents
-        const docs = JSON.parse(localStorage.getItem('jasmine_documents') || '[]');
-        docs.push({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-          title: file.name.replace(/\.[^/.]+$/, ''),
-          type: file.type,
-          category: category,
-          dataUrl: reader.result,
-          uploadedAt: new Date().toISOString()
-        });
-        localStorage.setItem('jasmine_documents', JSON.stringify(docs));
-
-        // Re-render the step to show updated list
-        renderCurrentStep();
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Clear the input so the same file can be selected again
-    event.target.value = '';
-  }
-
-  function removeUploadedFile(fieldId, index) {
-    if (formData[fieldId] && formData[fieldId][index]) {
-      formData[fieldId].splice(index, 1);
-      renderCurrentStep();
-    }
-  }
-
-  function renderCurrentStep() {
-    const container = document.getElementById('ob-content');
-    if (container && STEPS[currentStep]) {
-      const step = STEPS[currentStep];
-      container.innerHTML = `
-        <h2 class="ob-title">${step.title}</h2>
-        ${step.subtitle ? `<p class="ob-subtitle">${step.subtitle}</p>` : ''}
-        <div class="ob-fields">
-          ${step.fields.map(renderField).join('')}
-        </div>
-      `;
-    }
-  }
-
   return {
     shouldShow,
     show,
     next,
     prev,
     toggle,
-    toggleChip,
+    toggleConsent,
     skip,
     skipResume,
     handleResumeUpload,
     handleMultiUpload,
     removeUploadedFile,
-    getProfile
+    getProfile,
+    close
   };
 })();

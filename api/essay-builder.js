@@ -228,7 +228,8 @@ Write the enhanced essay now:`;
           { role: 'user', content: userPrompt }
         ],
         max_tokens: 2048,
-        temperature: 0.7
+        temperature: 0.7,
+        store: false
       }),
     });
 

@@ -63,7 +63,8 @@ Rules:
           { role: 'user', content: `Parse this scholarship list from ${source}:\n\n${content.substring(0, 15000)}` }
         ],
         max_tokens: 4000,
-        temperature: 0.3
+        temperature: 0.3,
+        store: false
       })
     });
 

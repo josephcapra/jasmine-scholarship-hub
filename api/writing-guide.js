@@ -208,7 +208,8 @@ End with: "Read your essay aloud before submitting to make sure every sentence s
           { role: 'user', content: userPrompt }
         ],
         max_tokens: 1500,
-        temperature: 0.7
+        temperature: 0.7,
+        store: false
       })
     });
 

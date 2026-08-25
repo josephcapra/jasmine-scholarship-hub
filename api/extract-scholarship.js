@@ -85,7 +85,8 @@ Return ONLY valid JSON with this structure (use null for fields you cannot find)
           { role: 'user', content: `Extract scholarship information from this webpage content:\n\nURL: ${url}\n\nContent:\n${pageContent}` }
         ],
         max_tokens: 1000,
-        temperature: 0.3
+        temperature: 0.3,
+        store: false
       })
     });
 
