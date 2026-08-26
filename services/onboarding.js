@@ -212,12 +212,12 @@ const Onboarding = (function() {
         return `
           <div class="ob-role-section">
             <div class="ob-role-options">
-              <button type="button" class="ob-role-btn ${formData.userRole === 'student' ? 'selected' : ''}" onclick="Onboarding.selectRole('student')">
+              <button type="button" class="ob-role-btn ${formData.userRole === 'student' ? 'selected' : ''}" onclick="Onboarding.selectRole('student', this)">
                 <div class="ob-role-emoji">🎓</div>
                 <div class="ob-role-title">I'm a Student</div>
                 <div class="ob-role-desc">Looking for scholarships and planning for college</div>
               </button>
-              <button type="button" class="ob-role-btn ${formData.userRole === 'parent' ? 'selected' : ''}" onclick="Onboarding.selectRole('parent')">
+              <button type="button" class="ob-role-btn ${formData.userRole === 'parent' ? 'selected' : ''}" onclick="Onboarding.selectRole('parent', this)">
                 <div class="ob-role-emoji">👨‍👩‍👧</div>
                 <div class="ob-role-title">I'm a Parent</div>
                 <div class="ob-role-desc">Supporting my child's scholarship journey</div>
@@ -509,13 +509,13 @@ const Onboarding = (function() {
     if (el) el.classList.toggle('active', formData[fieldId]);
   }
 
-  function selectRole(role) {
+  function selectRole(role, btnElement) {
     formData.userRole = role;
     // Update button states
     document.querySelectorAll('.ob-role-btn').forEach(btn => {
       btn.classList.remove('selected');
     });
-    event.currentTarget.classList.add('selected');
+    if (btnElement) btnElement.classList.add('selected');
 
     // If parent, redirect to parent page after a short delay
     if (role === 'parent') {
