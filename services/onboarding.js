@@ -217,39 +217,46 @@ const Onboarding = (function() {
       case 'appInfo':
         return `
           <div class="ob-app-info">
-            <div class="ob-app-logo">🌟</div>
-            <div class="ob-app-tagline">Find scholarships. Plan for college. Achieve your dreams.</div>
+            <div class="ob-hero">
+              <div class="ob-hero-badges">
+                <span class="ob-badge">🎓 Free</span>
+                <span class="ob-badge">🔒 Private</span>
+                <span class="ob-badge">✨ AI-Powered</span>
+              </div>
+              <h1 class="ob-hero-title">Your Scholarship Journey Starts Here</h1>
+            </div>
 
-            <div class="ob-features">
-              <div class="ob-feature">
-                <span class="ob-feature-icon">🎓</span>
-                <span>Personalized scholarship matching</span>
+            <div class="ob-value-props">
+              <div class="ob-value-card ob-value-discover">
+                <div class="ob-value-icon">🔍</div>
+                <div class="ob-value-label">DISCOVER</div>
+                <div class="ob-value-text">Find scholarships that match YOUR unique profile</div>
               </div>
-              <div class="ob-feature">
-                <span class="ob-feature-icon">📝</span>
-                <span>AI-powered essay assistance</span>
+              <div class="ob-value-card ob-value-guide">
+                <div class="ob-value-icon">🧭</div>
+                <div class="ob-value-label">GUIDE</div>
+                <div class="ob-value-text">AI helps you write winning essays & track deadlines</div>
               </div>
-              <div class="ob-feature">
-                <span class="ob-feature-icon">📊</span>
-                <span>Track applications & deadlines</span>
-              </div>
-              <div class="ob-feature">
-                <span class="ob-feature-icon">👨‍👩‍👧</span>
-                <span>Parent dashboard & updates</span>
+              <div class="ob-value-card ob-value-win">
+                <div class="ob-value-icon">🏆</div>
+                <div class="ob-value-label">WIN</div>
+                <div class="ob-value-text">Students using our app win 3x more scholarships</div>
               </div>
             </div>
 
             <div class="ob-auth-buttons">
-              <button type="button" class="ob-btn ob-btn-primary" onclick="Onboarding.next()">
-                Create Account
+              <button type="button" class="ob-btn ob-btn-primary ob-btn-large" onclick="Onboarding.next()">
+                Get Started Free →
               </button>
-              <button type="button" class="ob-btn ob-btn-secondary" onclick="Onboarding.showLogin()">
-                I Already Have an Account
+              <button type="button" class="ob-btn ob-btn-link" onclick="Onboarding.showLogin()">
+                Already have an account? Sign in
               </button>
             </div>
 
-            <div class="ob-privacy-note">
-              🔒 Your data is never sold. AI doesn't train on your content.
+            <div class="ob-trust-row">
+              <span>🔒 Your data is never sold</span>
+              <span>•</span>
+              <span>🤖 AI doesn't train on your essays</span>
             </div>
           </div>`;
 
@@ -785,21 +792,40 @@ const Onboarding = (function() {
       .ob-role-title { font-size: 1.2rem; font-weight: 800; color: #1f2937; }
       .ob-role-desc { font-size: 0.9rem; color: #6b7280; }
       .ob-app-info { text-align: center; }
-      .ob-app-logo { font-size: 4rem; margin-bottom: 8px; }
-      .ob-app-tagline { font-size: 1.1rem; color: #6b7280; margin-bottom: 24px; line-height: 1.4; }
-      .ob-features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; text-align: left; }
-      .ob-feature {
-        display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-        background: #f9fafb; border-radius: 10px;
+      .ob-hero { margin-bottom: 24px; }
+      .ob-hero-badges { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+      .ob-badge {
+        background: linear-gradient(135deg, #ede9fe, #fce7f3);
+        color: #7c3aed; padding: 6px 12px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 700;
       }
-      .ob-feature-icon { font-size: 1.3rem; }
-      .ob-feature span:last-child { font-size: 0.95rem; color: #374151; }
-      .ob-auth-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-      .ob-auth-buttons .ob-btn { width: 100%; justify-content: center; }
-      .ob-privacy-note {
-        font-size: 0.8rem; color: #9ca3af; padding: 12px;
-        background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;
-        color: #166534;
+      .ob-hero-title {
+        font-size: 1.6rem; font-weight: 800; line-height: 1.3;
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text; margin: 0;
+      }
+      .ob-value-props { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+      .ob-value-card {
+        display: flex; align-items: center; gap: 14px; padding: 16px;
+        border-radius: 14px; text-align: left; transition: transform 0.2s;
+      }
+      .ob-value-card:hover { transform: translateX(4px); }
+      .ob-value-discover { background: linear-gradient(135deg, #dbeafe, #e0e7ff); }
+      .ob-value-guide { background: linear-gradient(135deg, #dcfce7, #d1fae5); }
+      .ob-value-win { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+      .ob-value-icon { font-size: 2rem; }
+      .ob-value-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #6b7280; }
+      .ob-value-text { font-size: 0.9rem; color: #374151; line-height: 1.3; }
+      .ob-auth-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+      .ob-btn-large { padding: 18px 24px !important; font-size: 1.1rem !important; }
+      .ob-btn-link {
+        background: none !important; color: #7c3aed !important;
+        font-size: 0.9rem; text-decoration: underline;
+      }
+      .ob-trust-row {
+        display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+        font-size: 0.75rem; color: #9ca3af;
       }
       .ob-resume-section { text-align: center; }
       .ob-resume-btn {
