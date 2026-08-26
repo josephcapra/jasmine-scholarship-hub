@@ -135,6 +135,14 @@ const ParentAuth = (function() {
               </div>
             </div>
 
+            <div class="pam-option pam-option-highlight" onclick="ParentAuth.showSetupChild()">
+              <div class="pam-option-icon">👶</div>
+              <div class="pam-option-text">
+                <strong>Set up account for my child</strong>
+                <span>Create their profile now, they can take over later</span>
+              </div>
+            </div>
+
             <div class="pam-option" onclick="ParentAuth.skipConnection()">
               <div class="pam-option-icon">⏭️</div>
               <div class="pam-option-text">
@@ -162,6 +170,36 @@ const ParentAuth = (function() {
             <button class="pam-btn pam-btn-primary" onclick="ParentAuth.sendInvite()">Send Invite</button>
             <button class="pam-btn pam-btn-secondary" onclick="ParentAuth.backToStep2()">Back</button>
             <div id="pam-invite-error" class="pam-error"></div>
+          </div>
+
+          <div id="pam-step-setup-child" style="display: none;">
+            <p class="pam-question">Set up your child's profile</p>
+            <div class="pam-field">
+              <label>Child's First Name</label>
+              <input type="text" id="pam-child-first" placeholder="First name">
+            </div>
+            <div class="pam-field">
+              <label>Child's Last Name</label>
+              <input type="text" id="pam-child-last" placeholder="Last name">
+            </div>
+            <div class="pam-field">
+              <label>Child's Email (optional)</label>
+              <input type="email" id="pam-child-email" placeholder="child@email.com">
+            </div>
+            <div class="pam-field">
+              <label>Grade Level</label>
+              <select id="pam-child-grade">
+                <option value="">Select grade...</option>
+                <option value="9">9th Grade (Freshman)</option>
+                <option value="10">10th Grade (Sophomore)</option>
+                <option value="11">11th Grade (Junior)</option>
+                <option value="12">12th Grade (Senior)</option>
+                <option value="college">College Student</option>
+              </select>
+            </div>
+            <button class="pam-btn pam-btn-primary" onclick="ParentAuth.createChildAccount()">Create Account</button>
+            <button class="pam-btn pam-btn-secondary" onclick="ParentAuth.backToStep2()">Back</button>
+            <div id="pam-child-error" class="pam-error"></div>
           </div>
 
           <div id="pam-step-success" style="display: none;">
@@ -316,6 +354,13 @@ const ParentAuth = (function() {
         border-color: #7c3aed;
         background: #faf5ff;
       }
+      .pam-option-highlight {
+        background: linear-gradient(135deg, #ede9fe, #fce7f3);
+        border-color: #c4b5fd;
+      }
+      .pam-option-highlight:hover {
+        border-color: #7c3aed;
+      }
       .pam-option-icon {
         font-size: 1.5rem;
       }
@@ -416,9 +461,71 @@ const ParentAuth = (function() {
     document.getElementById('pam-step-invite').style.display = 'block';
   }
 
+  function showSetupChild() {
+    document.getElementById('pam-step-2').style.display = 'none';
+    document.getElementById('pam-step-setup-child').style.display = 'block';
+  }
+
+  async function createChildAccount() {
+    const firstName = document.getElementById('pam-child-first').value.trim();
+    const lastName = document.getElementById('pam-child-last').value.trim();
+    const email = document.getElementById('pam-child-email').value.trim();
+    const grade = document.getElementById('pam-child-grade').value;
+    const errorEl = document.getElementById('pam-child-error');
+
+    if (!firstName || !lastName) {
+      errorEl.textContent = 'Please enter your child\'s name';
+      return;
+    }
+
+    try {
+      const parentId = getParentId();
+      if (!parentId) throw new Error('Parent not logged in');
+
+      // Calculate graduation year from grade
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth();
+      const schoolYear = currentMonth >= 8 ? currentYear + 1 : currentYear;
+      const gradYearMap = { '9': schoolYear + 3, '10': schoolYear + 2, '11': schoolYear + 1, '12': schoolYear, 'college': schoolYear };
+      const graduationYear = gradYearMap[grade] || schoolYear + 1;
+
+      // Create student via Supabase
+      if (typeof SupabaseClient !== 'undefined') {
+        const studentData = {
+          email: email || `${firstName.toLowerCase()}.${lastName.toLowerCase()}@parent-created.local`,
+          firstName,
+          lastName,
+          graduationYear,
+          state: 'FL'
+        };
+
+        const student = await SupabaseClient.createStudent(studentData);
+
+        // Link parent to student
+        await SupabaseClient.acceptStudentInvite(parentId, student.invite_code);
+
+        // Show success
+        document.getElementById('pam-step-setup-child').style.display = 'none';
+        document.getElementById('pam-success-title').textContent = 'Account Created!';
+        document.getElementById('pam-success-message').innerHTML = `
+          ${firstName}'s account is ready.<br>
+          <strong>Their login code:</strong> ${student.invite_code}<br>
+          <span style="font-size: 0.85rem; color: #6b7280;">Share this so they can access their account.</span>
+        `;
+        document.getElementById('pam-step-success').style.display = 'block';
+      } else {
+        throw new Error('Database not available');
+      }
+    } catch (e) {
+      console.error('Create child error:', e);
+      errorEl.textContent = e.message || 'Failed to create account';
+    }
+  }
+
   function backToStep2() {
     document.getElementById('pam-step-code').style.display = 'none';
     document.getElementById('pam-step-invite').style.display = 'none';
+    document.getElementById('pam-step-setup-child').style.display = 'none';
     document.getElementById('pam-step-2').style.display = 'block';
   }
 
@@ -489,6 +596,8 @@ const ParentAuth = (function() {
     signInWithGoogle,
     showCodeEntry,
     showInviteStudent,
+    showSetupChild,
+    createChildAccount,
     backToStep2,
     submitCode,
     sendInvite,

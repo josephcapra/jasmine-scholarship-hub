@@ -198,6 +198,34 @@
       font-size: 4rem;
       margin-bottom: 16px;
     }
+    .connect-options {
+      margin-top: 20px;
+    }
+    .connect-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+    .connect-divider::before, .connect-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .connect-divider span {
+      padding: 0 12px;
+    }
+    .connect-code-section {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .code-entry-row {
+      display: flex;
+      gap: 12px;
+    }
 
     .student-switcher {
       display: flex;
@@ -335,7 +363,26 @@
       <div class="emoji">🔗</div>
       <h2>Connect With Your Child</h2>
       <p>Link your account to see their scholarship progress</p>
-      <button class="btn btn-primary" onclick="showConnectOptions()">Connect Now</button>
+
+      <div class="connect-options">
+        <button class="btn btn-primary" onclick="showConnectOptions()">
+          👶 Set Up Their Account
+        </button>
+
+        <div class="connect-divider"><span>or</span></div>
+
+        <div class="connect-code-section">
+          <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">Already have a code from your child?</p>
+          <div class="code-entry-row">
+            <input type="text" id="quick-code-input" placeholder="Enter code" maxlength="8"
+              style="flex: 1; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; text-transform: uppercase; text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
+            <button class="btn btn-secondary" onclick="submitQuickCode()" style="white-space: nowrap;">
+              Connect
+            </button>
+          </div>
+          <div id="quick-code-error" style="color: #ef4444; font-size: 0.85rem; margin-top: 8px;"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -676,12 +723,38 @@
         await loadParentDashboard();
       });
 
-      // Skip to step 2 if already logged in
+      // Skip to step 2 (setup child) if already logged in
       if (ParentAuth.isLoggedIn()) {
         setTimeout(() => {
           document.getElementById('pam-step-1').style.display = 'none';
-          document.getElementById('pam-step-2').style.display = 'block';
+          document.getElementById('pam-step-setup-child').style.display = 'block';
         }, 100);
+      }
+    }
+
+    async function submitQuickCode() {
+      const code = document.getElementById('quick-code-input').value.trim().toUpperCase();
+      const errorEl = document.getElementById('quick-code-error');
+      errorEl.textContent = '';
+
+      if (!code || code.length < 6) {
+        errorEl.textContent = 'Please enter a valid code';
+        return;
+      }
+
+      const parentId = ParentAuth.getParentId();
+      if (!parentId) {
+        errorEl.textContent = 'Please log in first';
+        return;
+      }
+
+      try {
+        await ParentAuth.linkWithStudentCode(code);
+        // Reload dashboard
+        await loadParentDashboard();
+        showToast('Connected successfully! 🎉');
+      } catch (e) {
+        errorEl.textContent = e.message || 'Invalid code';
       }
     }
 
