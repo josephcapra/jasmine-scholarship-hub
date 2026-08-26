@@ -79,28 +79,38 @@ export default async function handler(req, res) {
 }
 
 function buildEmailHtml(type, studentName, body) {
-  const studentDisplay = studentName || 'Your child';
+  const studentDisplay = studentName || 'Your student';
 
   const templates = {
     milestone: {
       emoji: '🎉',
       color: '#7c3aed',
-      title: 'Milestone Reached!'
+      title: 'Progress Update'
     },
     weekly: {
       emoji: '📊',
       color: '#14b8a6',
-      title: 'Weekly Progress Update'
+      title: 'Weekly Summary'
     },
     encouragement: {
       emoji: '💜',
       color: '#ec4899',
-      title: 'Encouragement Sent!'
+      title: 'Message Sent'
     },
     deadline: {
       emoji: '⏰',
       color: '#f59e0b',
-      title: 'Deadline Alert'
+      title: 'Upcoming Deadline'
+    },
+    welcome: {
+      emoji: '👋',
+      color: '#7c3aed',
+      title: 'Welcome to Early Access'
+    },
+    linked: {
+      emoji: '🔗',
+      color: '#10b981',
+      title: 'Account Connected'
     },
     default: {
       emoji: '📧',
@@ -118,41 +128,46 @@ function buildEmailHtml(type, studentName, body) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background: #faf5ff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+<body style="margin: 0; padding: 0; background: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <div style="max-width: 560px; margin: 0 auto; padding: 24px;">
+
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, ${template.color}, #ec4899); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
-      <div style="font-size: 48px; margin-bottom: 10px;">${template.emoji}</div>
-      <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800;">${template.title}</h1>
-      <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0;">${studentDisplay}'s Scholarship Journey</p>
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="font-size: 32px; margin-bottom: 8px;">${template.emoji}</div>
+      <h1 style="color: #1f2937; margin: 0; font-size: 20px; font-weight: 700;">${template.title}</h1>
     </div>
 
     <!-- Body -->
-    <div style="background: white; padding: 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-      <p style="font-size: 16px; line-height: 1.6; color: #374151; margin: 0 0 20px 0;">
-        ${body || 'You have a new update from Jasmine Scholarship Hub.'}
+    <div style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb;">
+      <p style="font-size: 15px; line-height: 1.6; color: #374151; margin: 0 0 20px 0;">
+        ${body || 'You have an update from Jasmine Scholarship Hub.'}
       </p>
 
       <a href="https://jasmine-scholarship-hub.vercel.app/parents.html"
-         style="display: inline-block; background: ${template.color}; color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
-        View Full Dashboard →
+         style="display: inline-block; background: ${template.color}; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+        View Dashboard
       </a>
+    </div>
 
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-      <p style="font-size: 13px; color: #9ca3af; margin: 0;">
-        You're receiving this because you're connected to ${studentDisplay}'s scholarship account.
-        <br><br>
-        <a href="https://jasmine-scholarship-hub.vercel.app/parents.html" style="color: #7c3aed;">Manage notification preferences</a>
+    <!-- Privacy Notice -->
+    <div style="margin-top: 24px; padding: 16px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
+      <p style="font-size: 13px; color: #166534; margin: 0; line-height: 1.5;">
+        <strong>Our promise to you:</strong> We never sell student data. Your student controls what they share. Essays remain their own work. You can delete your account anytime.
       </p>
     </div>
 
     <!-- Footer -->
-    <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+    <div style="text-align: center; padding: 20px 0; color: #9ca3af; font-size: 12px;">
+      <p style="margin: 0 0 8px 0;">
+        You're receiving this because you're connected to ${studentDisplay}'s account.
+      </p>
       <p style="margin: 0;">
-        🔒 Your data is encrypted and never sold
-        <br>
-        Jasmine Scholarship Hub
+        <a href="https://jasmine-scholarship-hub.vercel.app/parents.html" style="color: #6b7280;">Manage preferences</a>
+        &nbsp;·&nbsp;
+        <a href="https://jasmine-scholarship-hub.vercel.app/privacy.html" style="color: #6b7280;">Privacy Policy</a>
+      </p>
+      <p style="margin: 12px 0 0 0; color: #d1d5db;">
+        Jasmine Scholarship Hub · Early Access Program
       </p>
     </div>
   </div>
