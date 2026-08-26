@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js"></script>
   <script src="scholarships-data.js"></script>
   <script src="services/onboarding.js?v=2"></script>
+  <script src="services/encrypted-storage.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -1857,6 +1858,11 @@
       <!-- Privacy Center -->
       <div class="card" style="margin-bottom: 16px; margin-top: 24px; background: linear-gradient(135deg, #ede9fe, #ddd6fe);">
         <div class="card-title" style="margin-bottom: 12px; color: #5b21b6;">🔒 Privacy Center</div>
+        <div id="encryption-status" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #dcfce7; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem;">
+          <span style="color: #16a34a;">🔐</span>
+          <span style="color: #166534; font-weight: 600;">Data Encrypted</span>
+          <span style="color: #22c55e; font-size: 0.75rem;">(AES-256)</span>
+        </div>
         <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 16px;">Your data is protected. We never sell your information or use it for ads.</p>
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -6827,7 +6833,21 @@
     // ===========================================
     // INIT
     // ===========================================
-    function initApp() {
+    async function initApp() {
+      // Initialize encrypted storage
+      if (typeof EncryptedStorage !== 'undefined' && EncryptedStorage.isSupported()) {
+        const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+        const seed = profile.email || profile.firstName || 'default';
+        await EncryptedStorage.init(seed);
+
+        // Migrate existing data to encrypted storage (one-time)
+        if (!localStorage.getItem('jasmine_encryption_migrated')) {
+          await EncryptedStorage.migrateExistingData();
+          localStorage.setItem('jasmine_encryption_migrated', 'true');
+        }
+        console.log('Encryption status:', EncryptedStorage.getStatus());
+      }
+
       loadScholarships();
       loadDocuments();
       loadProfilePhoto();
@@ -6871,6 +6891,26 @@
     // Load profile section with Knowledge Vault data
     function loadProfileSection() {
       if (typeof KnowledgeVault === 'undefined') return;
+
+      // Update encryption status
+      const encStatus = document.getElementById('encryption-status');
+      if (encStatus && typeof EncryptedStorage !== 'undefined') {
+        const status = EncryptedStorage.getStatus();
+        if (status.initialized) {
+          encStatus.innerHTML = `
+            <span style="color: #16a34a;">🔐</span>
+            <span style="color: #166534; font-weight: 600;">Data Encrypted</span>
+            <span style="color: #22c55e; font-size: 0.75rem;">(${status.algorithm})</span>
+          `;
+          encStatus.style.background = '#dcfce7';
+        } else if (!status.supported) {
+          encStatus.innerHTML = `
+            <span style="color: #f59e0b;">⚠️</span>
+            <span style="color: #92400e; font-weight: 600;">Browser doesn't support encryption</span>
+          `;
+          encStatus.style.background = '#fef3c7';
+        }
+      }
 
       const profile = KnowledgeVault.buildProfile();
       const completion = KnowledgeVault.getProfileCompletion();
