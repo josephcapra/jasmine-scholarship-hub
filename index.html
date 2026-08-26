@@ -7683,6 +7683,10 @@
       showEditModal('background', 'Background', 'Tell us about your background');
     }
 
+    // Export edit functions immediately
+    window.editInterests = editInterests;
+    window.editBackground = editBackground;
+
     function editAchievements() {
       openAchievementLibrary();
     }
