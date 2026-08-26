@@ -1,4 +1,4 @@
-// Vercel Serverless Function: Send Parent Notifications
+// Vercel Serverless Function: Send Parent Notifications via SendGrid
 // POST /api/send-notification { parentEmail, studentName, type, subject, body }
 
 export default async function handler(req, res) {
@@ -9,11 +9,12 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+  const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'notifications@jasminescholarship.app';
 
-  // If no Resend key, just log and return success (for testing)
-  if (!RESEND_API_KEY) {
-    console.log('Email notification (no RESEND_API_KEY):', req.body);
+  // If no SendGrid key, just log and return success (for testing)
+  if (!SENDGRID_API_KEY) {
+    console.log('Email notification (no SENDGRID_API_KEY):', req.body);
     return res.status(200).json({
       success: true,
       message: 'Notification logged (email not configured)',
@@ -34,32 +35,41 @@ export default async function handler(req, res) {
     // Build email HTML
     const html = buildEmailHtml(type, studentName, emailBody);
 
-    // Send via Resend
-    const response = await fetch('https://api.resend.com/emails', {
+    // Send via SendGrid
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${SENDGRID_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'Jasmine Scholarship Hub <notifications@jasminescholarship.app>',
-        to: parentEmail,
+        personalizations: [{
+          to: [{ email: parentEmail }]
+        }],
+        from: {
+          email: FROM_EMAIL,
+          name: 'Jasmine Scholarship Hub'
+        },
         subject: subject,
-        html: html
+        content: [{
+          type: 'text/html',
+          value: html
+        }]
       })
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Resend error:', error);
-      return res.status(500).json({ error: 'Failed to send email' });
+      console.error('SendGrid error:', error);
+      return res.status(500).json({ error: 'Failed to send email', details: error });
     }
 
-    const result = await response.json();
+    // SendGrid returns 202 with no body on success
+    const messageId = response.headers.get('x-message-id');
 
     return res.status(200).json({
       success: true,
-      messageId: result.id
+      messageId: messageId || 'sent'
     });
 
   } catch (error) {
