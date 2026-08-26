@@ -6896,44 +6896,72 @@
     }
 
     async function loadParentInviteCode() {
-      if (typeof SupabaseClient === 'undefined') return;
+      const codeEl = document.getElementById('my-invite-code');
+      if (!codeEl) return;
 
-      const studentId = SupabaseClient.getLocalStudentId();
-      if (studentId) {
+      // Check for student ID in localStorage
+      const studentId = localStorage.getItem('jasmine_student_id');
+      console.log('[InviteCode] Student ID:', studentId);
+
+      if (studentId && typeof SupabaseClient !== 'undefined') {
         try {
           const student = await SupabaseClient.getStudent(studentId);
+          console.log('[InviteCode] Student from Supabase:', student);
           if (student && student.invite_code) {
-            document.getElementById('my-invite-code').textContent = student.invite_code;
+            codeEl.textContent = student.invite_code;
+            console.log('[InviteCode] Set code:', student.invite_code);
+          } else {
+            // Student exists but no invite code - generate one
+            const code = SupabaseClient.generateInviteCode();
+            codeEl.textContent = code;
+            console.log('[InviteCode] Generated code:', code);
           }
 
           // Load linked parents
           const links = await SupabaseClient.getLinkedParents(studentId);
           if (links && links.length > 0) {
-            document.getElementById('linked-parents').style.display = 'block';
-            document.getElementById('linked-parents-list').innerHTML = links.map(link => {
-              const parent = link.parents;
-              return `<div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: white; border-radius: 8px; margin-bottom: 6px;">
-                <span>👤</span>
-                <span style="font-weight: 600;">${parent.name || 'Parent'}</span>
-                <span style="color: #10b981; font-size: 0.8rem; margin-left: auto;">Connected ✓</span>
-              </div>`;
-            }).join('');
+            const linkedEl = document.getElementById('linked-parents');
+            const listEl = document.getElementById('linked-parents-list');
+            if (linkedEl && listEl) {
+              linkedEl.style.display = 'block';
+              listEl.innerHTML = links.map(link => {
+                const parent = link.parents;
+                return `<div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: white; border-radius: 8px; margin-bottom: 6px;">
+                  <span>👤</span>
+                  <span style="font-weight: 600;">${parent?.name || 'Parent'}</span>
+                  <span style="color: #10b981; font-size: 0.8rem; margin-left: auto;">Connected ✓</span>
+                </div>`;
+              }).join('');
+            }
           }
         } catch (e) {
-          console.log('Parent invite code not loaded:', e);
+          console.error('[InviteCode] Error loading from Supabase:', e);
+          // Fallback: generate a local code
+          if (typeof SupabaseClient !== 'undefined') {
+            codeEl.textContent = SupabaseClient.generateInviteCode();
+          }
         }
-      } else {
-        // Generate a placeholder code for display (actual code created on cloud sync)
-        document.getElementById('my-invite-code').textContent = SupabaseClient.generateInviteCode();
+      } else if (typeof SupabaseClient !== 'undefined') {
+        // No student ID - generate a placeholder code
+        codeEl.textContent = SupabaseClient.generateInviteCode();
+        console.log('[InviteCode] No student ID, generated placeholder');
       }
     }
 
     function copyInviteCode() {
       const code = document.getElementById('my-invite-code').textContent;
+      if (!code || code === '--------' || code.includes('-')) {
+        alert('Please wait - your invite code is loading...');
+        loadParentInviteCode();
+        return;
+      }
       navigator.clipboard.writeText(code).then(() => {
         const btn = event.target;
         btn.textContent = '✓ Copied!';
         setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+      }).catch(() => {
+        // Fallback for older browsers
+        prompt('Copy this code:', code);
       });
     }
 
