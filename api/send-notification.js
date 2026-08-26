@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     // Build email HTML
     const html = buildEmailHtml(type, studentName, emailBody);
 
-    // Send via SendGrid
+    // Send via SendGrid (click tracking disabled - SSL not configured for tracking domain)
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
@@ -54,7 +54,11 @@ export default async function handler(req, res) {
         content: [{
           type: 'text/html',
           value: html
-        }]
+        }],
+        tracking_settings: {
+          click_tracking: { enable: false },
+          open_tracking: { enable: false }
+        }
       })
     });
 
