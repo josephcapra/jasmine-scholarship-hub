@@ -494,8 +494,14 @@ const ParentAuth = (function() {
           `scope=email%20profile&` +
           `prompt=select_account`;
 
-        // For now, show setup message
-        alert('Google Sign-In requires setup. Please use email or Face ID.');
+        // Open Google OAuth in popup - needs client ID configured
+        // For now, show a message with Face ID option
+        const hasFaceId = typeof PasskeyAuth !== 'undefined' && PasskeyAuth.hasPasskey();
+        if (hasFaceId) {
+          alert('Google Sign-In is coming soon! Try Face ID for faster sign-in.');
+        } else {
+          alert('Google Sign-In is coming soon! Enter your email to continue, or set up Face ID for faster sign-in next time.');
+        }
       }
     } catch (e) {
       console.error('Google Sign-In error:', e);
