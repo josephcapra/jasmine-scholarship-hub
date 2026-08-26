@@ -95,6 +95,31 @@ const SupabaseClient = (function() {
     return data && data[0] ? data[0] : null;
   }
 
+  async function createOrUpdateStudent(profile) {
+    // Check if student exists by email
+    if (profile.email) {
+      const existing = await getStudentByEmail(profile.email);
+      if (existing) {
+        // Update existing student
+        const updated = await updateStudent(existing.id, profile);
+        return updated || existing;
+      }
+    }
+
+    // Check if we have a local student ID
+    const localId = getLocalStudentId();
+    if (localId) {
+      const existing = await getStudent(localId);
+      if (existing) {
+        const updated = await updateStudent(existing.id, profile);
+        return updated || existing;
+      }
+    }
+
+    // Create new student
+    return await createStudent(profile);
+  }
+
   async function updateStudent(id, updates) {
     const body = {};
     if (updates.firstName) body.first_name = updates.firstName;
@@ -432,6 +457,7 @@ const SupabaseClient = (function() {
   return {
     // Student
     createStudent,
+    createOrUpdateStudent,
     getStudent,
     getStudentByEmail,
     getStudentByInviteCode,

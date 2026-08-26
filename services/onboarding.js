@@ -492,22 +492,58 @@ const Onboarding = (function() {
     }
   }
 
-  function complete() {
-    collectValues();
-    localStorage.setItem(STORAGE_KEY, 'true');
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
+  async function complete() {
+    try {
+      collectValues();
+      console.log('[Onboarding] Completing setup with formData:', JSON.stringify(formData));
 
-    const existingVault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
-    const mergedVault = { ...existingVault, ...formData };
-    localStorage.setItem('jasmine_knowledge_vault', JSON.stringify(mergedVault));
+      localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(formData));
 
-    close();
+      const existingVault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
+      const mergedVault = { ...existingVault, ...formData };
+      localStorage.setItem('jasmine_knowledge_vault', JSON.stringify(mergedVault));
 
-    if (typeof window.switchSection === 'function') {
-      window.switchSection('profile');
-    }
-    if (typeof loadProfileSection === 'function') {
-      loadProfileSection();
+      // Sync to Supabase if available
+      if (typeof SupabaseClient !== 'undefined' && formData.firstName && formData.lastName) {
+        try {
+          console.log('[Onboarding] Syncing to Supabase...');
+          const email = formData.email || `${formData.firstName.toLowerCase()}.${formData.lastName.toLowerCase()}@student.local`;
+          const studentData = {
+            email: email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            birthMonth: formData.birthMonth,
+            birthYear: formData.birthYear,
+            school: formData.school || null,
+            graduationYear: formData.graduationYear,
+            gpa: formData.gpa,
+            state: formData.state || 'FL',
+            interests: formData.interests || [],
+            achievements: formData.achievements || [],
+            activities: formData.activities || []
+          };
+          const student = await SupabaseClient.createOrUpdateStudent(studentData);
+          if (student && student.id) {
+            localStorage.setItem('jasmine_student_id', student.id);
+            console.log('[Onboarding] Student synced to Supabase:', student.id);
+          }
+        } catch (syncError) {
+          console.warn('[Onboarding] Supabase sync failed (continuing locally):', syncError);
+        }
+      }
+
+      console.log('[Onboarding] Setup complete, closing modal');
+      close();
+
+      // Reload page to show the main app with new profile
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+
+    } catch (error) {
+      console.error('[Onboarding] Error completing setup:', error);
+      alert('There was an error saving your profile. Please try again.');
     }
   }
 
