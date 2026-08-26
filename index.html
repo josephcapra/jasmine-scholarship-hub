@@ -129,6 +129,17 @@
       letter-spacing: 0.5px;
       font-weight: 600;
     }
+    .stat-card.clickable {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card.clickable:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.2);
+    }
+    .stat-card.clickable:active {
+      transform: translateY(-1px);
+    }
 
     /* Affirmation Banner */
     .affirmation {
@@ -1610,15 +1621,15 @@
     </div>
 
     <div class="stats-row">
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="showScholarshipsByStatus('submitted')" title="View submitted applications">
         <div class="number">✅ <span id="apps-submitted">0</span></div>
         <div class="label">Submitted</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="showScholarshipsByStatus('in_progress')" title="View in-progress applications">
         <div class="number">📝 <span id="apps-progress">6</span></div>
         <div class="label">In Progress</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="showScholarshipsByStatus('all')" title="View all scholarships">
         <div class="number">💰 <span id="total-value">$0</span></div>
         <div class="label">Potential</div>
       </div>
@@ -6963,6 +6974,110 @@
         // Fallback for older browsers
         prompt('Copy this code:', code);
       });
+    }
+
+    async function showScholarshipsByStatus(status) {
+      // Get scholarships from Supabase or localStorage
+      let scholarships = [];
+      const studentId = localStorage.getItem('jasmine_student_id');
+
+      if (studentId && typeof SupabaseClient !== 'undefined') {
+        try {
+          scholarships = await SupabaseClient.getScholarships(studentId);
+        } catch (e) {
+          console.error('Error loading scholarships:', e);
+        }
+      }
+
+      // If no Supabase data, try localStorage
+      if (!scholarships.length) {
+        const localProgress = JSON.parse(localStorage.getItem('jasmine_scholarship_progress') || '{}');
+        const allScholarships = window.JASMINE_SCHOLARSHIPS || [];
+        scholarships = allScholarships.filter(s => localProgress[s.id]).map(s => ({
+          ...s,
+          status: localProgress[s.id].status || 'researching'
+        }));
+      }
+
+      // Filter by status
+      let filtered = scholarships;
+      let title = 'All Scholarships';
+      let emptyMsg = 'No scholarships found.';
+
+      if (status === 'submitted') {
+        filtered = scholarships.filter(s => s.status === 'submitted' || s.status === 'won');
+        title = '✅ Submitted Applications';
+        emptyMsg = 'No submitted applications yet. Keep working!';
+      } else if (status === 'in_progress') {
+        filtered = scholarships.filter(s => s.status === 'in_progress' || s.status === 'applying' || s.status === 'researching');
+        title = '📝 In Progress';
+        emptyMsg = 'No scholarships in progress. Start by exploring scholarships!';
+      }
+
+      // Create modal
+      const modal = document.createElement('div');
+      modal.id = 'scholarships-modal';
+      modal.innerHTML = `
+        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: flex; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto;">
+          <div style="background: white; border-radius: 20px; width: 100%; max-width: 500px; margin-top: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+              <h2 style="margin: 0; font-size: 1.3rem; font-weight: 800;">${title}</h2>
+              <button onclick="document.getElementById('scholarships-modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af;">×</button>
+            </div>
+            <div style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+              ${filtered.length === 0 ? `
+                <div style="text-align: center; padding: 40px 20px; color: #6b7280;">
+                  <div style="font-size: 3rem; margin-bottom: 12px;">📚</div>
+                  <p>${emptyMsg}</p>
+                  <button onclick="document.getElementById('scholarships-modal').remove(); switchSection('scholarships');" style="margin-top: 16px; padding: 12px 24px; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                    Explore Scholarships →
+                  </button>
+                </div>
+              ` : filtered.map(s => `
+                <div onclick="viewScholarshipDetail('${s.id || s.name}')" style="background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 700; color: #1f2937; margin-bottom: 4px;">${s.name}</div>
+                      ${s.organization ? `<div style="font-size: 0.85rem; color: #6b7280;">${s.organization}</div>` : ''}
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-weight: 800; color: #7c3aed;">${typeof s.amount === 'number' ? '$' + s.amount.toLocaleString() : s.amount || ''}</div>
+                      ${getStatusBadge(s.status)}
+                    </div>
+                  </div>
+                  ${s.deadline ? `<div style="margin-top: 8px; font-size: 0.8rem; color: #9ca3af;">📅 Deadline: ${new Date(s.deadline).toLocaleDateString()}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
+            ${filtered.length > 0 ? `
+              <div style="padding: 16px 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+                <button onclick="document.getElementById('scholarships-modal').remove(); switchSection('scholarships');" style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                  View All Scholarships
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function getStatusBadge(status) {
+      const badges = {
+        'researching': '<span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">Researching</span>',
+        'in_progress': '<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">In Progress</span>',
+        'applying': '<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">In Progress</span>',
+        'submitted': '<span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">Submitted</span>',
+        'won': '<span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">🏆 Won!</span>',
+        'rejected': '<span style="background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">Not Selected</span>'
+      };
+      return badges[status] || badges['researching'];
+    }
+
+    function viewScholarshipDetail(id) {
+      document.getElementById('scholarships-modal')?.remove();
+      switchSection('scholarships');
+      // Could expand to open specific scholarship detail
     }
 
     function loadHomeSection() {
