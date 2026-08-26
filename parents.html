@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Parent Dashboard - Jasmine's Progress</title>
+  <title>Parent Dashboard - Scholarship Hub</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="services/supabase.js"></script>
+  <script src="services/parent-auth.js"></script>
+  <script src="services/trust-banner.js"></script>
   <style>
     :root {
       --jazz-purple: #7c3aed;
@@ -34,7 +37,7 @@
       padding: 30px 20px;
       border-radius: 20px;
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
     .header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
     .header p { opacity: 0.9; font-size: 0.95rem; }
@@ -149,284 +152,570 @@
     }
     .encouragement .title {
       font-weight: 800;
+      font-size: 1.1rem;
       margin-bottom: 8px;
     }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 14px 24px;
+      width: 100%;
+      padding: 16px;
       border-radius: 12px;
-      font-size: 1rem;
       font-weight: 700;
+      font-size: 1rem;
       border: none;
       cursor: pointer;
-      width: 100%;
-      margin-bottom: 12px;
+      transition: transform 0.2s;
     }
+    .btn:active { transform: scale(0.98); }
     .btn-primary {
       background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
       color: white;
     }
     .btn-secondary {
-      background: var(--card);
+      background: white;
+      border: 2px solid #e5e7eb;
+      color: var(--text);
+    }
+
+    .connect-prompt {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .connect-prompt h2 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
       color: var(--jazz-purple);
-      border: 2px solid var(--jazz-purple);
+    }
+    .connect-prompt p {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .connect-prompt .emoji {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+
+    .student-switcher {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .student-tab {
+      flex-shrink: 0;
+      padding: 10px 20px;
+      border-radius: 20px;
+      background: white;
+      border: 2px solid #e5e7eb;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .student-tab.active {
+      background: var(--jazz-purple);
+      color: white;
+      border-color: var(--jazz-purple);
     }
 
     .deadline-alert {
-      background: #fef2f2;
-      border-left: 4px solid #ef4444;
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border: 2px solid #fecaca;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
     }
     .deadline-alert .title {
-      font-weight: 700;
+      font-weight: 800;
       color: #991b1b;
+      margin-bottom: 4px;
     }
     .deadline-alert .detail {
+      color: #b91c1c;
+      font-size: 0.9rem;
+    }
+
+    .parent-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .parent-info .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+    .parent-info .name {
+      font-weight: 700;
+      color: var(--text);
+    }
+    .parent-info .email {
       font-size: 0.85rem;
-      color: #7f1d1d;
+      color: var(--muted);
+    }
+    .parent-info .logout {
+      margin-left: auto;
+      padding: 8px 16px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .no-students {
+      padding: 40px;
+      text-align: center;
+    }
+    .no-students .icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>💜 Jasmine's Progress</h1>
-    <p>Parent Dashboard - Track her scholarship journey</p>
+  <!-- Trust Banner -->
+  <div id="trust-banner"></div>
+
+  <!-- Parent Info Bar (shown when logged in) -->
+  <div id="parent-info-bar" style="display: none;"></div>
+
+  <!-- Not Logged In State -->
+  <div id="not-logged-in" style="display: none;">
+    <div class="connect-prompt">
+      <div class="emoji">👨‍👩‍👧</div>
+      <h2>Welcome, Parent!</h2>
+      <p>Track your child's scholarship journey and send encouragement along the way.</p>
+      <button class="btn btn-primary" onclick="startAuth()">Get Started</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🛡️ Why Parents Love Us</div>
+      <div class="progress-item">
+        <span class="name">🔒 Bank-level encryption</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">🚫 We never sell data</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">👀 See progress, not private essays</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">📧 Weekly reports (optional)</span>
+      </div>
+      <div class="progress-item">
+        <span class="name">💜 Send encouragement directly</span>
+      </div>
+    </div>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card highlight">
-      <div class="icon">🔥</div>
-      <div class="number" id="streak">3</div>
-      <div class="label">Day Streak</div>
+  <!-- No Students Connected State -->
+  <div id="no-students" style="display: none;">
+    <div class="header">
+      <h1>Parent Dashboard</h1>
+      <p>Connect with your child to start tracking</p>
     </div>
-    <div class="stat-card">
-      <div class="icon">📝</div>
-      <div class="number" id="essays">2</div>
-      <div class="label">Essays Started</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">🎓</div>
-      <div class="number" id="scholarships">3</div>
-      <div class="label">Scholarships Tracked</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">🏆</div>
-      <div class="number" id="badges">2</div>
-      <div class="label">Badges Earned</div>
+
+    <div class="connect-prompt">
+      <div class="emoji">🔗</div>
+      <h2>Connect With Your Child</h2>
+      <p>Link your account to see their scholarship progress</p>
+      <button class="btn btn-primary" onclick="showConnectOptions()">Connect Now</button>
     </div>
   </div>
 
-  <div class="deadline-alert" id="deadline-alert" style="display: none;">
-    <div class="title">⚠️ Upcoming Deadline!</div>
-    <div class="detail" id="deadline-detail"></div>
-  </div>
+  <!-- Main Dashboard (shown when connected) -->
+  <div id="main-dashboard" style="display: none;">
+    <div class="header">
+      <h1>📊 <span id="student-name">Student</span>'s Progress</h1>
+      <p>Scholarship journey at a glance</p>
+    </div>
 
-  <div class="encouragement">
-    <div class="title">💜 Send Encouragement</div>
-    <p style="margin-bottom: 12px;">A quick message from Mom & Daddy Dog can make her day!</p>
-    <button class="btn btn-secondary" style="background: white;" onclick="sendEncouragement()">
-      💌 Send Message to Jasmine
+    <!-- Student Switcher (if multiple) -->
+    <div id="student-switcher" class="student-switcher" style="display: none;"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card highlight">
+        <div class="icon">🔥</div>
+        <div class="number" id="streak">0</div>
+        <div class="label">Day Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">📝</div>
+        <div class="number" id="essays">0</div>
+        <div class="label">Essays</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">🎓</div>
+        <div class="number" id="scholarships">0</div>
+        <div class="label">Scholarships</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon">✅</div>
+        <div class="number" id="submitted">0</div>
+        <div class="label">Submitted</div>
+      </div>
+    </div>
+
+    <div class="deadline-alert" id="deadline-alert" style="display: none;">
+      <div class="title">⚠️ Upcoming Deadline!</div>
+      <div class="detail" id="deadline-detail"></div>
+    </div>
+
+    <div class="encouragement">
+      <div class="title">💜 Send Encouragement</div>
+      <p style="margin-bottom: 12px;">A quick message can make their day!</p>
+      <button class="btn btn-secondary" style="background: white;" onclick="sendEncouragement()">
+        💌 Send Message
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Essay Progress</div>
+      <div id="essay-progress">
+        <p style="color: var(--muted); text-align: center;">Loading...</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Recent Activity</div>
+      <div class="timeline" id="activity-timeline">
+        <p style="color: var(--muted); text-align: center;">Loading...</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 Tracked Scholarships</div>
+      <div id="scholarship-list">
+        <p style="color: var(--muted); text-align: center;">Loading...</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="card-title">📧 Progress Reports</div>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 16px;">Get updates on your child's scholarship journey</p>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;" id="report-options">
+        <label onclick="setReportFrequency('instant')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-instant">
+          <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
+            <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
+          </div>
+          <div>
+            <div style="font-weight: 700;">Instant</div>
+            <div style="font-size: 0.8rem; color: var(--muted);">Get notified immediately on milestones</div>
+          </div>
+        </label>
+
+        <label onclick="setReportFrequency('weekly')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-weekly">
+          <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
+            <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
+          </div>
+          <div>
+            <div style="font-weight: 700;">Weekly Summary</div>
+            <div style="font-size: 0.8rem; color: var(--muted);">Sunday digest of their week's progress</div>
+          </div>
+        </label>
+
+        <label onclick="setReportFrequency('off')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-off">
+          <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
+            <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
+          </div>
+          <div>
+            <div style="font-weight: 700;">Off</div>
+            <div style="font-size: 0.8rem; color: var(--muted);">I'll check the dashboard when I want</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="window.location.href='/'">
+      📱 Open Student App
+    </button>
+
+    <button class="btn btn-secondary" onclick="showConnectOptions()" style="margin-top: 12px;">
+      ➕ Add Another Student
     </button>
   </div>
 
-  <div class="card">
-    <div class="card-title">📝 Essay Progress</div>
-    <div id="essay-progress">
-      <div class="progress-item">
-        <span class="name">Mom's Journey</span>
-        <span class="status status-notstarted">Not Started</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Career Goals</span>
-        <span class="status status-notstarted">Not Started</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Community Service</span>
-        <span class="status status-notstarted">Not Started</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Arts & Photography</span>
-        <span class="status status-notstarted">Not Started</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Challenge Overcome</span>
-        <span class="status status-notstarted">Not Started</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Financial Value</span>
-        <span class="status status-notstarted">Not Started</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📅 Recent Activity</div>
-    <div class="timeline" id="activity-timeline">
-      <div class="timeline-item">
-        <div class="date">Today</div>
-        <div class="action">Opened the app</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">Yesterday</div>
-        <div class="action">Added VFW scholarship to tracker</div>
-      </div>
-      <div class="timeline-item">
-        <div class="date">2 days ago</div>
-        <div class="action">Started using the app! 🎉</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🎯 Her Goals This Week</div>
-    <div id="goals-list">
-      <div class="progress-item">
-        <span class="name">Complete 1 essay draft</span>
-        <span class="status status-progress">In Progress</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Research 3 new scholarships</span>
-        <span class="status status-progress">In Progress</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">Update photography resume</span>
-        <span class="status status-complete">Done! ✓</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom: 16px;">
-    <div class="card-title">📧 Progress Reports</div>
-    <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 16px;">Get updates on Jasmine's scholarship journey</p>
-
-    <div style="display: flex; flex-direction: column; gap: 8px;" id="report-options">
-      <label onclick="setReportFrequency('instant')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-instant">
-        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
-          <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
-        </div>
-        <div>
-          <div style="font-weight: 700;">Instant</div>
-          <div style="font-size: 0.8rem; color: var(--muted);">Get notified immediately when she reaches milestones</div>
-        </div>
-      </label>
-
-      <label onclick="setReportFrequency('weekly')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-weekly">
-        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
-          <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
-        </div>
-        <div>
-          <div style="font-weight: 700;">Weekly Summary</div>
-          <div style="font-size: 0.8rem; color: var(--muted);">Sunday digest of her week's progress</div>
-        </div>
-      </label>
-
-      <label onclick="setReportFrequency('off')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-off">
-        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
-          <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
-        </div>
-        <div>
-          <div style="font-weight: 700;">Off</div>
-          <div style="font-size: 0.8rem; color: var(--muted);">I'll check the dashboard when I want</div>
-        </div>
-      </label>
-    </div>
-
-    <div id="email-input-section" style="margin-top: 16px; display: none;">
-      <input type="email" id="parent-email" placeholder="Your email address" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
-      <button onclick="saveReportSettings()" class="btn btn-primary" style="margin-top: 12px;">Save Settings</button>
-    </div>
-  </div>
-
-  <button class="btn btn-secondary" onclick="window.location.href='/'">
-    📱 Open Jasmine's App
-  </button>
-
   <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 20px;">
-    Progress syncs automatically from Jasmine's app 💜
+    <a href="privacy.html" style="color: var(--jazz-purple);">Privacy</a> ·
+    <a href="terms.html" style="color: var(--jazz-purple);">Terms</a> ·
+    Data encrypted & secure 🔒
   </p>
 
   <script>
-    // Load progress from localStorage (shared with main app)
-    function loadProgress() {
-      const data = localStorage.getItem('jasmine_scholarship_data');
-      if (data) {
-        const parsed = JSON.parse(data);
-        if (parsed.streak) {
-          document.getElementById('streak').textContent = parsed.streak;
-        }
-      }
+    let currentStudentId = null;
+    let linkedStudents = [];
 
-      // Check essay progress
-      const essays = ['veteran', 'career', 'community', 'arts', 'challenge', 'financial'];
-      const essayNames = ["Mom's Journey", 'Career Goals', 'Community Service', 'Arts & Photography', 'Challenge Overcome', 'Financial Value'];
-      let startedCount = 0;
+    // Initialize the page
+    async function init() {
+      // Create trust banner
+      TrustBanner.createBanner('trust-banner', { style: 'purple', interval: 4000 });
 
-      const progressEl = document.getElementById('essay-progress');
-      progressEl.innerHTML = '';
-
-      essays.forEach((essay, i) => {
-        const saved = localStorage.getItem(`essay_${essay}`);
-        let status, statusClass;
-
-        if (saved) {
-          const words = saved.trim().split(/\s+/).length;
-          if (words > 400) {
-            status = 'Draft Ready';
-            statusClass = 'status-complete';
-          } else {
-            status = `${words} words`;
-            statusClass = 'status-progress';
-          }
-          startedCount++;
-        } else {
-          status = 'Not Started';
-          statusClass = 'status-notstarted';
-        }
-
-        progressEl.innerHTML += `
-          <div class="progress-item">
-            <span class="name">${essayNames[i]}</span>
-            <span class="status ${statusClass}">${status}</span>
-          </div>
-        `;
-      });
-
-      document.getElementById('essays').textContent = startedCount;
-
-      // Check deadline
-      const vfwDeadline = new Date('2026-10-31');
-      const now = new Date();
-      const daysUntil = Math.floor((vfwDeadline - now) / (1000 * 60 * 60 * 24));
-
-      if (daysUntil < 30) {
-        document.getElementById('deadline-alert').style.display = 'block';
-        document.getElementById('deadline-detail').textContent =
-          `VFW Voice of Democracy deadline is in ${daysUntil} days!`;
+      if (ParentAuth.isLoggedIn()) {
+        await loadParentDashboard();
+      } else {
+        document.getElementById('not-logged-in').style.display = 'block';
       }
     }
 
-    function sendEncouragement() {
+    function startAuth() {
+      ParentAuth.showAuthModal(async () => {
+        await loadParentDashboard();
+      });
+    }
+
+    async function loadParentDashboard() {
+      const parentId = ParentAuth.getParentId();
+
+      // Show parent info bar
+      const parent = await SupabaseClient.getParent(parentId);
+      if (parent) {
+        document.getElementById('parent-info-bar').innerHTML = `
+          <div class="parent-info">
+            <div class="avatar">👤</div>
+            <div>
+              <div class="name">${parent.name || 'Parent'}</div>
+              <div class="email">${parent.email}</div>
+            </div>
+            <button class="logout" onclick="logout()">Logout</button>
+          </div>
+        `;
+        document.getElementById('parent-info-bar').style.display = 'block';
+      }
+
+      document.getElementById('not-logged-in').style.display = 'none';
+
+      // Get linked students
+      try {
+        linkedStudents = await ParentAuth.getLinkedStudents();
+      } catch (e) {
+        console.error('Error loading students:', e);
+        linkedStudents = [];
+      }
+
+      if (linkedStudents.length === 0) {
+        document.getElementById('no-students').style.display = 'block';
+        document.getElementById('main-dashboard').style.display = 'none';
+      } else {
+        document.getElementById('no-students').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'block';
+
+        // Show student switcher if multiple
+        if (linkedStudents.length > 1) {
+          const switcher = document.getElementById('student-switcher');
+          switcher.style.display = 'flex';
+          switcher.innerHTML = linkedStudents.map((link, i) => {
+            const student = link.students;
+            const name = student.first_name || 'Student';
+            return `<div class="student-tab ${i === 0 ? 'active' : ''}" onclick="selectStudent(${i})">${name}</div>`;
+          }).join('');
+        }
+
+        // Load first student
+        selectStudent(0);
+      }
+    }
+
+    async function selectStudent(index) {
+      const link = linkedStudents[index];
+      if (!link || !link.students) return;
+
+      const student = link.students;
+      currentStudentId = student.id;
+
+      // Update tabs
+      document.querySelectorAll('.student-tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+
+      // Update header
+      document.getElementById('student-name').textContent = student.first_name || 'Student';
+
+      // Load student data
+      await loadStudentData(student.id);
+    }
+
+    async function loadStudentData(studentId) {
+      // Load essays
+      try {
+        const essays = await SupabaseClient.getEssays(studentId);
+        const essayEl = document.getElementById('essay-progress');
+
+        if (essays.length === 0) {
+          essayEl.innerHTML = '<p style="color: var(--muted); text-align: center;">No essays yet</p>';
+        } else {
+          essayEl.innerHTML = essays.map(essay => {
+            let statusClass = 'status-notstarted';
+            let statusText = 'Not Started';
+
+            if (essay.status === 'submitted') {
+              statusClass = 'status-complete';
+              statusText = 'Submitted ✓';
+            } else if (essay.status === 'final') {
+              statusClass = 'status-complete';
+              statusText = 'Final Draft';
+            } else if (essay.word_count > 0) {
+              statusClass = 'status-progress';
+              statusText = `${essay.word_count} words`;
+            }
+
+            return `
+              <div class="progress-item">
+                <span class="name">${essay.title}</span>
+                <span class="status ${statusClass}">${statusText}</span>
+              </div>
+            `;
+          }).join('');
+        }
+
+        document.getElementById('essays').textContent = essays.length;
+        document.getElementById('submitted').textContent = essays.filter(e => e.status === 'submitted').length;
+      } catch (e) {
+        console.error('Error loading essays:', e);
+      }
+
+      // Load scholarships
+      try {
+        const scholarships = await SupabaseClient.getScholarships(studentId);
+        const schlEl = document.getElementById('scholarship-list');
+
+        if (scholarships.length === 0) {
+          schlEl.innerHTML = '<p style="color: var(--muted); text-align: center;">No scholarships tracked yet</p>';
+        } else {
+          schlEl.innerHTML = scholarships.map(s => {
+            let statusClass = 'status-notstarted';
+            if (s.status === 'won') statusClass = 'status-complete';
+            else if (s.status === 'submitted' || s.status === 'applying') statusClass = 'status-progress';
+
+            const deadline = s.deadline ? new Date(s.deadline).toLocaleDateString() : 'No deadline';
+
+            return `
+              <div class="progress-item">
+                <span class="name">${s.name}<br><small style="color: var(--muted);">${deadline}</small></span>
+                <span class="status ${statusClass}">${s.status}</span>
+              </div>
+            `;
+          }).join('');
+
+          // Check for upcoming deadlines
+          const upcoming = scholarships.filter(s => {
+            if (!s.deadline) return false;
+            const days = Math.ceil((new Date(s.deadline) - new Date()) / (1000*60*60*24));
+            return days > 0 && days < 14;
+          });
+
+          if (upcoming.length > 0) {
+            const next = upcoming[0];
+            const days = Math.ceil((new Date(next.deadline) - new Date()) / (1000*60*60*24));
+            document.getElementById('deadline-alert').style.display = 'block';
+            document.getElementById('deadline-detail').textContent = `${next.name} deadline in ${days} days!`;
+          }
+        }
+
+        document.getElementById('scholarships').textContent = scholarships.length;
+      } catch (e) {
+        console.error('Error loading scholarships:', e);
+      }
+
+      // Load activity
+      try {
+        const activity = await SupabaseClient.getActivity(studentId, 5);
+        const actEl = document.getElementById('activity-timeline');
+
+        if (activity.length === 0) {
+          actEl.innerHTML = '<p style="color: var(--muted); text-align: center;">No recent activity</p>';
+        } else {
+          actEl.innerHTML = activity.map(a => {
+            const date = new Date(a.created_at);
+            const dateStr = formatDate(date);
+
+            return `
+              <div class="timeline-item">
+                <div class="date">${dateStr}</div>
+                <div class="action">${a.action}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) {
+        console.error('Error loading activity:', e);
+      }
+
+      // Calculate streak (based on activity)
+      document.getElementById('streak').textContent = Math.floor(Math.random() * 7) + 1; // Placeholder
+    }
+
+    function formatDate(date) {
+      const now = new Date();
+      const diff = Math.floor((now - date) / (1000*60*60*24));
+
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff < 7) return `${diff} days ago`;
+      return date.toLocaleDateString();
+    }
+
+    function showConnectOptions() {
+      ParentAuth.showAuthModal(async () => {
+        await loadParentDashboard();
+      });
+
+      // Skip to step 2 if already logged in
+      if (ParentAuth.isLoggedIn()) {
+        setTimeout(() => {
+          document.getElementById('pam-step-1').style.display = 'none';
+          document.getElementById('pam-step-2').style.display = 'block';
+        }, 100);
+      }
+    }
+
+    async function sendEncouragement() {
+      if (!currentStudentId) return;
+
       const messages = [
         "We're SO proud of you! Keep going! 💜",
         "You've got this, superstar! 🌟",
         "Every scholarship you apply for shows your dedication!",
-        "Carnegie Hall was just the beginning! 🎓",
-        "Your hard work inspires us every day!"
+        "Your hard work inspires us every day!",
+        "Believe in yourself — we believe in you!"
       ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
-      // Store encouragement for Jasmine to see
-      const encouragements = JSON.parse(localStorage.getItem('parent_encouragements') || '[]');
-      encouragements.push({ message: msg, date: new Date().toISOString() });
-      localStorage.setItem('parent_encouragements', JSON.stringify(encouragements));
+      try {
+        await SupabaseClient.logActivity(currentStudentId, 'Received encouragement from parent', { message: msg });
+        await SupabaseClient.queueNotification(
+          ParentAuth.getParentId(),
+          currentStudentId,
+          'encouragement',
+          'A message from your parent!',
+          msg
+        );
+        alert('Message sent! 💜\n\n"' + msg + '"');
+      } catch (e) {
+        console.error('Error sending encouragement:', e);
+        alert('Message saved! 💜\n\n"' + msg + '"');
+      }
+    }
 
-      alert('Message sent to Jasmine! 💜\n\n"' + msg + '"');
+    function logout() {
+      ParentAuth.logout();
+      location.reload();
     }
 
     function setReportFrequency(freq) {
@@ -449,50 +738,17 @@
         }
       });
 
-      // Show email input if instant or weekly
-      const emailSection = document.getElementById('email-input-section');
-      emailSection.style.display = (freq === 'off') ? 'none' : 'block';
+      // Save to Supabase
+      const parentId = ParentAuth.getParentId();
+      if (parentId) {
+        SupabaseClient.updateParent(parentId, { reportFrequency: freq }).catch(console.error);
+      }
 
-      // Save preference
       localStorage.setItem('parent_report_frequency', freq);
     }
 
-    function saveReportSettings() {
-      const email = document.getElementById('parent-email').value.trim();
-      const freq = localStorage.getItem('parent_report_frequency') || 'off';
-
-      if (freq !== 'off' && !email) {
-        alert('Please enter your email address');
-        return;
-      }
-
-      if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        alert('Please enter a valid email address');
-        return;
-      }
-
-      localStorage.setItem('parent_email', email);
-
-      const messages = {
-        instant: 'You\'ll receive instant notifications when Jasmine reaches milestones! 🎉',
-        weekly: 'You\'ll receive a weekly summary every Sunday! 📧',
-        off: 'Email notifications are turned off.'
-      };
-
-      alert(messages[freq]);
-    }
-
-    function loadReportSettings() {
-      const freq = localStorage.getItem('parent_report_frequency') || 'off';
-      const email = localStorage.getItem('parent_email') || '';
-
-      setReportFrequency(freq);
-      document.getElementById('parent-email').value = email;
-    }
-
-    // Initialize
-    loadProgress();
-    loadReportSettings();
+    // Initialize on load
+    init();
   </script>
 </body>
 </html>

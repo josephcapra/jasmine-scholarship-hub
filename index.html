@@ -10,10 +10,11 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%237c3aed' width='100' height='100' rx='20'/><text y='.9em' x='10' font-size='70'>🌟</text></svg>">
   <meta name="theme-color" content="#7c3aed">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js"></script>
   <script src="scholarships-data.js"></script>
   <script src="services/onboarding.js?v=2"></script>
   <script src="services/encrypted-storage.js"></script>
+  <script src="services/supabase.js"></script>
+  <script src="services/trust-banner.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -1623,6 +1624,9 @@
       </div>
     </div>
 
+    <!-- Trust Banner -->
+    <div id="student-trust-banner" style="margin: 0 16px 16px;"></div>
+
     <div class="affirmation" id="affirmation">
       <div class="from">💜 From Daddy Dog & Mom</div>
       <div class="message" id="affirmation-text">We are SO proud of you, Jasmine! Every scholarship you apply for shows your dedication. You've got this, superstar!</div>
@@ -1853,6 +1857,29 @@
         <div class="card-title">Scholarship Fit Tags</div>
         <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;">Based on your profile, you match these scholarship categories:</p>
         <div id="profile-fit-tags"></div>
+      </div>
+
+      <!-- Parent Connection -->
+      <div class="card" style="margin-bottom: 16px; margin-top: 24px; background: linear-gradient(135deg, #fce7f3, #fbcfe8);">
+        <div class="card-title" style="margin-bottom: 12px; color: #be185d;">👨‍👩‍👧 Connect Parents</div>
+        <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;">Let your parents track your progress and send encouragement (up to 2 parents).</p>
+
+        <div id="parent-invite-code" style="background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 12px;">
+          <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px;">Share this code with your parents:</div>
+          <div id="my-invite-code" style="font-size: 1.8rem; font-weight: 800; letter-spacing: 4px; color: #be185d;">--------</div>
+          <button onclick="copyInviteCode()" style="margin-top: 8px; padding: 8px 16px; background: #be185d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📋 Copy Code</button>
+        </div>
+
+        <div id="linked-parents" style="display: none;">
+          <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">Connected Parents:</div>
+          <div id="linked-parents-list"></div>
+        </div>
+
+        <a href="parents.html" style="display: flex; align-items: center; gap: 8px; padding: 12px; background: white; border-radius: 8px; text-decoration: none; color: #374151; margin-top: 8px;">
+          <span>👀</span>
+          <span style="flex: 1;">Preview Parent Dashboard</span>
+          <span style="color: #9ca3af;">→</span>
+        </a>
       </div>
 
       <!-- Privacy Center -->
@@ -6858,6 +6885,56 @@
       updateStats();
       loadProfileSection();
       loadHomeSection();
+
+      // Initialize trust banner
+      if (typeof TrustBanner !== 'undefined') {
+        TrustBanner.createBanner('student-trust-banner', { style: 'default', interval: 5000 });
+      }
+
+      // Load parent invite code
+      loadParentInviteCode();
+    }
+
+    async function loadParentInviteCode() {
+      if (typeof SupabaseClient === 'undefined') return;
+
+      const studentId = SupabaseClient.getLocalStudentId();
+      if (studentId) {
+        try {
+          const student = await SupabaseClient.getStudent(studentId);
+          if (student && student.invite_code) {
+            document.getElementById('my-invite-code').textContent = student.invite_code;
+          }
+
+          // Load linked parents
+          const links = await SupabaseClient.getLinkedParents(studentId);
+          if (links && links.length > 0) {
+            document.getElementById('linked-parents').style.display = 'block';
+            document.getElementById('linked-parents-list').innerHTML = links.map(link => {
+              const parent = link.parents;
+              return `<div style="display: flex; align-items: center; gap: 8px; padding: 8px; background: white; border-radius: 8px; margin-bottom: 6px;">
+                <span>👤</span>
+                <span style="font-weight: 600;">${parent.name || 'Parent'}</span>
+                <span style="color: #10b981; font-size: 0.8rem; margin-left: auto;">Connected ✓</span>
+              </div>`;
+            }).join('');
+          }
+        } catch (e) {
+          console.log('Parent invite code not loaded:', e);
+        }
+      } else {
+        // Generate a placeholder code for display (actual code created on cloud sync)
+        document.getElementById('my-invite-code').textContent = SupabaseClient.generateInviteCode();
+      }
+    }
+
+    function copyInviteCode() {
+      const code = document.getElementById('my-invite-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = event.target;
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+      });
     }
 
     function loadHomeSection() {
