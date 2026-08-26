@@ -19,8 +19,16 @@ const Onboarding = (function() {
       fields: []
     },
     {
+      id: 'role',
+      title: 'Are You a Student or Parent?',
+      subtitle: 'This helps us show you the right experience',
+      fields: [
+        { id: 'userRole', type: 'roleSelect' }
+      ]
+    },
+    {
       id: 'age',
-      title: 'First, Let\'s Verify Your Age',
+      title: 'Let\'s Verify Your Age',
       subtitle: 'This app is designed for students age 14 and older',
       fields: [
         { id: 'birthMonth', type: 'select', label: 'Birth Month', required: true, options: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] },
@@ -197,6 +205,23 @@ const Onboarding = (function() {
             </div>
             <div class="ob-switch ${formData[f.id] ? 'active' : ''}" id="ob-${f.id}">
               <div class="ob-knob"></div>
+            </div>
+          </div>`;
+
+      case 'roleSelect':
+        return `
+          <div class="ob-role-section">
+            <div class="ob-role-options">
+              <button type="button" class="ob-role-btn ${formData.userRole === 'student' ? 'selected' : ''}" onclick="Onboarding.selectRole('student')">
+                <div class="ob-role-emoji">🎓</div>
+                <div class="ob-role-title">I'm a Student</div>
+                <div class="ob-role-desc">Looking for scholarships and planning for college</div>
+              </button>
+              <button type="button" class="ob-role-btn ${formData.userRole === 'parent' ? 'selected' : ''}" onclick="Onboarding.selectRole('parent')">
+                <div class="ob-role-emoji">👨‍👩‍👧</div>
+                <div class="ob-role-title">I'm a Parent</div>
+                <div class="ob-role-desc">Supporting my child's scholarship journey</div>
+              </button>
             </div>
           </div>`;
 
@@ -484,6 +509,26 @@ const Onboarding = (function() {
     if (el) el.classList.toggle('active', formData[fieldId]);
   }
 
+  function selectRole(role) {
+    formData.userRole = role;
+    // Update button states
+    document.querySelectorAll('.ob-role-btn').forEach(btn => {
+      btn.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+
+    // If parent, redirect to parent page after a short delay
+    if (role === 'parent') {
+      setTimeout(() => {
+        localStorage.setItem('jasmine_wizard_seen', 'true');
+        window.location.href = 'parents.html';
+      }, 300);
+    } else {
+      // Auto-advance to next step for students
+      setTimeout(() => next(), 300);
+    }
+  }
+
   function skip() {
     if (confirm('You can complete your profile later. Skip for now?')) {
       localStorage.setItem(STORAGE_KEY, 'true');
@@ -667,6 +712,18 @@ const Onboarding = (function() {
         margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 8px;
         font-size: 0.85rem; color: #92400e;
       }
+      .ob-role-section { padding: 10px 0; }
+      .ob-role-options { display: flex; flex-direction: column; gap: 16px; }
+      .ob-role-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 8px;
+        padding: 24px 20px; background: #f9fafb; border: 3px solid #e5e7eb;
+        border-radius: 16px; cursor: pointer; transition: all 0.2s; text-align: center;
+      }
+      .ob-role-btn:hover { background: #f3f4f6; border-color: #d1d5db; transform: translateY(-2px); }
+      .ob-role-btn.selected { background: #ede9fe; border-color: #7c3aed; }
+      .ob-role-emoji { font-size: 3rem; }
+      .ob-role-title { font-size: 1.2rem; font-weight: 800; color: #1f2937; }
+      .ob-role-desc { font-size: 0.9rem; color: #6b7280; }
       .ob-resume-section { text-align: center; }
       .ob-resume-btn {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -714,6 +771,7 @@ const Onboarding = (function() {
     prev,
     toggle,
     toggleConsent,
+    selectRole,
     skip,
     skipResume,
     handleResumeUpload,
