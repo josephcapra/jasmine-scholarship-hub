@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Account Login - Jasmine Scholarship Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --pink: #ec4899;
+      --green: #10b981;
+      --bg: #faf5ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: var(--purple);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 30px;
+    }
+    .account-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.1);
+    }
+    .family-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--purple);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .person {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .person-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .person-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .person-role {
+      background: var(--purple);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .person-role.parent {
+      background: var(--pink);
+    }
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .stat {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    .stat strong {
+      color: var(--purple);
+    }
+    .login-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    .login-btn.parent {
+      background: linear-gradient(135deg, var(--pink), #f472b6);
+    }
+    .notice {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .notice strong {
+      color: var(--green);
+    }
+    .id-code {
+      font-family: monospace;
+      background: #f3f4f6;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔑 Test Account Login</h1>
+    <p class="subtitle">Click to log in as any test account</p>
+
+    <div class="notice">
+      <strong>✅ SSL Fix Applied</strong> - Email links now work correctly!
+    </div>
+
+    <!-- Williams Family -->
+    <div class="account-card">
+      <div class="family-name">👨‍👩‍👧 The Williams Family</div>
+
+      <div class="person">
+        <div class="person-header">
+          <span class="person-name">Aaliyah Williams</span>
+          <span class="person-role">Student</span>
+        </div>
+        <div class="stats">
+          <span class="stat"><strong>Grade 11</strong> • Class of 2027</span>
+          <span class="stat"><strong>3.9 GPA</strong></span>
+        </div>
+        <div class="stats">
+          <span class="stat">📚 <strong>3</strong> Scholarships ($20,500)</span>
+          <span class="stat">✍️ <strong>2</strong> Essays</span>
+        </div>
+        <div class="stats">
+          <span class="stat">Interests: Engineering, CS, Basketball</span>
+        </div>
+        <button class="login-btn" onclick="loginStudent('d243c011-7ab1-4ed5-9ae4-665538974bae', 'Aaliyah Williams')">
+          Login as Aaliyah →
+        </button>
+      </div>
+
+      <div class="person">
+        <div class="person-header">
+          <span class="person-name">Michelle Williams</span>
+          <span class="person-role parent">Parent</span>
+        </div>
+        <div class="stats">
+          <span class="stat">Notifications: <strong>Instant</strong></span>
+        </div>
+        <button class="login-btn parent" onclick="loginParent('65f8be50-7141-41b3-b0c2-3003c15b976a', 'michelle.williams@demo.jasminescholarship.app')">
+          Login as Michelle →
+        </button>
+      </div>
+    </div>
+
+    <!-- Chen Family -->
+    <div class="account-card">
+      <div class="family-name">👨‍👩‍👦 The Chen Family</div>
+
+      <div class="person">
+        <div class="person-header">
+          <span class="person-name">Kevin Chen</span>
+          <span class="person-role">Student</span>
+        </div>
+        <div class="stats">
+          <span class="stat"><strong>Grade 12</strong> • Class of 2026</span>
+          <span class="stat"><strong>4.0 GPA</strong></span>
+        </div>
+        <div class="stats">
+          <span class="stat">📚 <strong>4</strong> Scholarships ($44,000)</span>
+          <span class="stat">🏆 <strong>$4,000 WON!</strong></span>
+        </div>
+        <div class="stats">
+          <span class="stat">Interests: Pre-Med, Biology, Debate</span>
+        </div>
+        <button class="login-btn" onclick="loginStudent('ba63bfd5-88cd-4628-82fd-b129c4846759', 'Kevin Chen')">
+          Login as Kevin →
+        </button>
+      </div>
+
+      <div class="person">
+        <div class="person-header">
+          <span class="person-name">David Chen</span>
+          <span class="person-role parent">Parent</span>
+        </div>
+        <div class="stats">
+          <span class="stat">Notifications: <strong>Weekly</strong></span>
+        </div>
+        <button class="login-btn parent" onclick="loginParent('974d43e3-fbc4-40e7-9e07-234a0b660149', 'david.chen@demo.jasminescholarship.app')">
+          Login as David →
+        </button>
+      </div>
+    </div>
+
+    <p style="text-align: center; color: #9ca3af; font-size: 0.85rem; margin-top: 20px;">
+      These are test accounts created for beta testing.<br>
+      Data is stored in Supabase cloud database.
+    </p>
+  </div>
+
+  <script>
+    function loginStudent(studentId, name) {
+      localStorage.setItem('jasmine_student_id', studentId);
+      localStorage.setItem('jasmine_student_name', name);
+      // Clear parent session if any
+      localStorage.removeItem('jasmine_parent_id');
+      localStorage.removeItem('jasmine_parent_email');
+      window.location.href = 'index.html';
+    }
+
+    function loginParent(parentId, email) {
+      localStorage.setItem('jasmine_parent_id', parentId);
+      localStorage.setItem('jasmine_parent_email', email);
+      // Clear student session if any
+      localStorage.removeItem('jasmine_student_id');
+      localStorage.removeItem('jasmine_student_name');
+      window.location.href = 'parents.html';
+    }
+  </script>
+</body>
+</html>
