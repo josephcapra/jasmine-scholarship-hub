@@ -14,9 +14,11 @@ const Onboarding = (function() {
   const STEPS = [
     {
       id: 'welcome',
-      title: "Welcome to Your Scholarship Hub! 🌟",
-      subtitle: "Let's get you set up to find scholarships and plan for college",
-      fields: []
+      title: "Jasmine's Scholarship Hub",
+      subtitle: "",
+      fields: [
+        { id: 'appInfo', type: 'appInfo' }
+      ]
     },
     {
       id: 'role',
@@ -135,24 +137,28 @@ const Onboarding = (function() {
 
     container.innerHTML = `
       <div class="ob-card">
+        ${step.id !== 'welcome' ? `
         <div class="ob-progress"><div class="ob-progress-bar" style="width:${progress}%"></div></div>
-        <div class="ob-step">Step ${currentStep + 1} of ${STEPS.length}</div>
+        <div class="ob-step">Step ${currentStep} of ${STEPS.length - 1}</div>
+        ` : ''}
 
         <h2 class="ob-title">${step.title}</h2>
-        <p class="ob-subtitle">${step.subtitle}</p>
+        ${step.subtitle ? `<p class="ob-subtitle">${step.subtitle}</p>` : ''}
 
         <div class="ob-fields">
           ${step.fields.map(f => renderField(f)).join('')}
         </div>
 
+        ${step.id !== 'welcome' ? `
         <div class="ob-actions">
           ${!isFirst ? `<button class="ob-btn ob-btn-secondary" onclick="Onboarding.prev()">← Back</button>` : '<div></div>'}
           <button class="ob-btn ob-btn-primary" id="ob-next-btn" onclick="Onboarding.next()">
-            ${isLast ? 'Finish Setup →' : isFirst ? 'Get Started →' : 'Continue →'}
+            ${isLast ? 'Finish Setup →' : 'Continue →'}
           </button>
         </div>
 
-        ${(!isFirst && currentStep > 2) ? `<button class="ob-skip" onclick="Onboarding.skip()">Skip for now</button>` : ''}
+        ${(currentStep > 2) ? `<button class="ob-skip" onclick="Onboarding.skip()">Skip for now</button>` : ''}
+        ` : ''}
       </div>
     `;
 
@@ -205,6 +211,45 @@ const Onboarding = (function() {
             </div>
             <div class="ob-switch ${formData[f.id] ? 'active' : ''}" id="ob-${f.id}">
               <div class="ob-knob"></div>
+            </div>
+          </div>`;
+
+      case 'appInfo':
+        return `
+          <div class="ob-app-info">
+            <div class="ob-app-logo">🌟</div>
+            <div class="ob-app-tagline">Find scholarships. Plan for college. Achieve your dreams.</div>
+
+            <div class="ob-features">
+              <div class="ob-feature">
+                <span class="ob-feature-icon">🎓</span>
+                <span>Personalized scholarship matching</span>
+              </div>
+              <div class="ob-feature">
+                <span class="ob-feature-icon">📝</span>
+                <span>AI-powered essay assistance</span>
+              </div>
+              <div class="ob-feature">
+                <span class="ob-feature-icon">📊</span>
+                <span>Track applications & deadlines</span>
+              </div>
+              <div class="ob-feature">
+                <span class="ob-feature-icon">👨‍👩‍👧</span>
+                <span>Parent dashboard & updates</span>
+              </div>
+            </div>
+
+            <div class="ob-auth-buttons">
+              <button type="button" class="ob-btn ob-btn-primary" onclick="Onboarding.next()">
+                Create Account
+              </button>
+              <button type="button" class="ob-btn ob-btn-secondary" onclick="Onboarding.showLogin()">
+                I Already Have an Account
+              </button>
+            </div>
+
+            <div class="ob-privacy-note">
+              🔒 Your data is never sold. AI doesn't train on your content.
             </div>
           </div>`;
 
@@ -529,6 +574,21 @@ const Onboarding = (function() {
     }
   }
 
+  function showLogin() {
+    // Close onboarding and show login screen
+    close();
+    // Show the login screen if it exists
+    const loginScreen = document.getElementById('login-screen');
+    const mainApp = document.getElementById('main-app');
+    if (loginScreen) {
+      loginScreen.style.display = 'flex';
+      if (mainApp) mainApp.classList.remove('visible');
+    } else {
+      // Fallback: just close and let the app handle it
+      alert('Please log in with your existing account credentials.');
+    }
+  }
+
   function skip() {
     if (confirm('You can complete your profile later. Skip for now?')) {
       localStorage.setItem(STORAGE_KEY, 'true');
@@ -724,6 +784,23 @@ const Onboarding = (function() {
       .ob-role-emoji { font-size: 3rem; }
       .ob-role-title { font-size: 1.2rem; font-weight: 800; color: #1f2937; }
       .ob-role-desc { font-size: 0.9rem; color: #6b7280; }
+      .ob-app-info { text-align: center; }
+      .ob-app-logo { font-size: 4rem; margin-bottom: 8px; }
+      .ob-app-tagline { font-size: 1.1rem; color: #6b7280; margin-bottom: 24px; line-height: 1.4; }
+      .ob-features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; text-align: left; }
+      .ob-feature {
+        display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+        background: #f9fafb; border-radius: 10px;
+      }
+      .ob-feature-icon { font-size: 1.3rem; }
+      .ob-feature span:last-child { font-size: 0.95rem; color: #374151; }
+      .ob-auth-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+      .ob-auth-buttons .ob-btn { width: 100%; justify-content: center; }
+      .ob-privacy-note {
+        font-size: 0.8rem; color: #9ca3af; padding: 12px;
+        background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;
+        color: #166534;
+      }
       .ob-resume-section { text-align: center; }
       .ob-resume-btn {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -772,6 +849,7 @@ const Onboarding = (function() {
     toggle,
     toggleConsent,
     selectRole,
+    showLogin,
     skip,
     skipResume,
     handleResumeUpload,
