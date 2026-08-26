@@ -7353,6 +7353,7 @@
     }
 
     function editBasicInfo() {
+      console.log('editBasicInfo called');
       const profile = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
 
       const modal = document.createElement('div');
@@ -7509,10 +7510,12 @@
     window.saveBasicInfo = saveBasicInfo;
 
     function editInterests() {
+      console.log('editInterests called');
       showEditModal('interests', 'My Interests', 'Select your interests and passions');
     }
 
     function editBackground() {
+      console.log('editBackground called');
       showEditModal('background', 'Background', 'Tell us about your background');
     }
 
