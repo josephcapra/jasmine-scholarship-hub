@@ -472,7 +472,7 @@ const ParentAuth = (function() {
   }
 
   async function signInWithGoogle() {
-    const clientId = '383923649216-61v5iee0o30omc41f6ba5io4ss0617k2.apps.googleusercontent.com';
+    const clientId = '383923649216-diemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
 
     try {
       // Check if Google Identity Services library is loaded
