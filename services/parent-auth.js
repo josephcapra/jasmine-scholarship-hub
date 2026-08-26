@@ -472,55 +472,84 @@ const ParentAuth = (function() {
   }
 
   async function signInWithGoogle() {
-    // Use Google OAuth popup
-    const clientId = '383923649216-xxxxxxxxxx.apps.googleusercontent.com'; // Will be configured
-    const redirectUri = window.location.origin + '/parents.html';
+    const clientId = '383923649216-61v5iee0o30omc41f6ba5io4ss0617k2.apps.googleusercontent.com';
 
     try {
-      // Check if we have the Google client library
+      // Check if Google Identity Services library is loaded
       if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        // Initialize Google Identity Services
         google.accounts.id.initialize({
           client_id: clientId,
           callback: handleGoogleResponse,
-          auto_select: true
+          auto_select: false,
+          cancel_on_tap_outside: true
         });
-        google.accounts.id.prompt();
-      } else {
-        // Fallback: OAuth popup flow
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-          `client_id=${clientId}&` +
-          `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-          `response_type=token&` +
-          `scope=email%20profile&` +
-          `prompt=select_account`;
 
-        // Open Google OAuth in popup - needs client ID configured
-        // For now, show a message with Face ID option
-        const hasFaceId = typeof PasskeyAuth !== 'undefined' && PasskeyAuth.hasPasskey();
-        if (hasFaceId) {
-          alert('Google Sign-In is coming soon! Try Face ID for faster sign-in.');
-        } else {
-          alert('Google Sign-In is coming soon! Enter your email to continue, or set up Face ID for faster sign-in next time.');
-        }
+        // Show the One Tap prompt or button
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            // One Tap not available, show button instead
+            console.log('One Tap not displayed, reason:', notification.getNotDisplayedReason?.() || notification.getSkippedReason?.());
+            // Fall back to alert for now
+            showGoogleButton();
+          }
+        });
+      } else {
+        // Library not loaded yet, wait and retry
+        setTimeout(() => {
+          if (typeof google !== 'undefined' && google.accounts) {
+            signInWithGoogle();
+          } else {
+            alert('Google Sign-In is loading. Please try again in a moment, or use email/Face ID.');
+          }
+        }, 1000);
       }
     } catch (e) {
       console.error('Google Sign-In error:', e);
-      alert('Google Sign-In unavailable. Please use email or Face ID.');
+      alert('Google Sign-In error. Please use email or Face ID.');
     }
   }
 
+  function showGoogleButton() {
+    // Render Google Sign-In button in a container if One Tap fails
+    const container = document.createElement('div');
+    container.id = 'google-signin-container';
+    container.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10002; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);';
+    container.innerHTML = `
+      <h3 style="margin: 0 0 16px; text-align: center;">Sign in with Google</h3>
+      <div id="google-btn-target"></div>
+      <button onclick="document.getElementById('google-signin-container').remove()" style="margin-top: 16px; width: 100%; padding: 10px; background: #f3f4f6; border: none; border-radius: 8px; cursor: pointer;">Cancel</button>
+    `;
+    document.body.appendChild(container);
+
+    // Render the Google button
+    google.accounts.id.renderButton(
+      document.getElementById('google-btn-target'),
+      { theme: 'outline', size: 'large', width: 280 }
+    );
+  }
+
   function handleGoogleResponse(response) {
+    // Remove popup if present
+    const container = document.getElementById('google-signin-container');
+    if (container) container.remove();
+
     // Decode JWT token to get user info
-    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-    const name = payload.name;
-    const email = payload.email;
+    try {
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      const name = payload.name;
+      const email = payload.email;
 
-    // Prefill the form
-    document.getElementById('pam-name').value = name;
-    document.getElementById('pam-email').value = email;
+      // Prefill the form
+      document.getElementById('pam-name').value = name;
+      document.getElementById('pam-email').value = email;
 
-    // Auto-submit
-    handleStep1();
+      // Auto-submit
+      handleStep1();
+    } catch (e) {
+      console.error('Error parsing Google response:', e);
+      alert('Error with Google Sign-In. Please try again.');
+    }
   }
 
   async function signInWithPasskey() {
