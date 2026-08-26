@@ -301,9 +301,47 @@
     </div>
   </div>
 
-  <button class="btn btn-primary" onclick="emailWeeklyReport()">
-    📧 Email Me Weekly Reports
-  </button>
+  <div class="card" style="margin-bottom: 16px;">
+    <div class="card-title">📧 Progress Reports</div>
+    <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 16px;">Get updates on Jasmine's scholarship journey</p>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;" id="report-options">
+      <label onclick="setReportFrequency('instant')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-instant">
+        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
+          <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Instant</div>
+          <div style="font-size: 0.8rem; color: var(--muted);">Get notified immediately when she reaches milestones</div>
+        </div>
+      </label>
+
+      <label onclick="setReportFrequency('weekly')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-weekly">
+        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
+          <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Weekly Summary</div>
+          <div style="font-size: 0.8rem; color: var(--muted);">Sunday digest of her week's progress</div>
+        </div>
+      </label>
+
+      <label onclick="setReportFrequency('off')" style="display: flex; align-items: center; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 10px; cursor: pointer; border: 2px solid transparent;" id="opt-off">
+        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center;" class="radio-circle">
+          <div class="radio-dot" style="width: 10px; height: 10px; border-radius: 50%; background: transparent;"></div>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Off</div>
+          <div style="font-size: 0.8rem; color: var(--muted);">I'll check the dashboard when I want</div>
+        </div>
+      </label>
+    </div>
+
+    <div id="email-input-section" style="margin-top: 16px; display: none;">
+      <input type="email" id="parent-email" placeholder="Your email address" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+      <button onclick="saveReportSettings()" class="btn btn-primary" style="margin-top: 12px;">Save Settings</button>
+    </div>
+  </div>
 
   <button class="btn btn-secondary" onclick="window.location.href='/'">
     📱 Open Jasmine's App
@@ -391,13 +429,70 @@
       alert('Message sent to Jasmine! 💜\n\n"' + msg + '"');
     }
 
-    async function emailWeeklyReport() {
-      alert('Weekly progress reports will be emailed to you every Sunday! 📧');
-      // Would register for weekly emails via API
+    function setReportFrequency(freq) {
+      // Update UI
+      ['instant', 'weekly', 'off'].forEach(f => {
+        const opt = document.getElementById('opt-' + f);
+        const circle = opt.querySelector('.radio-circle');
+        const dot = opt.querySelector('.radio-dot');
+
+        if (f === freq) {
+          opt.style.border = '2px solid var(--jazz-purple)';
+          opt.style.background = '#ede9fe';
+          circle.style.borderColor = 'var(--jazz-purple)';
+          dot.style.background = 'var(--jazz-purple)';
+        } else {
+          opt.style.border = '2px solid transparent';
+          opt.style.background = '#f9fafb';
+          circle.style.borderColor = '#d1d5db';
+          dot.style.background = 'transparent';
+        }
+      });
+
+      // Show email input if instant or weekly
+      const emailSection = document.getElementById('email-input-section');
+      emailSection.style.display = (freq === 'off') ? 'none' : 'block';
+
+      // Save preference
+      localStorage.setItem('parent_report_frequency', freq);
+    }
+
+    function saveReportSettings() {
+      const email = document.getElementById('parent-email').value.trim();
+      const freq = localStorage.getItem('parent_report_frequency') || 'off';
+
+      if (freq !== 'off' && !email) {
+        alert('Please enter your email address');
+        return;
+      }
+
+      if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        alert('Please enter a valid email address');
+        return;
+      }
+
+      localStorage.setItem('parent_email', email);
+
+      const messages = {
+        instant: 'You\'ll receive instant notifications when Jasmine reaches milestones! 🎉',
+        weekly: 'You\'ll receive a weekly summary every Sunday! 📧',
+        off: 'Email notifications are turned off.'
+      };
+
+      alert(messages[freq]);
+    }
+
+    function loadReportSettings() {
+      const freq = localStorage.getItem('parent_report_frequency') || 'off';
+      const email = localStorage.getItem('parent_email') || '';
+
+      setReportFrequency(freq);
+      document.getElementById('parent-email').value = email;
     }
 
     // Initialize
     loadProgress();
+    loadReportSettings();
   </script>
 </body>
 </html>
