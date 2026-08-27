@@ -1929,8 +1929,13 @@
         </div>
       </div>
 
+      <!-- Logout Button -->
+      <button onclick="logoutUser()" style="width: 100%; margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem;">
+        🚪 Log Out
+      </button>
+
       <!-- Reset Account (for testing/fresh start) -->
-      <button onclick="resetAccount()" style="width: 100%; margin-top: 24px; padding: 12px; background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; border-radius: 10px; font-weight: 600; cursor: pointer;">
+      <button onclick="resetAccount()" style="width: 100%; margin-top: 12px; padding: 12px; background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; border-radius: 10px; font-weight: 600; cursor: pointer;">
         🔄 Reset Account (Start Fresh)
       </button>
     </section>
@@ -5988,6 +5993,39 @@
     }
 
     window.deleteDocument = deleteDocument;
+
+    // Logout Function - signs out and clears session
+    async function logoutUser() {
+      if (!confirm('Log out of your account?')) return;
+
+      try {
+        // Sign out of Supabase Auth if available
+        if (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.signOut) {
+          await SupabaseAuth.signOut();
+        }
+
+        // Clear session-related localStorage items
+        const sessionKeys = [
+          'jasmine_auth_token',
+          'jasmine_auth_refresh',
+          'jasmine_auth_user',
+          'jasmine_student_id',
+          'jasmine_parent_id',
+          'jasmine_passkey_credential',
+          'jasmine_passkey_user'
+        ];
+        sessionKeys.forEach(key => localStorage.removeItem(key));
+
+        showToast('Logged out successfully');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 500);
+      } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Logout failed. Please try again.');
+      }
+    }
+    window.logoutUser = logoutUser;
 
     // Reset Account Function - clears all Jasmine data
     function resetAccount() {

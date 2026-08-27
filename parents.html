@@ -790,7 +790,15 @@
       }
     }
 
-    function logout() {
+    async function logout() {
+      // Sign out of Supabase Auth if available
+      if (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.signOut) {
+        try {
+          await SupabaseAuth.signOut();
+        } catch (e) {
+          console.warn('SupabaseAuth signOut failed:', e);
+        }
+      }
       ParentAuth.logout();
       location.reload();
     }
