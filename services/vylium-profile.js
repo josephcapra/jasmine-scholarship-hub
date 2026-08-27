@@ -13,6 +13,12 @@ const VyliumProfile = (function() {
   'use strict';
 
   const STORAGE_KEY = 'jasmine_vylium_profile';
+  const GUEST_ID_KEY = 'jasmine_vylium_guest_id';
+  const SUPABASE_URL = 'https://ntmsclblmncklbxlttlw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50bXNjbGJsbW5ja2xieGx0dGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MDUyNzUsImV4cCI6MjEwMzI4MTI3NX0.BVm-mcQsxJQAKHBgLEhnNRTL0Yazrys9uXaSifFucQU';
+
+  let supabaseProfileId = null;
+  let syncPending = false;
 
   // SIX CORE DIMENSIONS (RIASEC-based)
   const DIMENSIONS = {
@@ -266,11 +272,196 @@ const VyliumProfile = (function() {
   let answers = {};
   let profileComplete = false;
 
-  function init() {
-    loadState();
+  // ===========================================
+  // SUPABASE SYNC
+  // ===========================================
+
+  function getGuestSessionId() {
+    let guestId = localStorage.getItem(GUEST_ID_KEY);
+    if (!guestId) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      guestId = '';
+      for (let i = 0; i < 22; i++) {
+        guestId += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      localStorage.setItem(GUEST_ID_KEY, guestId);
+    }
+    return guestId;
   }
 
-  function loadState() {
+  function getCurrentUserId() {
+    // Check if Supabase auth is available and user is logged in
+    if (typeof supabase !== 'undefined' && supabase.auth) {
+      const session = supabase.auth.getSession();
+      if (session?.data?.session?.user?.id) {
+        return session.data.session.user.id;
+      }
+    }
+    return null;
+  }
+
+  async function supabaseRequest(endpoint, options = {}) {
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+        method: options.method || 'GET',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': options.prefer || 'return=representation'
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined
+      });
+
+      if (!response.ok) {
+        console.warn('Supabase request failed:', response.status);
+        return null;
+      }
+
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    } catch (e) {
+      console.warn('Supabase request error:', e);
+      return null;
+    }
+  }
+
+  async function loadFromSupabase() {
+    const userId = getCurrentUserId();
+    const guestId = getGuestSessionId();
+
+    let query = 'vylium_profiles?select=*';
+    if (userId) {
+      query += `&user_id=eq.${userId}`;
+    } else {
+      query += `&guest_session_id=eq.${guestId}`;
+    }
+    query += '&limit=1';
+
+    const data = await supabaseRequest(query);
+    if (data && data.length > 0) {
+      const profile = data[0];
+      supabaseProfileId = profile.id;
+      return {
+        scores: profile.scores || { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 },
+        overlayScores: profile.overlay_scores || {},
+        answers: profile.answers || {},
+        profileComplete: profile.profile_complete || false
+      };
+    }
+    return null;
+  }
+
+  async function saveToSupabase() {
+    if (syncPending) return;
+    syncPending = true;
+
+    try {
+      const userId = getCurrentUserId();
+      const guestId = getGuestSessionId();
+      const profile = getProfile();
+
+      const data = {
+        scores,
+        overlay_scores: overlayScores,
+        answers,
+        profile_complete: profileComplete,
+        answered_count: Object.keys(answers).length,
+        type_code: profile.type?.code || null,
+        type_name: profile.type?.name || null,
+        type_emoji: profile.type?.emoji || null,
+        top_dimensions: profile.topDimensions,
+        normalized_scores: profile.normalizedScores
+      };
+
+      if (supabaseProfileId) {
+        // Update existing profile
+        await supabaseRequest(`vylium_profiles?id=eq.${supabaseProfileId}`, {
+          method: 'PATCH',
+          body: data
+        });
+      } else {
+        // Create new profile
+        if (userId) {
+          data.user_id = userId;
+        } else {
+          data.guest_session_id = guestId;
+        }
+
+        const result = await supabaseRequest('vylium_profiles', {
+          method: 'POST',
+          body: data
+        });
+
+        if (result && result[0]) {
+          supabaseProfileId = result[0].id;
+        }
+      }
+    } catch (e) {
+      console.warn('Supabase save error:', e);
+    } finally {
+      syncPending = false;
+    }
+  }
+
+  // Debounced save to avoid too many requests
+  let saveTimeout = null;
+  function debouncedSaveToSupabase() {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      saveToSupabase();
+    }, 1000);
+  }
+
+  async function convertGuestToUser(userId) {
+    const guestId = getGuestSessionId();
+    try {
+      await supabaseRequest('rpc/convert_guest_to_user_profile', {
+        method: 'POST',
+        body: {
+          p_guest_session_id: guestId,
+          p_user_id: userId
+        }
+      });
+      localStorage.removeItem(GUEST_ID_KEY);
+      return true;
+    } catch (e) {
+      console.error('Failed to convert guest profile:', e);
+      return false;
+    }
+  }
+
+  // ===========================================
+  // STATE MANAGEMENT
+  // ===========================================
+
+  async function init() {
+    // First load from localStorage (fast)
+    loadStateFromLocal();
+
+    // Then try to load from Supabase (may have more recent data)
+    try {
+      const cloudData = await loadFromSupabase();
+      if (cloudData) {
+        // Check if cloud data is more complete
+        const cloudAnswerCount = Object.keys(cloudData.answers || {}).length;
+        const localAnswerCount = Object.keys(answers).length;
+
+        if (cloudAnswerCount > localAnswerCount) {
+          scores = cloudData.scores;
+          overlayScores = cloudData.overlayScores;
+          answers = cloudData.answers;
+          profileComplete = cloudData.profileComplete;
+          saveStateToLocal(); // Update local with cloud data
+          console.log('[VyliumProfile] Loaded from cloud:', cloudAnswerCount, 'answers');
+        }
+      }
+    } catch (e) {
+      console.warn('Cloud load failed, using local:', e);
+    }
+  }
+
+  function loadStateFromLocal() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       scores = saved.scores || { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
@@ -278,12 +469,17 @@ const VyliumProfile = (function() {
       answers = saved.answers || {};
       profileComplete = saved.profileComplete || false;
     } catch (e) {
-      console.error('Vylium load error:', e);
+      console.error('Vylium local load error:', e);
     }
   }
 
-  function saveState() {
+  function saveStateToLocal() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ scores, overlayScores, answers, profileComplete }));
+  }
+
+  function saveState() {
+    saveStateToLocal();
+    debouncedSaveToSupabase();
   }
 
   function answer(questionId, choice) {
@@ -451,6 +647,7 @@ const VyliumProfile = (function() {
     overlayScores = {};
     answers = {};
     profileComplete = false;
+    supabaseProfileId = null;
     saveState();
   }
 
@@ -774,6 +971,10 @@ const VyliumProfile = (function() {
     renderMiniProfile,
     getScholarshipBoost,
     shareResult,
-    compareProfiles
+    compareProfiles,
+    // Supabase sync
+    syncNow: saveToSupabase,
+    convertGuestToUser,
+    getGuestSessionId
   };
 })();
