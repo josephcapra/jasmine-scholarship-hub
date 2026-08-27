@@ -479,16 +479,47 @@ const ParentAuth = (function() {
   let googleScriptInjected = false;
 
   let googleScriptLoadPromise = null;
+  let googleScriptAttempts = 0;
 
-  function injectGoogleScript() {
-    if (googleScriptLoadPromise) return googleScriptLoadPromise;
+  function injectGoogleScript(forceRetry = false) {
+    // If google is already available, we're done
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+      return Promise.resolve(true);
+    }
 
-    const existingScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
-    if (existingScript) {
-      googleScriptInjected = true;
-      googleScriptLoadPromise = Promise.resolve(true);
+    // If we have a pending promise and not forcing retry, return it
+    if (googleScriptLoadPromise && !forceRetry) {
       return googleScriptLoadPromise;
     }
+
+    // Remove any existing failed script tags on retry
+    if (forceRetry) {
+      const oldScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+      if (oldScript) oldScript.remove();
+      googleScriptLoadPromise = null;
+    }
+
+    // Check if script already exists and google is loading
+    const existingScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+    if (existingScript && !forceRetry) {
+      // Script exists, wait for google object
+      googleScriptLoadPromise = new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          if (typeof google !== 'undefined' && google.accounts) {
+            clearInterval(checkInterval);
+            resolve(true);
+          }
+        }, 100);
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(false);
+        }, 5000);
+      });
+      return googleScriptLoadPromise;
+    }
+
+    googleScriptAttempts++;
+    console.log(`Loading Google Identity Services (attempt ${googleScriptAttempts})`);
 
     googleScriptLoadPromise = new Promise((resolve) => {
       const script = document.createElement('script');
@@ -509,18 +540,27 @@ const ParentAuth = (function() {
     return googleScriptLoadPromise;
   }
 
-  async function waitForGoogle(maxWait = 10000) {
-    // Inject and wait for script to load
-    const scriptLoaded = await injectGoogleScript();
-    if (!scriptLoaded) return false;
+  async function waitForGoogle(maxWait = 12000) {
+    // Try loading script with up to 2 retries
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const scriptLoaded = await injectGoogleScript(attempt > 0);
 
-    // Now wait for google.accounts.id to be available
-    const start = Date.now();
-    while (Date.now() - start < maxWait) {
-      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-        return true;
+      if (scriptLoaded) {
+        // Wait for google.accounts.id to be available
+        const start = Date.now();
+        while (Date.now() - start < 5000) {
+          if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+            return true;
+          }
+          await new Promise(r => setTimeout(r, 100));
+        }
       }
-      await new Promise(r => setTimeout(r, 100));
+
+      // If first attempt failed, wait before retry
+      if (attempt < 2) {
+        console.log(`Google script load failed, retrying in ${(attempt + 1) * 1000}ms...`);
+        await new Promise(r => setTimeout(r, (attempt + 1) * 1000));
+      }
     }
     return false;
   }
