@@ -33,8 +33,16 @@ export default async function handler(req, res) {
       ADDITIONAL_BACKGROUND,
       INTENDED_MAJOR_OR_CAREER,
       FINANCIAL_INFORMATION,
-      TARGET_SCHOLARSHIP_COUNT
+      TARGET_SCHOLARSHIP_COUNT,
+      PATHWAY = 'college'
     } = body;
+
+    // Map pathway to search focus
+    const pathwayFocus = {
+      college: 'Focus on 4-year college and university scholarships, academic merit awards, and college-bound programs.',
+      trades: 'Focus on vocational training scholarships, trade school funding, apprenticeship programs, career/technical education grants, and workforce development awards.',
+      both: 'Include both traditional college scholarships AND vocational/trade school funding opportunities.'
+    }[PATHWAY] || '';
 
     const systemPrompt = `You are a scholarship research expert with web search capabilities. Your task is to find REAL, CURRENTLY OPEN scholarships that match the student's profile.
 
@@ -81,19 +89,20 @@ FINANCIAL SITUATION: ${FINANCIAL_INFORMATION}
 
 TODAY'S DATE: ${CURRENT_DATE}
 
-Search the web for real scholarships this student qualifies for. Prioritize:
+PATHWAY: ${PATHWAY.toUpperCase()}
+${pathwayFocus}
+
+Search for real scholarships this student qualifies for. Prioritize:
 1. Local scholarships in ${COUNTY}, ${STATE} (less competition)
-2. Photography/arts scholarships (student has National Gold Medal)
-3. Military family scholarships (parents are veterans)
-4. Florida state programs (Bright Futures, etc.)
-5. Entrepreneurship scholarships (student runs photography business)
-6. Community service scholarships
-7. Academic merit scholarships
+2. Scholarships matching the student's interests and achievements
+3. ${PATHWAY === 'trades' ? 'Trade school, vocational, and apprenticeship funding' : 'Academic merit and college-bound programs'}
+4. ${ADDITIONAL_BACKGROUND.includes('Military') ? 'Military family scholarships' : 'Community service scholarships'}
+5. State programs (Florida Bright Futures, etc.)
 
 Return ONLY the JSON array, no other text.`;
 
-    // Use OpenAI's Responses API with web search
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    // Use OpenAI Chat Completions API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,78 +110,23 @@ Return ONLY the JSON array, no other text.`;
       },
       body: JSON.stringify({
         model: 'gpt-4o',
-        tools: [{ type: 'web_search_preview' }],
-        input: [
+        messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
-        ]
+        ],
+        max_tokens: 8000,
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', response.status, errorText);
-
-      // Fallback to chat completions if responses API fails
-      const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          max_tokens: 8000,
-          temperature: 0.7,
-        store: false
-        })
-      });
-
-      if (!fallbackResponse.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const fallbackData = await fallbackResponse.json();
-      const content = fallbackData.choices?.[0]?.message?.content || '[]';
-
-      let scholarships = [];
-      try {
-        const jsonMatch = content.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          scholarships = JSON.parse(jsonMatch[0]);
-        }
-      } catch (parseError) {
-        console.error('Parse error:', parseError);
-      }
-
-      return res.status(200).json({
-        success: true,
-        scholarships,
-        searchDate: new Date().toISOString(),
-        searchType: 'fallback',
-        profile: { city: CITY, state: STATE, gradeLevel: GRADE_LEVEL }
-      });
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-
-    // Extract text from responses API output
-    let content = '';
-    if (data.output) {
-      for (const item of data.output) {
-        if (item.type === 'message' && item.content) {
-          for (const block of item.content) {
-            if (block.type === 'output_text') {
-              content += block.text;
-            }
-          }
-        }
-      }
-    }
+    const content = data.choices?.[0]?.message?.content || '[]';
 
     let scholarships = [];
     try {
@@ -189,7 +143,7 @@ Return ONLY the JSON array, no other text.`;
       success: true,
       scholarships,
       searchDate: new Date().toISOString(),
-      searchType: 'web_search',
+      searchType: 'ai_search',
       profile: {
         city: CITY,
         state: STATE,

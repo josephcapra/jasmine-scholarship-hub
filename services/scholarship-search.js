@@ -173,20 +173,44 @@ const ScholarshipSearch = (function() {
               Our AI will search for scholarships that match your profile, location, interests, and achievements.
             </p>
 
+            <div class="ss-pathway-selector" style="margin-bottom: 16px;">
+              <label style="font-weight: 700; font-size: 0.9rem; color: #374151; display: block; margin-bottom: 8px;">What's your path after high school?</label>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <label class="ss-pathway-option" style="flex: 1; min-width: 100px;">
+                  <input type="radio" name="ss-pathway" value="college" checked style="display: none;">
+                  <div class="ss-pathway-card" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem;">🎓</div>
+                    <div style="font-size: 0.85rem; font-weight: 600;">College</div>
+                  </div>
+                </label>
+                <label class="ss-pathway-option" style="flex: 1; min-width: 100px;">
+                  <input type="radio" name="ss-pathway" value="trades" style="display: none;">
+                  <div class="ss-pathway-card" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem;">🔧</div>
+                    <div style="font-size: 0.85rem; font-weight: 600;">Trade/Career</div>
+                  </div>
+                </label>
+                <label class="ss-pathway-option" style="flex: 1; min-width: 100px;">
+                  <input type="radio" name="ss-pathway" value="both" style="display: none;">
+                  <div class="ss-pathway-card" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 1.5rem;">🌟</div>
+                    <div style="font-size: 0.85rem; font-weight: 600;">Both</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div class="ss-time-warning">
-              <strong>Personalized Deep Search</strong><br><br>
-              This isn't a basic scholarship list. Our AI will spend <strong>30+ minutes</strong> conducting an
-              in-depth search customized to your name, qualifications, achievements, location, and goals.
+              <strong>Personalized In-Depth Search</strong><br><br>
+              This isn't a basic scholarship list. Our AI conducts an in-depth search customized to your qualifications, achievements, location, and goals.
               <br><br>
               It will:
               <ul style="margin: 8px 0 0 16px; padding: 0;">
-                <li>Research 50+ opportunities matched specifically to you</li>
-                <li>Verify each scholarship is real and currently open</li>
-                <li>Analyze your competitive advantage for each one</li>
-                <li>Create a strategy for how YOU can win each scholarship</li>
+                <li>Find opportunities matched specifically to your profile</li>
+                <li>Focus on scholarships where you have a competitive advantage</li>
+                <li>Prioritize local and regional scholarships (less competition)</li>
+                <li>Suggest winning strategies for each scholarship</li>
               </ul>
-              <br>
-              You can close this window and check back later - results will be saved to your account.
             </div>
 
             <button class="ss-btn ss-btn-primary" onclick="ScholarshipSearch.runAISearch()">
@@ -305,6 +329,25 @@ const ScholarshipSearch = (function() {
         document.getElementById('ss-panel-' + tab.dataset.tab).classList.add('active');
       };
     });
+
+    // Pathway selector styling
+    modal.querySelectorAll('.ss-pathway-option input').forEach(input => {
+      const card = input.nextElementSibling;
+      if (input.checked) {
+        card.style.borderColor = '#7c3aed';
+        card.style.background = '#ede9fe';
+      }
+      input.addEventListener('change', () => {
+        modal.querySelectorAll('.ss-pathway-card').forEach(c => {
+          c.style.borderColor = '#e5e7eb';
+          c.style.background = 'transparent';
+        });
+        if (input.checked) {
+          card.style.borderColor = '#7c3aed';
+          card.style.background = '#ede9fe';
+        }
+      });
+    });
   }
 
   function closeModal() {
@@ -343,7 +386,12 @@ const ScholarshipSearch = (function() {
 
     status.innerHTML = '<div class="ss-loading">Searching for scholarships...</div>';
 
+    // Get selected pathway
+    const pathwayInput = document.querySelector('input[name="ss-pathway"]:checked');
+    const pathway = pathwayInput ? pathwayInput.value : 'college';
+
     const promptData = buildSearchPrompt();
+    promptData.PATHWAY = pathway;
 
     try {
       const response = await fetch('/api/scholarship-search', {
