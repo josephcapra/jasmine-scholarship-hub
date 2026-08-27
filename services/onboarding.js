@@ -258,6 +258,14 @@ const Onboarding = (function() {
               <span>•</span>
               <span>🤖 AI doesn't train on your essays</span>
             </div>
+
+            <div class="ob-beta-notice">
+              <div class="ob-beta-badge">🧪 BETA</div>
+              <div class="ob-beta-text">
+                <strong>You're invited to our limited beta!</strong>
+                <p>Free access in exchange for periodic feedback to help us improve.</p>
+              </div>
+            </div>
           </div>`;
 
       case 'roleSelect':
@@ -827,6 +835,21 @@ const Onboarding = (function() {
         display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
         font-size: 0.75rem; color: #9ca3af;
       }
+      .ob-beta-notice {
+        display: flex; align-items: center; gap: 12px;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border: 2px solid #f59e0b;
+        border-radius: 12px; padding: 14px 18px; margin-top: 16px;
+        text-align: left;
+      }
+      .ob-beta-badge {
+        background: #f59e0b; color: white; font-weight: 800;
+        padding: 6px 10px; border-radius: 8px; font-size: 0.75rem;
+        white-space: nowrap;
+      }
+      .ob-beta-text { flex: 1; }
+      .ob-beta-text strong { color: #92400e; font-size: 0.95rem; display: block; margin-bottom: 2px; }
+      .ob-beta-text p { color: #78350f; font-size: 0.85rem; margin: 0; }
       .ob-resume-section { text-align: center; }
       .ob-resume-btn {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
