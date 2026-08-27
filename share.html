@@ -7,15 +7,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- OG Meta Tags (dynamic via JS) -->
-  <meta property="og:title" content="What Future Type are you?">
-  <meta property="og:description" content="Take the 3-minute test and discover your Future Type.">
+  <meta property="og:title" content="What Vylium Type are you?">
+  <meta property="og:description" content="Take the 3-minute test and discover your Vylium Type.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
 
   <!-- No indexing for privacy -->
   <meta name="robots" content="noindex, nofollow">
 
-  <title>Future Type Challenge</title>
+  <title>Vylium Type Challenge</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
@@ -519,7 +519,7 @@
     <div class="error-title">This link isn't available</div>
     <div class="error-message">The shared result may have expired or been removed.</div>
     <a href="/index.html" class="btn-take-test" style="max-width: 280px;">
-      Take the Future Type Test
+      Take the Vylium Type Test
     </a>
   </div>
 
@@ -528,12 +528,12 @@
     <div class="hero">
       <div class="friend-badge" id="friend-badge">A friend challenged you!</div>
       <div class="friend-type-emoji" id="friend-emoji">🧭</div>
-      <div class="friend-type-name" id="friend-type">Future Type</div>
+      <div class="friend-type-name" id="friend-type">Vylium Type</div>
       <div class="challenge-text">Think you'll get the same result?</div>
     </div>
 
     <div class="content">
-      <div class="prompt-text">What Future Type are you?</div>
+      <div class="prompt-text">What Vylium Type are you?</div>
       <div class="subtext">15 quick questions. Find out how you compare.</div>
 
       <button class="btn-take-test" id="start-test-btn">
@@ -560,7 +560,7 @@
   <!-- Test View -->
   <div id="test-view" class="test-container">
     <div class="test-header">
-      <div class="test-title">🧭 Future Type</div>
+      <div class="test-title">🧭 Vylium Type</div>
       <div class="test-subtitle">Answer honestly — there are no wrong answers</div>
     </div>
     <div class="test-progress">
@@ -642,9 +642,9 @@
       }
 
       function showGenericLanding() {
-        document.getElementById('friend-badge').textContent = 'Discover your Future Type';
+        document.getElementById('friend-badge').textContent = 'Discover your Vylium Type';
         document.getElementById('friend-emoji').textContent = '🧭';
-        document.getElementById('friend-type').textContent = 'Future Type';
+        document.getElementById('friend-type').textContent = 'Vylium Type';
         showView(landingView);
       }
 
@@ -652,7 +652,7 @@
         const friendName = data.firstName || 'A friend';
         document.getElementById('friend-badge').textContent = `${friendName} challenged you!`;
         document.getElementById('friend-emoji').textContent = data.typeEmoji || '🧭';
-        document.getElementById('friend-type').textContent = data.futureType || 'Future Type';
+        document.getElementById('friend-type').textContent = data.futureType || 'Vylium Type';
 
         // Update OG tags dynamically
         document.querySelector('meta[property="og:title"]').content = `${friendName} got ${data.futureType}. What will you get?`;

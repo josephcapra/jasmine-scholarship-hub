@@ -1,5 +1,5 @@
 /**
- * VYLIUM Profile - Personality & Future Discovery Assessment
+ * Vylium Personality Test
  * "Light on your path."
  *
  * Based on Holland RIASEC + overlay traits

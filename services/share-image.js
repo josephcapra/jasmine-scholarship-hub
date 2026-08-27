@@ -61,7 +61,7 @@ const ShareImage = (function() {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.font = 'bold 36px Nunito, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('MY FUTURE TYPE', width / 2, 280);
+    ctx.fillText('MY VYLIUM TYPE', width / 2, 280);
 
     // Emoji
     ctx.font = '200px sans-serif';
@@ -253,12 +253,12 @@ const ShareImage = (function() {
 
     try {
       const blob = await getImageBlob(canvas);
-      const file = new File([blob], 'my-future-type.png', { type: 'image/png' });
+      const file = new File([blob], 'my-vylium-type.png', { type: 'image/png' });
 
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: title || 'My Future Type',
-          text: text || 'See what Future Type you get!',
+          title: title || 'My Vylium Type',
+          text: text || 'See what Vylium Type you get!',
           files: [file]
         });
         return true;
@@ -293,7 +293,7 @@ const ShareImage = (function() {
 
     const shared = await shareImage(
       canvas,
-      'My Future Type',
+      'My Vylium Type',
       `I got ${profile.type?.name}. What type are you?`
     );
 

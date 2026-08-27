@@ -2,7 +2,7 @@
  * Viral Share Service
  * Secure share tokens, public result retrieval, guest sessions, analytics
  *
- * Core Loop: Take Test → Get Future Type → Share Result → Friend Opens → Friend Takes Test → Compare → Challenge
+ * Core Loop: Take Test → Get Vylium Type → Share Result → Friend Opens → Friend Takes Test → Compare → Challenge
  */
 
 const ViralShare = (function() {
@@ -76,7 +76,7 @@ const ViralShare = (function() {
   }
 
   // ===========================================
-  // CREATE SHARE (after completing Future Type)
+  // CREATE SHARE (after completing Vylium Personality Test)
   // ===========================================
 
   function createShare(options = {}) {
@@ -212,7 +212,7 @@ const ViralShare = (function() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'What Future Type are you?',
+          title: 'What Vylium Type are you?',
           text: text,
           url: url
         });
@@ -397,7 +397,7 @@ const ViralShare = (function() {
 
     // Same type bonus
     if (comparison.myType === comparison.theirType) {
-      comparison.similarities.unshift('You got the same Future Type!');
+      comparison.similarities.unshift('You got the same Vylium Type!');
       comparison.compatibilityScore += 25;
     }
 
@@ -545,7 +545,7 @@ const ViralShare = (function() {
         <!-- Privacy Note -->
         <div class="share-privacy-note">
           <span class="privacy-icon">🔒</span>
-          <span>Only your Future Type and traits are shared. No personal info.</span>
+          <span>Only your Vylium Type and traits are shared. No personal info.</span>
         </div>
 
         <!-- Disclaimer -->
@@ -653,7 +653,7 @@ const ViralShare = (function() {
           <h3>Turn Your Result Into a Future Plan</h3>
           <p>Build a free profile to see scholarships, colleges, and careers matched to you.</p>
           <button class="btn-continue" id="build-profile-btn">
-            Build My Future Profile
+            Build My Profile
           </button>
           <button class="btn-skip" id="skip-profile-btn">
             Not now
