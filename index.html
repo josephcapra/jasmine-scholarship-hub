@@ -1786,6 +1786,173 @@
       margin: 4px;
     }
 
+    /* VYLIUM Profile Styles */
+    .vylium-progress {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .vylium-progress-bar {
+      height: 100%;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .vylium-question-number {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .vylium-question {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+    .vylium-options {
+      display: flex;
+      gap: 12px;
+    }
+    .vylium-option {
+      flex: 1;
+      padding: 20px 16px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .vylium-option:hover {
+      border-color: var(--jazz-purple);
+      transform: translateY(-2px);
+    }
+    .vylium-option.selected {
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      border-color: transparent;
+      color: white;
+      transform: scale(0.98);
+    }
+    .vylium-option-text {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .vylium-results { text-align: center; }
+    .vylium-type-reveal {
+      padding: 24px;
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .vylium-type-emoji { font-size: 4rem; margin-bottom: 12px; }
+    .vylium-type-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+      margin-bottom: 8px;
+    }
+    .vylium-type-desc {
+      font-size: 0.95rem;
+      color: #5b21b6;
+      line-height: 1.5;
+    }
+    .vylium-traits { margin-bottom: 20px; }
+    .vylium-traits-title {
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .vylium-traits-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .vylium-trait {
+      background: var(--card);
+      border: 2px solid;
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+    .vylium-trait-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .vylium-trait-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 4px 0;
+    }
+    .vylium-trait-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 6px 0 4px;
+    }
+    .vylium-trait-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .vylium-trait-percent {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .vylium-section {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .vylium-section-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .vylium-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .vylium-tag {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #f3f4f6;
+      color: var(--text);
+    }
+    .vylium-tag-green { background: #d1fae5; color: #065f46; }
+    .vylium-tag-red { background: #fee2e2; color: #dc2626; }
+    .vylium-footer {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 16px 0;
+    }
+    .vylium-mini {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      border-radius: 16px;
+    }
+    .vylium-mini-start {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+    }
+    .vylium-mini-icon { font-size: 2rem; }
+    .vylium-mini-text { flex: 1; text-align: left; }
+    .vylium-mini-title { font-weight: 700; color: #5b21b6; }
+    .vylium-mini-start .vylium-mini-title { color: #92400e; }
+    .vylium-mini-desc { font-size: 0.8rem; color: #7c3aed; }
+    .vylium-mini-start .vylium-mini-desc { color: #b45309; }
+    .vylium-mini-traits { font-size: 0.85rem; font-weight: 600; }
+
     /* Activity Feed Item */
     .activity-item {
       display: flex;
@@ -1969,6 +2136,11 @@
         <button onclick="openWYRGame()" style="background: none; border: none; color: var(--jazz-purple); font-size: 0.8rem; font-weight: 600; cursor: pointer;">Play More →</button>
       </div>
       <div id="daily-wyr-container"></div>
+    </div>
+
+    <!-- VYLIUM Future Profile Mini -->
+    <div style="margin: 0 16px 16px;">
+      <div id="vylium-mini-container"></div>
     </div>
 
     <!-- Rewards Banner - Only shows if parent enabled -->
@@ -3153,6 +3325,20 @@
       </div>
     </div>
 
+    <!-- VYLIUM Profile Assessment Modal -->
+    <div class="modal-overlay" id="vylium-modal">
+      <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3 class="modal-title">🧭 Discover Your Future Profile</h3>
+          <button class="modal-close" onclick="closeVyliumAssessment()">×</button>
+        </div>
+        <div id="vylium-assessment-container"></div>
+        <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div style="font-size: 0.75rem; color: var(--muted); font-style: italic;">Built for my daughter and shared with the world 💜</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Resume Editor Modal -->
     <div class="modal-overlay" id="resume-edit-modal">
       <div class="modal">
@@ -3252,6 +3438,7 @@
   <!-- Service modules loaded before main scripts -->
   <script src="data/would-you-rather.js"></script>
   <script src="services/would-you-rather.js"></script>
+  <script src="services/vylium-profile.js"></script>
   <script src="services/badges.js"></script>
   <script src="services/knowledge-vault.js"></script>
   <script src="services/next-actions.js"></script>
@@ -3366,7 +3553,40 @@
     // Initialize WYR on page load
     document.addEventListener('DOMContentLoaded', function() {
       setTimeout(initDailyWYR, 500);
+      setTimeout(initVyliumMini, 600);
     });
+
+    // VYLIUM Profile Functions
+    function initVyliumMini() {
+      if (typeof VyliumProfile !== 'undefined') {
+        VyliumProfile.renderMiniProfile('vylium-mini-container');
+      }
+    }
+
+    function openVyliumAssessment() {
+      document.getElementById('vylium-modal').classList.add('active');
+      if (typeof VyliumProfile !== 'undefined') {
+        const profile = VyliumProfile.getProfile();
+        if (profile.isComplete) {
+          VyliumProfile.renderResults('vylium-assessment-container', profile);
+        } else {
+          VyliumProfile.renderAssessment('vylium-assessment-container', function(profile) {
+            // Refresh mini profile on complete
+            initVyliumMini();
+            // Check for badges
+            if (typeof BadgeService !== 'undefined') {
+              BadgeService.onAction('profile_complete');
+            }
+            showToast('Profile discovered! 🎉');
+          });
+        }
+      }
+    }
+
+    function closeVyliumAssessment() {
+      document.getElementById('vylium-modal').classList.remove('active');
+      initVyliumMini();
+    }
 
     // Progress Ring Generator
     function createProgressRing(percent, size = 48) {

@@ -73,6 +73,11 @@ const WouldYouRather = (function() {
         for (const [dim, points] of Object.entries(scoreUpdate)) {
           scores[dim] = (scores[dim] || 0) + points;
         }
+
+        // Also feed into VyliumProfile for unified scoring
+        if (typeof VyliumProfile !== 'undefined' && question.category.includes('PROFILE')) {
+          VyliumProfile.addScores(scoreUpdate);
+        }
       }
 
       saveState();
