@@ -474,47 +474,87 @@ const ParentAuth = (function() {
     }
   }
 
-  async function signInWithGoogle() {
+  let googleInitialized = false;
+  let googleInitializing = false;
+
+  async function waitForGoogle(maxWait = 5000) {
+    const start = Date.now();
+    while (Date.now() - start < maxWait) {
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        return true;
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return false;
+  }
+
+  async function initializeGoogle() {
+    if (googleInitialized) return true;
+    if (googleInitializing) {
+      // Wait for existing initialization
+      await new Promise(r => setTimeout(r, 500));
+      return googleInitialized;
+    }
+
+    googleInitializing = true;
     const clientId = '383923649216-diemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
 
     try {
-      // Check if Google Identity Services library is loaded
-      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-        // Initialize Google Identity Services
-        google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleGoogleResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true
-        });
-
-        // Show the One Tap prompt or button
-        google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            // One Tap not available, show button instead
-            console.log('One Tap not displayed, reason:', notification.getNotDisplayedReason?.() || notification.getSkippedReason?.());
-            // Fall back to alert for now
-            showGoogleButton();
-          }
-        });
-      } else {
-        // Library not loaded yet, wait and retry silently
-        setTimeout(() => {
-          if (typeof google !== 'undefined' && google.accounts) {
-            signInWithGoogle();
-          } else {
-            // Show subtle toast instead of blocking alert
-            const toast = document.createElement('div');
-            toast.textContent = 'Google Sign-In loading... Please try again.';
-            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:12px 24px;border-radius:25px;z-index:10000;font-size:14px;';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-          }
-        }, 1000);
+      const loaded = await waitForGoogle();
+      if (!loaded) {
+        console.warn('Google Identity Services not loaded');
+        googleInitializing = false;
+        return false;
       }
+
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      googleInitialized = true;
+      googleInitializing = false;
+      return true;
+    } catch (e) {
+      console.error('Google init error:', e);
+      googleInitializing = false;
+      return false;
+    }
+  }
+
+  async function signInWithGoogle() {
+    // Show loading indicator
+    const loadingToast = document.createElement('div');
+    loadingToast.textContent = 'Loading Google Sign-In...';
+    loadingToast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:12px 24px;border-radius:25px;z-index:10000;font-size:14px;';
+    document.body.appendChild(loadingToast);
+
+    try {
+      const initialized = await initializeGoogle();
+
+      if (!initialized) {
+        loadingToast.textContent = 'Google Sign-In unavailable. Try email sign-in.';
+        loadingToast.style.background = '#dc2626';
+        setTimeout(() => loadingToast.remove(), 3000);
+        return;
+      }
+
+      loadingToast.remove();
+
+      // Show the One Tap prompt or button
+      google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          console.log('One Tap not displayed, showing button');
+          showGoogleButton();
+        }
+      });
     } catch (e) {
       console.error('Google Sign-In error:', e);
-      alert('Google Sign-In error. Please use email or Face ID.');
+      loadingToast.textContent = 'Sign-in error. Try email instead.';
+      loadingToast.style.background = '#dc2626';
+      setTimeout(() => loadingToast.remove(), 3000);
     }
   }
 
