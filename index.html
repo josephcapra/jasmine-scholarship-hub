@@ -1662,6 +1662,130 @@
       font-weight: 700;
     }
 
+    /* Would You Rather Styles */
+    .wyr-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .wyr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .wyr-badge {
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      color: var(--jazz-purple);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .wyr-number {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .wyr-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .wyr-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .wyr-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .wyr-option:hover {
+      border-color: var(--jazz-purple);
+      transform: translateX(4px);
+    }
+    .wyr-option:active, .wyr-option.selected {
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      border-color: transparent;
+      color: white;
+      transform: scale(0.98);
+    }
+    .wyr-emoji {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .wyr-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .wyr-or {
+      text-align: center;
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .wyr-result, .wyr-complete, .wyr-game-over {
+      text-align: center;
+      padding: 24px;
+    }
+    .wyr-result-icon, .wyr-complete-icon, .wyr-game-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    .wyr-result-text, .wyr-complete-text, .wyr-game-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .wyr-streak {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--jazz-gold);
+    }
+    .wyr-answered {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .wyr-progress {
+      text-align: center;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .wyr-top-traits {
+      margin: 16px 0;
+    }
+    .wyr-traits-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .wyr-trait {
+      display: inline-block;
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #065f46;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin: 4px;
+    }
+
     /* Activity Feed Item */
     .activity-item {
       display: flex;
@@ -1836,6 +1960,15 @@
     <div class="affirmation" id="affirmation">
       <div class="from">💜 From Daddy Dog & Mom</div>
       <div class="message" id="affirmation-text">We are SO proud of you, Jasmine! Every scholarship you apply for shows your dedication. You've got this, superstar!</div>
+    </div>
+
+    <!-- Daily Would You Rather -->
+    <div style="margin: 0 16px 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="font-weight: 700; font-size: 0.9rem; color: var(--text);">🎮 Daily Question</div>
+        <button onclick="openWYRGame()" style="background: none; border: none; color: var(--jazz-purple); font-size: 0.8rem; font-weight: 600; cursor: pointer;">Play More →</button>
+      </div>
+      <div id="daily-wyr-container"></div>
     </div>
 
     <!-- Rewards Banner - Only shows if parent enabled -->
@@ -3006,6 +3139,20 @@
       </div>
     </div>
 
+    <!-- Would You Rather Game Modal -->
+    <div class="modal-overlay" id="wyr-modal">
+      <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3 class="modal-title">🎮 Would You Rather</h3>
+          <button class="modal-close" onclick="closeWYRGame()">×</button>
+        </div>
+        <div id="wyr-game-container"></div>
+        <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div style="font-size: 0.75rem; color: var(--muted); font-style: italic;">Built for my daughter and shared with the world 💜</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Resume Editor Modal -->
     <div class="modal-overlay" id="resume-edit-modal">
       <div class="modal">
@@ -3085,6 +3232,11 @@
       </button>
     </nav>
 
+    <!-- Footer Tagline -->
+    <div style="text-align: center; padding: 8px 16px; margin-bottom: 70px; font-size: 0.75rem; color: var(--muted); font-style: italic;">
+      Built for my daughter and shared with the world 💜
+    </div>
+
     <!-- Feedback Button -->
     <button onclick="window.showFeedbackModal()" style="
       position: fixed; bottom: 80px; right: 16px; z-index: 1000;
@@ -3098,6 +3250,8 @@
   </div><!-- end main-app -->
 
   <!-- Service modules loaded before main scripts -->
+  <script src="data/would-you-rather.js"></script>
+  <script src="services/would-you-rather.js"></script>
   <script src="services/badges.js"></script>
   <script src="services/knowledge-vault.js"></script>
   <script src="services/next-actions.js"></script>
@@ -3181,6 +3335,38 @@
         if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
       }
     })();
+
+    // Would You Rather Functions
+    function initDailyWYR() {
+      if (typeof WouldYouRather !== 'undefined') {
+        WouldYouRather.renderDailyCard('daily-wyr-container', function(result) {
+          // Award badge on streak milestones
+          if (typeof BadgeService !== 'undefined') {
+            BadgeService.onAction('wyr_answer');
+          }
+        });
+      }
+    }
+
+    function openWYRGame() {
+      document.getElementById('wyr-modal').classList.add('active');
+      if (typeof WouldYouRather !== 'undefined') {
+        WouldYouRather.renderGameMode('wyr-game-container', function(stats) {
+          if (typeof BadgeService !== 'undefined') {
+            BadgeService.onAction('wyr_complete');
+          }
+        });
+      }
+    }
+
+    function closeWYRGame() {
+      document.getElementById('wyr-modal').classList.remove('active');
+    }
+
+    // Initialize WYR on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initDailyWYR, 500);
+    });
 
     // Progress Ring Generator
     function createProgressRing(percent, size = 48) {
