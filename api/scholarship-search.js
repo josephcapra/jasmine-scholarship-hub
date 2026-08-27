@@ -89,14 +89,14 @@ FINANCIAL SITUATION: ${FINANCIAL_INFORMATION}
 
 TODAY'S DATE: ${CURRENT_DATE}
 
-PATHWAY: ${PATHWAY.toUpperCase()}
+PATHWAY: ${(PATHWAY || 'college').toUpperCase()}
 ${pathwayFocus}
 
 Search for real scholarships this student qualifies for. Prioritize:
-1. Local scholarships in ${COUNTY}, ${STATE} (less competition)
+1. Local scholarships in ${COUNTY || 'the local area'}, ${STATE || 'Florida'} (less competition)
 2. Scholarships matching the student's interests and achievements
 3. ${PATHWAY === 'trades' ? 'Trade school, vocational, and apprenticeship funding' : 'Academic merit and college-bound programs'}
-4. ${ADDITIONAL_BACKGROUND.includes('Military') ? 'Military family scholarships' : 'Community service scholarships'}
+4. ${(ADDITIONAL_BACKGROUND || '').includes('Military') ? 'Military family scholarships' : 'Community service scholarships'}
 5. State programs (Florida Bright Futures, etc.)
 
 Return ONLY the JSON array, no other text.`;
