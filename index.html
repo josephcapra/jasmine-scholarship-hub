@@ -2627,6 +2627,538 @@
     .discover-content > div.active {
       display: block;
     }
+
+    /* Phase 5: Application Tracker Styles */
+    .app-tracker-dashboard {
+      padding-bottom: 20px;
+    }
+    .app-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .app-stat-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .app-stat-card.awarded {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    }
+    .app-stat-number {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+    }
+    .app-stat-card.awarded .app-stat-number {
+      color: #065f46;
+    }
+    .app-stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .app-section {
+      margin-bottom: 20px;
+    }
+    .app-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .app-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .application-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .application-card:active {
+      transform: scale(0.98);
+    }
+    .app-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .app-card-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex: 1;
+      margin-right: 10px;
+    }
+    .app-card-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .app-deadline.urgent {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .app-deadline.soon {
+      color: #f59e0b;
+    }
+    .app-materials-progress {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .mini-progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    .mini-progress-fill {
+      height: 100%;
+      background: var(--jazz-purple);
+      border-radius: 2px;
+    }
+    .app-empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .app-empty-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    /* Application Modal */
+    .app-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .app-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .app-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+    }
+    .app-modal-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      max-height: 85vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+    .app-modal.active .app-modal-content {
+      transform: translateY(0);
+    }
+    .app-modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .app-modal-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+    .app-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .app-modal-body {
+      padding: 20px;
+    }
+    .app-detail-amount {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--jazz-purple);
+      margin-bottom: 8px;
+    }
+    .app-detail-deadline {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .app-status-section {
+      margin-bottom: 20px;
+    }
+    .app-status-section label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .app-status-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .status-option {
+      padding: 8px 14px;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .status-option.active {
+      border-color: var(--status-color);
+      background: color-mix(in srgb, var(--status-color) 10%, transparent);
+    }
+    .app-materials-section {
+      margin-bottom: 20px;
+    }
+    .app-materials-section label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .materials-list {
+      margin-bottom: 10px;
+    }
+    .material-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #f9fafb;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .material-item.completed {
+      background: #f0fdf4;
+    }
+    .material-item.completed .material-name {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+    .add-material {
+      display: flex;
+      gap: 8px;
+    }
+    .add-material input {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+    }
+    .add-material button {
+      padding: 10px 16px;
+      background: var(--jazz-purple);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .app-notes-section label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .app-notes-section textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      resize: vertical;
+      margin-bottom: 10px;
+    }
+    .btn-save-notes {
+      width: 100%;
+      padding: 12px;
+      background: var(--jazz-purple);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Friends Styles */
+    .invite-card {
+      background: linear-gradient(135deg, #f5f3ff, #fdf4ff);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .invite-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .invite-icon {
+      font-size: 1.5rem;
+    }
+    .invite-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .invite-code-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .invite-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .invite-code {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+      letter-spacing: 2px;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .btn-share-invite {
+      width: 100%;
+    }
+    .friends-empty {
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+    }
+    .friends-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .friend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      padding: 12px;
+      border-radius: 12px;
+    }
+    .friend-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .friend-info {
+      flex: 1;
+    }
+    .friend-name {
+      font-weight: 700;
+    }
+    .friend-since {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .friend-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .friend-actions button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #f3f4f6;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* Weekly Report Styles */
+    .weekly-report, .parent-report {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .report-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+    .report-date {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .report-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .report-stat {
+      text-align: center;
+      padding: 12px 8px;
+      background: #f5f3ff;
+      border-radius: 12px;
+    }
+    .report-stat-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+    }
+    .report-stat-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .report-level {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .level-badge {
+      background: var(--jazz-purple);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .xp-earned {
+      color: var(--jazz-gold);
+      font-weight: 600;
+    }
+    .report-insights {
+      margin-bottom: 20px;
+    }
+    .report-insights h4 {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .insight-item {
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .insight-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .insight-good {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .insight-encourage {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .insight-fun {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+    .insight-achievement {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+    .report-footer {
+      text-align: center;
+    }
+    .parent-stats {
+      margin-bottom: 20px;
+    }
+    .parent-stat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-emoji {
+      font-size: 1.3rem;
+    }
+    .stat-text {
+      font-size: 0.95rem;
+    }
+    .parent-suggestions h4 {
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+    .suggestion-card {
+      background: #fef3c7;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .suggestion-context {
+      font-size: 0.85rem;
+      color: #92400e;
+      margin-bottom: 10px;
+    }
+    .suggestion-prompt {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .prompt-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .prompt-text {
+      font-style: italic;
+      color: var(--text);
+    }
+    .encouragement-cta {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    .encouragement-cta p {
+      margin-bottom: 12px;
+      color: #9d174d;
+    }
   </style>
 </head>
 <body>
@@ -3059,7 +3591,9 @@
         <button class="discover-tab" onclick="switchDiscoverTab('trades')">🔧 Trades</button>
         <button class="discover-tab" onclick="switchDiscoverTab('colleges')">🎓 Colleges</button>
         <button class="discover-tab" onclick="switchDiscoverTab('badges')">🏆 Badges</button>
+        <button class="discover-tab" onclick="switchDiscoverTab('friends')">👥 Friends</button>
         <button class="discover-tab" onclick="switchDiscoverTab('share')">📤 Share</button>
+        <button class="discover-tab" onclick="switchDiscoverTab('report')">📊 Report</button>
       </div>
 
       <!-- Discover Content Areas -->
@@ -3093,6 +3627,15 @@
           <div id="badges-grid-container"></div>
         </div>
 
+        <!-- Friends Tab -->
+        <div id="discover-friends">
+          <div id="invite-card-container"></div>
+          <div class="card" style="margin-top: 16px;">
+            <h3 style="margin-bottom: 12px;">👥 My Friends</h3>
+            <div id="friends-list-container"></div>
+          </div>
+        </div>
+
         <!-- Share Tab -->
         <div id="discover-share">
           <div id="shareable-card-container"></div>
@@ -3100,6 +3643,11 @@
             <h3 style="margin-bottom: 12px;">💌 Family Messages</h3>
             <div id="parent-encouragements-container"></div>
           </div>
+        </div>
+
+        <!-- Weekly Report Tab -->
+        <div id="discover-report">
+          <div id="weekly-report-container"></div>
         </div>
       </div>
     </section>
@@ -3464,7 +4012,16 @@
 
     <!-- Goals Section - Vision Board + Goal Planner -->
     <section class="section" id="section-goals">
-      <h2 class="section-title">🎯 My Goals & Vision</h2>
+      <h2 class="section-title">📋 Plan & Track</h2>
+
+      <!-- Application Tracker -->
+      <div class="card" style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 1rem;">📋 Application Tracker</h3>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openApplicationTracker()">View All</button>
+        </div>
+        <div id="app-tracker-mini"></div>
+      </div>
 
       <!-- Dream College Card -->
       <div id="dream-college-card" class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; margin-bottom: 16px; cursor: pointer;" onclick="openDreamCollegeModal()">
@@ -4108,6 +4665,9 @@
   <script src="data/careers.js"></script>
   <script src="services/career-discovery.js"></script>
   <script src="services/engagement.js"></script>
+  <script src="services/application-tracker.js"></script>
+  <script src="services/friends.js"></script>
+  <script src="services/weekly-report.js"></script>
   <script src="services/badges.js"></script>
   <script src="services/knowledge-vault.js"></script>
   <script src="services/next-actions.js"></script>
@@ -4224,6 +4784,7 @@
       setTimeout(initDailyWYR, 500);
       setTimeout(initVyliumMini, 600);
       setTimeout(initDiscoverSection, 700);
+      setTimeout(initAppTrackerMini, 800);
     });
 
     // VYLIUM Profile Functions
@@ -4258,9 +4819,9 @@
       initVyliumMini();
     }
 
-    // Phase 3 & 4: Discover Section Functions
+    // Phase 3-5: Discover Section Functions
     function initDiscoverSection() {
-      // XP Bar
+      // XP Bar & Engagement
       if (typeof Engagement !== 'undefined') {
         Engagement.renderXPBar('xp-bar-container');
         Engagement.renderDailyMissions('daily-missions-container');
@@ -4270,10 +4831,22 @@
         Engagement.checkBadges();
       }
 
-      // Career Widget on home/profile if needed
+      // Career Discovery
       if (typeof CareerDiscovery !== 'undefined') {
         CareerDiscovery.renderTradesExplorer('trades-explorer-container');
         CareerDiscovery.renderCollegeTypes('colleges-explorer-container');
+      }
+
+      // Friends
+      if (typeof FriendsService !== 'undefined') {
+        FriendsService.renderInviteCard('invite-card-container');
+        FriendsService.renderFriendsList('friends-list-container');
+        FriendsService.checkInviteCode();
+      }
+
+      // Weekly Report
+      if (typeof WeeklyReport !== 'undefined') {
+        WeeklyReport.renderWeeklyReport('weekly-report-container');
       }
     }
 
@@ -4281,8 +4854,8 @@
       document.querySelectorAll('.discover-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.discover-content > div').forEach(d => d.classList.remove('active'));
 
-      document.querySelector(`.discover-tab[onclick*="${tabId}"]`).classList.add('active');
-      document.getElementById('discover-' + tabId).classList.add('active');
+      document.querySelector(`.discover-tab[onclick*="${tabId}"]`)?.classList.add('active');
+      document.getElementById('discover-' + tabId)?.classList.add('active');
 
       // Load content on demand
       if (tabId === 'badges' && typeof Engagement !== 'undefined') {
@@ -4292,12 +4865,18 @@
         Engagement.renderShareableCard('shareable-card-container');
         Engagement.renderParentEncouragements('parent-encouragements-container');
       }
+      if (tabId === 'friends' && typeof FriendsService !== 'undefined') {
+        FriendsService.renderInviteCard('invite-card-container');
+        FriendsService.renderFriendsList('friends-list-container');
+      }
+      if (tabId === 'report' && typeof WeeklyReport !== 'undefined') {
+        WeeklyReport.renderWeeklyReport('weekly-report-container');
+      }
     }
 
     function openCareerExplorer() {
       if (typeof CareerDiscovery !== 'undefined') {
         CareerDiscovery.renderExplorer('career-explorer-container', function(savedCareers) {
-          // Award badge if 3+ careers saved
           if (savedCareers.length >= 3 && typeof Engagement !== 'undefined') {
             Engagement.awardBadge('career_saver');
           }
@@ -4306,9 +4885,58 @@
       }
     }
 
+    function openApplicationTracker() {
+      // Show application tracker modal or switch to dedicated view
+      const modal = document.createElement('div');
+      modal.id = 'app-tracker-modal';
+      modal.innerHTML = `
+        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto;">
+          <div style="background: var(--card); border-radius: 20px; width: 100%; max-width: 500px; margin-top: 40px; padding: 20px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h2 style="margin: 0;">📋 Application Tracker</h2>
+              <button onclick="document.getElementById('app-tracker-modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            <div id="app-tracker-full"></div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      if (typeof ApplicationTracker !== 'undefined') {
+        ApplicationTracker.renderDashboard('app-tracker-full');
+      }
+    }
+
+    function initAppTrackerMini() {
+      if (typeof ApplicationTracker !== 'undefined') {
+        const stats = ApplicationTracker.getStats();
+        const upcoming = ApplicationTracker.getUpcomingDeadlines(7);
+        const container = document.getElementById('app-tracker-mini');
+        if (container) {
+          if (stats.total === 0) {
+            container.innerHTML = '<p style="color: var(--muted); font-size: 0.9rem;">Save scholarships to start tracking applications!</p>';
+          } else {
+            container.innerHTML = `
+              <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <div style="flex: 1; text-align: center; background: #f5f3ff; padding: 10px; border-radius: 10px;">
+                  <div style="font-size: 1.3rem; font-weight: 800; color: var(--jazz-purple);">${stats.inProgress}</div>
+                  <div style="font-size: 0.7rem; color: var(--muted);">In Progress</div>
+                </div>
+                <div style="flex: 1; text-align: center; background: #d1fae5; padding: 10px; border-radius: 10px;">
+                  <div style="font-size: 1.3rem; font-weight: 800; color: #065f46;">${stats.submitted}</div>
+                  <div style="font-size: 0.7rem; color: var(--muted);">Submitted</div>
+                </div>
+              </div>
+              ${upcoming.length > 0 ? `<div style="font-size: 0.85rem; color: #dc2626;">🔥 ${upcoming.length} deadline(s) this week</div>` : ''}
+            `;
+          }
+        }
+      }
+    }
+
     // Make Discover functions global
     window.switchDiscoverTab = switchDiscoverTab;
     window.openCareerExplorer = openCareerExplorer;
+    window.openApplicationTracker = openApplicationTracker;
 
     // Progress Ring Generator
     function createProgressRing(percent, size = 48) {
