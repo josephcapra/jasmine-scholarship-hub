@@ -478,30 +478,49 @@ const ParentAuth = (function() {
   let googleInitializing = false;
   let googleScriptInjected = false;
 
+  let googleScriptLoadPromise = null;
+
   function injectGoogleScript() {
-    if (googleScriptInjected) return;
-    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) {
+    if (googleScriptLoadPromise) return googleScriptLoadPromise;
+
+    const existingScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+    if (existingScript) {
       googleScriptInjected = true;
-      return;
+      googleScriptLoadPromise = Promise.resolve(true);
+      return googleScriptLoadPromise;
     }
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    document.head.appendChild(script);
-    googleScriptInjected = true;
-    console.log('Injected Google Identity Services script');
+
+    googleScriptLoadPromise = new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.onload = () => {
+        console.log('Google Identity Services script loaded');
+        googleScriptInjected = true;
+        resolve(true);
+      };
+      script.onerror = () => {
+        console.error('Failed to load Google Identity Services');
+        resolve(false);
+      };
+      document.head.appendChild(script);
+    });
+
+    return googleScriptLoadPromise;
   }
 
-  async function waitForGoogle(maxWait = 8000) {
-    // Try to inject the script if not present
-    injectGoogleScript();
+  async function waitForGoogle(maxWait = 10000) {
+    // Inject and wait for script to load
+    const scriptLoaded = await injectGoogleScript();
+    if (!scriptLoaded) return false;
 
+    // Now wait for google.accounts.id to be available
     const start = Date.now();
     while (Date.now() - start < maxWait) {
       if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
         return true;
       }
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 100));
     }
     return false;
   }
