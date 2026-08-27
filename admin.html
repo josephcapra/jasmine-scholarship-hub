@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Jasmine Scholarship Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #8b5cf6;
+      --accent-light: #a78bfa;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* Login */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .login-box {
+      background: var(--card);
+      padding: 40px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-box h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .login-box p { color: var(--muted); margin-bottom: 24px; }
+    .login-box input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 16px;
+    }
+    .login-box input:focus { outline: none; border-color: var(--accent); }
+    .login-box button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .login-box button:hover { background: var(--accent-light); }
+    .login-error { color: var(--danger); margin-top: 12px; display: none; }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .header h1 { font-size: 1.75rem; }
+    .header-actions { display: flex; gap: 12px; }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-label { color: var(--muted); font-size: 0.85rem; margin-bottom: 8px; }
+    .stat-value { font-size: 2rem; font-weight: 800; }
+    .stat-change { font-size: 0.85rem; margin-top: 4px; }
+    .stat-change.up { color: var(--success); }
+    .stat-change.down { color: var(--danger); }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 1.1rem; font-weight: 700; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    /* Charts placeholder */
+    .chart-container {
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      padding: 20px 0;
+    }
+    .chart-bar {
+      flex: 1;
+      background: var(--accent);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s;
+      position: relative;
+    }
+    .chart-bar:hover { background: var(--accent-light); }
+    .chart-bar-label {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* Funnel */
+    .funnel { display: flex; flex-direction: column; gap: 8px; }
+    .funnel-step {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .funnel-bar-container { flex: 1; background: var(--bg); border-radius: 8px; height: 32px; overflow: hidden; }
+    .funnel-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #ec4899); display: flex; align-items: center; padding: 0 12px; }
+    .funnel-label { width: 140px; font-weight: 600; font-size: 0.9rem; }
+    .funnel-value { width: 80px; text-align: right; font-weight: 700; }
+    .funnel-rate { width: 60px; text-align: right; color: var(--muted); font-size: 0.85rem; }
+
+    /* Type Distribution */
+    .type-dist { display: flex; flex-direction: column; gap: 12px; }
+    .type-row { display: flex; align-items: center; gap: 12px; }
+    .type-name { width: 150px; font-weight: 600; }
+    .type-bar-container { flex: 1; background: var(--bg); border-radius: 4px; height: 24px; overflow: hidden; }
+    .type-bar { height: 100%; background: var(--accent); border-radius: 4px; }
+    .type-count { width: 50px; text-align: right; color: var(--muted); }
+
+    /* Grid layout */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* Refresh indicator */
+    .refresh-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Login Overlay -->
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-box">
+      <h1>Admin Dashboard</h1>
+      <p>Enter the admin password to continue</p>
+      <input type="password" id="admin-password" placeholder="Password" autofocus>
+      <button onclick="checkPassword()">Login</button>
+      <p class="login-error" id="login-error">Incorrect password</p>
+    </div>
+  </div>
+
+  <div class="container hidden" id="dashboard">
+    <div class="header">
+      <h1>Analytics Dashboard</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
+        <button class="btn btn-primary" onclick="toggleSimulation()" id="sim-btn">Start Live Sim</button>
+        <button class="btn btn-secondary" onclick="injectHistory()">Inject 7 Days</button>
+        <button class="btn btn-secondary" onclick="exportData()">Export</button>
+        <button class="btn btn-danger" onclick="clearData()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Top Stats -->
+    <div class="stats-grid" id="top-stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Events</div>
+        <div class="stat-value" id="stat-events">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sessions (7d)</div>
+        <div class="stat-value" id="stat-sessions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Assessments Complete</div>
+        <div class="stat-value" id="stat-assessments">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Shares Created</div>
+        <div class="stat-value" id="stat-shares">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Session</div>
+        <div class="stat-value" id="stat-duration">0s</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completion Rate</div>
+        <div class="stat-value" id="stat-completion">0%</div>
+      </div>
+    </div>
+
+    <!-- Daily Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Daily Activity (Last 7 Days)</div>
+      </div>
+      <div class="chart-container" id="daily-chart"></div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Viral Funnel -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Viral Loop Funnel</div>
+        </div>
+        <div class="funnel" id="viral-funnel"></div>
+      </div>
+
+      <!-- Type Distribution -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Vylium Type Distribution</div>
+        </div>
+        <div class="type-dist" id="type-distribution"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Top Clicks -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Most Clicked Elements</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Element</th>
+              <th>Text</th>
+              <th>Clicks</th>
+            </tr>
+          </thead>
+          <tbody id="clicks-table"></tbody>
+        </table>
+      </div>
+
+      <!-- Feature Usage -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Feature Usage</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Uses</th>
+              <th>Users</th>
+            </tr>
+          </thead>
+          <tbody id="features-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Session Stats -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Session Engagement</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Avg Page Views</div>
+          <div class="stat-value" id="stat-pageviews">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Clicks</div>
+          <div class="stat-value" id="stat-clicks">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Viral Coefficient</div>
+          <div class="stat-value" id="stat-viral">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="refresh-indicator hidden" id="refresh-indicator">Last updated: <span id="last-updated"></span></div>
+
+  <script src="services/analytics.js"></script>
+  <script src="services/simulator.js"></script>
+  <script>
+    // Simple password protection (not secure, just basic)
+    const ADMIN_PASSWORD = 'jasmine2026';
+
+    function checkPassword() {
+      const input = document.getElementById('admin-password').value;
+      if (input === ADMIN_PASSWORD) {
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('refresh-indicator').classList.remove('hidden');
+        loadDashboard();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+        document.getElementById('admin-password').value = '';
+      }
+    }
+
+    // Enter key to login
+    document.getElementById('admin-password').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    function loadDashboard() {
+      const summary = Analytics.getSummary();
+
+      // Top stats
+      document.getElementById('stat-events').textContent = summary.totalEvents.toLocaleString();
+      document.getElementById('stat-sessions').textContent = summary.sessions.totalSessions || 0;
+      document.getElementById('stat-assessments').textContent = summary.assessment.totalCompletes;
+      document.getElementById('stat-shares').textContent = summary.viral.sharesCreated;
+      document.getElementById('stat-duration').textContent = (summary.sessions.avgDuration || 0) + 's';
+      document.getElementById('stat-completion').textContent = summary.assessment.completionRate;
+      document.getElementById('stat-pageviews').textContent = summary.sessions.avgPageViews || '0';
+      document.getElementById('stat-clicks').textContent = summary.sessions.avgClicks || '0';
+      document.getElementById('stat-viral').textContent = summary.viral.viralCoeff;
+
+      // Daily chart
+      renderDailyChart(summary.daily);
+
+      // Viral funnel
+      renderViralFunnel(summary.viral);
+
+      // Type distribution
+      renderTypeDistribution(summary.assessment.typeDistribution);
+
+      // Clicks table
+      renderClicksTable(summary.clicks);
+
+      // Features table
+      renderFeaturesTable(summary.features);
+
+      // Update timestamp
+      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+    }
+
+    function renderDailyChart(daily) {
+      const container = document.getElementById('daily-chart');
+      const maxSessions = Math.max(...daily.map(d => d.sessions), 1);
+
+      container.innerHTML = daily.map(d => {
+        const height = Math.max(10, (d.sessions / maxSessions) * 100);
+        const date = new Date(d.date);
+        const label = date.toLocaleDateString('en-US', { weekday: 'short' });
+        return `
+          <div class="chart-bar" style="height: ${height}%" title="${d.date}: ${d.sessions} sessions, ${d.pageViews} views">
+            <span class="chart-bar-label">${label}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderViralFunnel(viral) {
+      const container = document.getElementById('viral-funnel');
+      const steps = [
+        { label: 'Shares Created', value: viral.sharesCreated, max: viral.sharesCreated },
+        { label: 'Share Attempts', value: viral.shareAttempts, rate: viral.shareRate },
+        { label: 'Links Opened', value: viral.linksOpened, rate: viral.openRate },
+        { label: 'Tests Started', value: viral.guestTestStarts, rate: viral.testStartRate },
+        { label: 'Tests Completed', value: viral.guestTestCompletes, rate: viral.testCompleteRate },
+        { label: 'Re-shares', value: viral.reShares, rate: '' }
+      ];
+
+      const maxVal = Math.max(...steps.map(s => s.value), 1);
+
+      container.innerHTML = steps.map(s => {
+        const width = Math.max(5, (s.value / maxVal) * 100);
+        return `
+          <div class="funnel-step">
+            <span class="funnel-label">${s.label}</span>
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: ${width}%"></div>
+            </div>
+            <span class="funnel-value">${s.value}</span>
+            <span class="funnel-rate">${s.rate || ''}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTypeDistribution(types) {
+      const container = document.getElementById('type-distribution');
+      if (!types || types.length === 0) {
+        container.innerHTML = '<p style="color: var(--muted)">No assessment data yet</p>';
+        return;
+      }
+
+      const maxCount = Math.max(...types.map(t => t.count), 1);
+
+      container.innerHTML = types.slice(0, 10).map(t => {
+        const width = (t.count / maxCount) * 100;
+        return `
+          <div class="type-row">
+            <span class="type-name">${t.type}</span>
+            <div class="type-bar-container">
+              <div class="type-bar" style="width: ${width}%"></div>
+            </div>
+            <span class="type-count">${t.count}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderClicksTable(clicks) {
+      const tbody = document.getElementById('clicks-table');
+      if (!clicks || clicks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color: var(--muted)">No click data yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = clicks.slice(0, 10).map(c => `
+        <tr>
+          <td><code>${c.element}</code></td>
+          <td>${c.text || '-'}</td>
+          <td>${c.count}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderFeaturesTable(features) {
+      const tbody = document.getElementById('features-table');
+      if (!features || features.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color: var(--muted)">No feature data yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = features.slice(0, 10).map(f => `
+        <tr>
+          <td>${f.feature}</td>
+          <td>${f.uses}</td>
+          <td>${f.users}</td>
+        </tr>
+      `).join('');
+    }
+
+    function refreshData() {
+      loadDashboard();
+    }
+
+    function exportData() {
+      const data = Analytics.exportData();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `jasmine-analytics-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearData() {
+      if (confirm('Are you sure you want to clear all analytics data? This cannot be undone.')) {
+        Analytics.clearData();
+        loadDashboard();
+      }
+    }
+
+    // Simulation controls
+    let simRunning = false;
+    let autoRefresh = null;
+
+    function toggleSimulation() {
+      const btn = document.getElementById('sim-btn');
+      if (simRunning) {
+        Simulator.stopLiveSimulation();
+        simRunning = false;
+        btn.textContent = 'Start Live Sim';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-primary');
+        if (autoRefresh) {
+          clearInterval(autoRefresh);
+          autoRefresh = null;
+        }
+      } else {
+        Simulator.startLiveSimulation(3000); // Event every 3 seconds
+        simRunning = true;
+        btn.textContent = 'Stop Live Sim';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-danger');
+        // Auto-refresh dashboard
+        autoRefresh = setInterval(loadDashboard, 5000);
+      }
+    }
+
+    function injectHistory() {
+      const count = Simulator.injectHistoricalData(7);
+      alert(`Injected ${count} simulated events for the past 7 days.`);
+      loadDashboard();
+    }
+  </script>
+</body>
+</html>
