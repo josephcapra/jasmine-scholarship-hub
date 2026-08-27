@@ -1,8 +1,14 @@
 // Vercel Serverless Function: AI-powered essay assistance for Jasmine
 // POST /jasmine/api/ai-assist { action, essayType, content }
 
+import { aiAssistSchema, validateRequest } from './lib/validation.js';
+
+const ALLOWED_ORIGIN = process.env.NODE_ENV === 'production'
+  ? 'https://jasmine-scholarship-hub.vercel.app'
+  : '*';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -54,7 +60,13 @@ WRITING GUIDANCE:
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
 
-    const { action, essayType, content } = body;
+    // Validate input
+    const validation = validateRequest(aiAssistSchema, body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: 'Validation failed', details: validation.errors });
+    }
+
+    const { action, essayType, content } = validation.data;
     let userPrompt = '';
 
     if (action === 'tips') {

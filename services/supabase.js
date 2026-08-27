@@ -56,6 +56,11 @@ const SupabaseClient = (function() {
   // ========== STUDENT FUNCTIONS ==========
 
   async function createStudent(profile) {
+    // Get auth user ID if authenticated
+    const authUserId = (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.getCurrentUser)
+      ? SupabaseAuth.getCurrentUser()?.id
+      : null;
+
     const data = await request('students', {
       method: 'POST',
       body: {
@@ -76,7 +81,8 @@ const SupabaseClient = (function() {
         skills: profile.skills || [],
         community_service: profile.communityService || [],
         military_family: profile.militaryFamily || false,
-        invite_code: generateInviteCode()
+        invite_code: generateInviteCode(),
+        auth_user_id: authUserId
       }
     });
 
@@ -154,12 +160,18 @@ const SupabaseClient = (function() {
   // ========== PARENT FUNCTIONS ==========
 
   async function createParent(profile) {
+    // Get auth user ID if authenticated
+    const authUserId = (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.getCurrentUser)
+      ? SupabaseAuth.getCurrentUser()?.id
+      : null;
+
     const data = await request('parents', {
       method: 'POST',
       body: {
         email: profile.email,
         name: profile.name,
-        report_frequency: profile.reportFrequency || 'weekly'
+        report_frequency: profile.reportFrequency || 'weekly',
+        auth_user_id: authUserId
       }
     });
 

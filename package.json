@@ -4,7 +4,8 @@
   "description": "Jasmine's Scholarship Hub - AI-powered scholarship discovery and application assistant",
   "private": true,
   "dependencies": {
+    "mammoth": "^1.6.0",
     "pdf-parse": "^1.1.1",
-    "mammoth": "^1.6.0"
+    "zod": "^4.4.3"
   }
 }
