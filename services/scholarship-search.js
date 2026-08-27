@@ -1,6 +1,6 @@
 /**
  * Scholarship Search Service
- * AI-powered discovery + manual entry
+ * Personalized discovery + manual entry
  */
 
 const ScholarshipSearch = (function() {
@@ -170,7 +170,7 @@ const ScholarshipSearch = (function() {
             ` : ''}
 
             <p class="ss-desc">
-              Our AI will search for scholarships that match your profile, location, interests, and achievements.
+              We'll search for scholarships that match your profile, location, interests, and achievements.
             </p>
 
             <div class="ss-pathway-selector" style="margin-bottom: 16px;">
@@ -202,7 +202,7 @@ const ScholarshipSearch = (function() {
 
             <div class="ss-time-warning">
               <strong>Personalized In-Depth Search</strong><br><br>
-              This isn't a basic scholarship list. Our AI conducts an in-depth search customized to your qualifications, achievements, location, and goals.
+              This isn't a basic scholarship list. We conduct an in-depth search customized to your qualifications, achievements, location, and goals.
               <br><br>
               It will:
               <ul style="margin: 8px 0 0 16px; padding: 0;">
