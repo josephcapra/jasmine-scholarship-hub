@@ -257,6 +257,7 @@ const ParentAuth = (function() {
         width: 100%;
         position: relative;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        color: #1f2937;
       }
       .pam-box h2 {
         margin: 0 0 8px 0;
@@ -264,7 +265,7 @@ const ParentAuth = (function() {
         font-size: 1.5rem;
       }
       .pam-subtitle {
-        color: #6b7280;
+        color: #4b5563;
         margin-bottom: 24px;
       }
       .pam-field {
@@ -274,7 +275,7 @@ const ParentAuth = (function() {
         display: block;
         font-weight: 600;
         margin-bottom: 6px;
-        color: #374151;
+        color: #1f2937;
       }
       .pam-field input, .pam-field select {
         width: 100%;
@@ -283,6 +284,8 @@ const ParentAuth = (function() {
         border-radius: 10px;
         font-size: 1rem;
         transition: border-color 0.2s;
+        background: white;
+        color: #1f2937;
       }
       .pam-field input:focus, .pam-field select:focus {
         outline: none;
@@ -373,7 +376,7 @@ const ParentAuth = (function() {
         font-size: 1.1rem;
         font-weight: 600;
         margin-bottom: 16px;
-        color: #374151;
+        color: #1f2937;
       }
       .pam-option {
         display: flex;
