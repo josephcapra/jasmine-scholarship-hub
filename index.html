@@ -1955,6 +1955,161 @@
     .vylium-mini-start .vylium-mini-desc { color: #b45309; }
     .vylium-mini-traits { font-size: 0.85rem; font-weight: 600; }
 
+    /* New Vylium result elements */
+    .vylium-type-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #7c3aed;
+      margin-bottom: 8px;
+    }
+    .vylium-type-tagline {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    .vylium-trait-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .vylium-trait-score {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+    .vylium-trait-keywords {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .vylium-section-content {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.5;
+      font-style: italic;
+    }
+    .vylium-careers-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .vylium-career-tag {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .vylium-careers-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .vylium-score-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* Dark mode support for Vylium */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .vylium-type-reveal {
+        background: linear-gradient(135deg, #312e81, #4c1d95);
+      }
+      :root:not([data-theme="light"]) .vylium-type-name {
+        color: #c4b5fd;
+      }
+      :root:not([data-theme="light"]) .vylium-type-desc {
+        color: #a5b4fc;
+      }
+      :root:not([data-theme="light"]) .vylium-type-badge {
+        color: #c4b5fd;
+      }
+      :root:not([data-theme="light"]) .vylium-type-tagline {
+        color: #9ca3af;
+      }
+      :root:not([data-theme="light"]) .vylium-tag {
+        background: #374151;
+        color: #e5e7eb;
+      }
+      :root:not([data-theme="light"]) .vylium-tag-green {
+        background: #064e3b;
+        color: #6ee7b7;
+      }
+      :root:not([data-theme="light"]) .vylium-tag-red {
+        background: #7f1d1d;
+        color: #fca5a5;
+      }
+      :root:not([data-theme="light"]) .vylium-mini {
+        background: linear-gradient(135deg, #312e81, #4c1d95);
+      }
+      :root:not([data-theme="light"]) .vylium-mini-start {
+        background: linear-gradient(135deg, #78350f, #92400e);
+      }
+      :root:not([data-theme="light"]) .vylium-mini-title {
+        color: #c4b5fd;
+      }
+      :root:not([data-theme="light"]) .vylium-mini-start .vylium-mini-title {
+        color: #fcd34d;
+      }
+      :root:not([data-theme="light"]) .vylium-mini-desc {
+        color: #a5b4fc;
+      }
+      :root:not([data-theme="light"]) .vylium-mini-start .vylium-mini-desc {
+        color: #fbbf24;
+      }
+    }
+    :root[data-theme="dark"] .vylium-type-reveal {
+      background: linear-gradient(135deg, #312e81, #4c1d95);
+    }
+    :root[data-theme="dark"] .vylium-type-name {
+      color: #c4b5fd;
+    }
+    :root[data-theme="dark"] .vylium-type-desc {
+      color: #a5b4fc;
+    }
+    :root[data-theme="dark"] .vylium-type-badge {
+      color: #c4b5fd;
+    }
+    :root[data-theme="dark"] .vylium-type-tagline {
+      color: #9ca3af;
+    }
+    :root[data-theme="dark"] .vylium-tag {
+      background: #374151;
+      color: #e5e7eb;
+    }
+    :root[data-theme="dark"] .vylium-tag-green {
+      background: #064e3b;
+      color: #6ee7b7;
+    }
+    :root[data-theme="dark"] .vylium-tag-red {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+    :root[data-theme="dark"] .vylium-mini {
+      background: linear-gradient(135deg, #312e81, #4c1d95);
+    }
+    :root[data-theme="dark"] .vylium-mini-start {
+      background: linear-gradient(135deg, #78350f, #92400e);
+    }
+    :root[data-theme="dark"] .vylium-mini-title {
+      color: #c4b5fd;
+    }
+    :root[data-theme="dark"] .vylium-mini-start .vylium-mini-title {
+      color: #fcd34d;
+    }
+    :root[data-theme="dark"] .vylium-mini-desc {
+      color: #a5b4fc;
+    }
+    :root[data-theme="dark"] .vylium-mini-start .vylium-mini-desc {
+      color: #fbbf24;
+    }
+
     /* Activity Feed Item */
     .activity-item {
       display: flex;

@@ -98,11 +98,12 @@ const ViralShare = (function() {
       typeCode: profile.type.code,
       typeDescription: profile.type.description,
 
-      // Top traits (safe to share)
+      // Top traits (safe to share) - now uses 0-100 normalized scores
       topTraits: profile.topDimensions.slice(0, 3).map(d => ({
         label: d.label,
         name: d.name,
-        percent: profile.percentages[d.code]
+        score: d.score,
+        color: d.color
       })),
 
       // Privacy settings
@@ -511,10 +512,10 @@ const ViralShare = (function() {
               <div class="trait-bar-item">
                 <div class="trait-bar-header">
                   <span class="trait-bar-label">${t.label}</span>
-                  <span class="trait-bar-percent">${profile.percentages[t.code]}%</span>
+                  <span class="trait-bar-score">${t.score}</span>
                 </div>
                 <div class="trait-bar-track">
-                  <div class="trait-bar-fill" style="width: ${profile.percentages[t.code]}%; background: ${t.color}"></div>
+                  <div class="trait-bar-fill" style="width: ${t.score}%; background: ${t.color}"></div>
                 </div>
               </div>
             `).join('')}
@@ -522,13 +523,13 @@ const ViralShare = (function() {
         </div>
 
         <!-- Career Directions -->
-        ${profile.careerClusters && profile.careerClusters.length > 0 ? `
+        ${profile.careerSuggestions && profile.careerSuggestions.length > 0 ? `
           <div class="directions-section">
-            <h3 class="directions-heading">Potential Directions</h3>
+            <h3 class="directions-heading">Careers Worth Exploring</h3>
             <div class="directions-tags">
-              ${profile.careerClusters.slice(0, 5).map(c => `<span class="direction-tag">${c}</span>`).join('')}
+              ${profile.careerSuggestions.slice(0, 5).map(c => `<span class="direction-tag">${c}</span>`).join('')}
             </div>
-            <p class="directions-note">Directions that may fit your interests and strengths</p>
+            <p class="directions-note">Starting points based on your profile, not predictions</p>
           </div>
         ` : ''}
 

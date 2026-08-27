@@ -1,9 +1,12 @@
 /**
  * VYLIUM Profile - Personality & Future Discovery Assessment
- * "Light on your path"
+ * "Light on your path."
  *
- * Based on Holland RIASEC + Big Five-style dimensions
+ * Based on Holland RIASEC + overlay traits
  * Non-clinical, education and career discovery assessment
+ *
+ * Version: August 27, 2026
+ * Full 50-question assessment with independent 0-100 scoring
  */
 
 const VyliumProfile = (function() {
@@ -11,80 +14,255 @@ const VyliumProfile = (function() {
 
   const STORAGE_KEY = 'jasmine_vylium_profile';
 
-  // RIASEC Dimensions
+  // SIX CORE DIMENSIONS (RIASEC-based)
   const DIMENSIONS = {
-    R: { code: 'R', name: 'Realistic', label: 'Builder', color: '#ef4444', description: 'Hands-on, practical, physical work' },
-    I: { code: 'I', name: 'Investigative', label: 'Analyst', color: '#3b82f6', description: 'Research, analysis, problem-solving' },
-    A: { code: 'A', name: 'Artistic', label: 'Creator', color: '#ec4899', description: 'Creative, expressive, original' },
-    S: { code: 'S', name: 'Social', label: 'Helper', color: '#10b981', description: 'Helping, teaching, connecting' },
-    E: { code: 'E', name: 'Enterprising', label: 'Leader', color: '#f59e0b', description: 'Leading, persuading, managing' },
-    C: { code: 'C', name: 'Conventional', label: 'Organizer', color: '#6366f1', description: 'Organizing, detail-oriented, systematic' }
+    R: { code: 'R', name: 'Realistic', label: 'Builder', color: '#ef4444', description: 'Hands-on, practical, physical work', keywords: ['Making', 'Fixing', 'Tools', 'Tangible'] },
+    I: { code: 'I', name: 'Investigative', label: 'Analyst', color: '#3b82f6', description: 'Research, analysis, problem-solving', keywords: ['Curious', 'Investigative', 'Logical'] },
+    A: { code: 'A', name: 'Artistic', label: 'Creator', color: '#ec4899', description: 'Creative, expressive, original', keywords: ['Original', 'Expressive', 'Imaginative'] },
+    S: { code: 'S', name: 'Social', label: 'Connector', color: '#10b981', description: 'Helping, teaching, connecting', keywords: ['Empathy', 'Collaboration', 'Community'] },
+    E: { code: 'E', name: 'Enterprising', label: 'Leader', color: '#f59e0b', description: 'Leading, persuading, managing', keywords: ['Initiative', 'Ownership', 'Influence'] },
+    C: { code: 'C', name: 'Conventional', label: 'Organizer', color: '#6366f1', description: 'Organizing, detail-oriented, systematic', keywords: ['Planning', 'Structure', 'Reliability'] }
   };
 
-  // 36 Personality Types based on top 2 RIASEC dimensions
+  // OVERLAY TRAITS
+  const OVERLAY_TRAITS = {
+    Explorer: { key: 'X', description: 'Novelty seeking' },
+    Team: { key: 'T', description: 'Team orientation' },
+    Independence: { key: 'D', description: 'Independent worker' },
+    Practicality: { key: 'P', description: 'Practical focus' },
+    Verbal: { key: 'V', description: 'Verbal/social expression' },
+    Numerical: { key: 'N', description: 'Numerical/analytical confidence' },
+    HandsOn: { key: 'H', description: 'Hands-on preference' },
+    Structure: { key: 'K', description: 'Structure preference' },
+    Flexibility: { key: 'F', description: 'Flexibility preference' },
+    Leadership: { key: 'L', description: 'Leadership energy' },
+    Mission: { key: 'M', description: 'Mission/service orientation' },
+    Growth: { key: 'G', description: 'Growth/learning orientation' },
+    Risk: { key: 'RISK', description: 'Risk tolerance' },
+    Indoor: { key: 'INDOOR', description: 'Indoor work' },
+    Outdoor: { key: 'OUTDOOR', description: 'Outdoor work' },
+    SmallTeam: { key: 'SMALL', description: 'Small team preference' },
+    LargeOrg: { key: 'LARGE', description: 'Large organization fit' }
+  };
+
+  // VYLIUM TYPES (Top 2 dimensions → Type)
   const TYPES = {
-    'RI': { name: 'The Engineer', emoji: '⚙️', description: 'You combine hands-on skills with analytical thinking. You love understanding how things work and making them better.' },
-    'RA': { name: 'The Maker', emoji: '🛠️', description: 'You blend practical skills with creative vision. You build things that are both functional and beautiful.' },
-    'RS': { name: 'The Coach', emoji: '🏆', description: 'You combine physical skills with people skills. You excel at training others and hands-on leadership.' },
-    'RE': { name: 'The Builder-Leader', emoji: '🏗️', description: 'You lead with action. You prefer managing projects where you can see tangible results.' },
-    'RC': { name: 'The Operator', emoji: '🔧', description: 'You combine technical skills with precision. You excel at systematic, hands-on work.' },
-    'IR': { name: 'The Technologist', emoji: '💻', description: 'You blend research with practical application. You love turning ideas into working solutions.' },
-    'IA': { name: 'The Inventor', emoji: '💡', description: 'You combine deep thinking with creativity. You generate original ideas backed by research.' },
-    'IS': { name: 'The Problem Solver', emoji: '🧩', description: 'You use analysis to help people. You find solutions to complex human challenges.' },
-    'IE': { name: 'The Strategist', emoji: '♟️', description: 'You combine research with business sense. You develop winning strategies based on data.' },
-    'IC': { name: 'The Analyst', emoji: '📊', description: 'You love data and precision. You excel at detailed research and systematic analysis.' },
-    'AR': { name: 'The Artisan', emoji: '🎨', description: 'You blend creativity with craftsmanship. You create beautiful things with your hands.' },
-    'AI': { name: 'The Innovator', emoji: '🚀', description: 'You combine artistic vision with analytical thinking. You create groundbreaking ideas.' },
-    'AS': { name: 'The Storyteller', emoji: '📖', description: 'You use creativity to connect with people. You excel at communication and expression.' },
-    'AE': { name: 'The Visionary', emoji: '🌟', description: 'You combine creative vision with leadership. You inspire others with big ideas.' },
-    'AC': { name: 'The Designer', emoji: '✏️', description: 'You blend creativity with precision. You create beautiful, well-organized work.' },
-    'SR': { name: 'The Trainer', emoji: '🎯', description: 'You combine people skills with practical action. You teach through doing.' },
-    'SI': { name: 'The Counselor', emoji: '🤝', description: 'You blend empathy with understanding. You help people solve problems thoughtfully.' },
-    'SA': { name: 'The Performer', emoji: '🎭', description: 'You combine social energy with creativity. You entertain and inspire others.' },
-    'SE': { name: 'The Influencer', emoji: '📣', description: 'You blend people skills with leadership. You motivate and guide others.' },
-    'SC': { name: 'The Coordinator', emoji: '📋', description: 'You combine helping with organization. You keep teams running smoothly.' },
-    'ER': { name: 'The Entrepreneur', emoji: '💼', description: 'You combine leadership with action. You build businesses and lead by doing.' },
-    'EI': { name: 'The Executive', emoji: '🏢', description: 'You blend leadership with analysis. You make strategic decisions based on data.' },
-    'EA': { name: 'The Producer', emoji: '🎬', description: 'You combine leadership with creativity. You bring creative projects to life.' },
-    'ES': { name: 'The Director', emoji: '🎪', description: 'You blend leadership with people skills. You inspire and manage teams.' },
-    'EC': { name: 'The Manager', emoji: '📈', description: 'You combine leadership with organization. You run efficient, successful operations.' },
-    'CR': { name: 'The Technician', emoji: '🔬', description: 'You blend precision with practical skills. You excel at technical, detailed work.' },
-    'CI': { name: 'The Researcher', emoji: '🔍', description: 'You combine organization with analysis. You conduct thorough, systematic research.' },
-    'CA': { name: 'The Editor', emoji: '📝', description: 'You blend precision with creativity. You perfect and polish creative work.' },
-    'CS': { name: 'The Administrator', emoji: '🗂️', description: 'You combine organization with people focus. You keep organizations running smoothly.' },
-    'CE': { name: 'The Planner', emoji: '📅', description: 'You blend organization with business sense. You plan and execute efficiently.' }
+    'RI': { name: 'The Engineer', emoji: '⚙️', tagline: 'Hands-on thinker + problem solver', description: 'You combine practical skills with analytical thinking. You love understanding how things work and making them better.' },
+    'IR': { name: 'The Engineer', emoji: '⚙️', tagline: 'Analytical builder + practical thinker', description: 'You blend research with hands-on application. You turn ideas into working solutions.' },
+    'RA': { name: 'The Maker', emoji: '🛠️', tagline: 'Creator who builds', description: 'You blend practical skills with creative vision. You build things that are both functional and beautiful.' },
+    'AR': { name: 'The Maker', emoji: '🛠️', tagline: 'Creative builder', description: 'You combine creativity with craftsmanship. You create beautiful things with your hands.' },
+    'RS': { name: 'The Coach', emoji: '🏆', tagline: 'Practical helper + hands-on guide', description: 'You combine physical skills with people skills. You excel at training others and hands-on leadership.' },
+    'SR': { name: 'The Coach', emoji: '🏆', tagline: 'Helper who does', description: 'You blend helping with practical action. You teach through doing.' },
+    'RE': { name: 'The Builder-Leader', emoji: '🏗️', tagline: 'Action-oriented leader', description: 'You lead with action. You prefer managing projects where you can see tangible results.' },
+    'ER': { name: 'The Entrepreneur', emoji: '💼', tagline: 'Leader who builds', description: 'You combine leadership with action. You build businesses and lead by doing.' },
+    'RC': { name: 'The Operator', emoji: '🔧', tagline: 'Technical + precise', description: 'You combine technical skills with precision. You excel at systematic, hands-on work.' },
+    'CR': { name: 'The Technician', emoji: '🔬', tagline: 'Precise + practical', description: 'You blend precision with practical skills. You excel at technical, detailed work.' },
+    'IA': { name: 'The Innovator', emoji: '💡', tagline: 'Creative thinker + curious problem solver', description: 'You combine deep thinking with creativity. You generate original ideas backed by research.' },
+    'AI': { name: 'The Innovator', emoji: '💡', tagline: 'Curious creator + analytical mind', description: 'You combine artistic vision with analytical thinking. You create groundbreaking ideas.' },
+    'IS': { name: 'The Problem Solver', emoji: '🧩', tagline: 'Analytical helper', description: 'You use analysis to help people. You find solutions to complex human challenges.' },
+    'SI': { name: 'The Problem Solver', emoji: '🧩', tagline: 'Thoughtful connector', description: 'You blend empathy with understanding. You help people solve problems thoughtfully.' },
+    'IE': { name: 'The Strategist', emoji: '♟️', tagline: 'Data-driven leader', description: 'You combine research with business sense. You develop winning strategies based on data.' },
+    'EI': { name: 'The Strategist', emoji: '♟️', tagline: 'Strategic thinker + leader', description: 'You blend leadership with analysis. You make strategic decisions based on data.' },
+    'IC': { name: 'The Systems Thinker', emoji: '📊', tagline: 'Analytical + organized', description: 'You love data and precision. You excel at detailed research and systematic analysis.' },
+    'CI': { name: 'The Systems Thinker', emoji: '📊', tagline: 'Organized analyst', description: 'You combine organization with analysis. You conduct thorough, systematic research.' },
+    'AS': { name: 'The Storyteller', emoji: '📖', tagline: 'Creative connector', description: 'You use creativity to connect with people. You excel at communication and expression.' },
+    'SA': { name: 'The Storyteller', emoji: '📖', tagline: 'Empathetic creator', description: 'You combine social energy with creativity. You entertain and inspire others.' },
+    'AE': { name: 'The Visionary', emoji: '🌟', tagline: 'Creative leader + big ideas', description: 'You combine creative vision with leadership. You inspire others with big ideas.' },
+    'EA': { name: 'The Visionary', emoji: '🌟', tagline: 'Leader with vision', description: 'You combine leadership with creativity. You bring creative projects to life.' },
+    'AC': { name: 'The Designer', emoji: '✏️', tagline: 'Creative + precise', description: 'You blend creativity with precision. You create beautiful, well-organized work.' },
+    'CA': { name: 'The Designer', emoji: '✏️', tagline: 'Organized creative', description: 'You blend precision with creativity. You perfect and polish creative work.' },
+    'SE': { name: 'The Catalyst', emoji: '📣', tagline: 'Connector + influencer', description: 'You blend people skills with leadership. You motivate and guide others.' },
+    'ES': { name: 'The Catalyst', emoji: '📣', tagline: 'Leader who connects', description: 'You combine leadership with people skills. You inspire and manage teams.' },
+    'SC': { name: 'The Guide', emoji: '📋', tagline: 'Helpful organizer', description: 'You combine helping with organization. You keep teams running smoothly.' },
+    'CS': { name: 'The Guide', emoji: '📋', tagline: 'Organized helper', description: 'You combine organization with people focus. You keep organizations running smoothly.' },
+    'EC': { name: 'The Executor', emoji: '📈', tagline: 'Leader + organizer', description: 'You combine leadership with organization. You run efficient, successful operations.' },
+    'CE': { name: 'The Executor', emoji: '📈', tagline: 'Organized leader', description: 'You blend organization with business sense. You plan and execute efficiently.' }
   };
 
-  // Quick Assessment Questions (10-15 questions)
+  // 50 ASSESSMENT QUESTIONS from spec
   const ASSESSMENT_QUESTIONS = [
-    { id: 1, text: 'Indoors or outdoors?', a: 'Indoors', b: 'Outdoors', score: { a: { I: 1, C: 1 }, b: { R: 1 } } },
-    { id: 2, text: 'Build it or brainstorm it?', a: 'Build it', b: 'Brainstorm it', score: { a: { R: 1 }, b: { I: 1, A: 1 } } },
-    { id: 3, text: 'Work with people or work with systems?', a: 'People', b: 'Systems', score: { a: { S: 1, E: 1 }, b: { I: 1, C: 1 } } },
-    { id: 4, text: 'Big city energy or smaller community vibes?', a: 'Big city', b: 'Smaller community', score: { a: { E: 1, A: 1 }, b: { S: 1, R: 1 } } },
-    { id: 5, text: 'Lead the team or be the expert?', a: 'Lead the team', b: 'Be the expert', score: { a: { E: 1 }, b: { I: 1 } } },
-    { id: 6, text: 'Predictable routine or variety every day?', a: 'Predictable', b: 'Variety', score: { a: { C: 1 }, b: { A: 1, E: 1 } } },
-    { id: 7, text: 'Desk work or hands-on work?', a: 'Desk', b: 'Hands-on', score: { a: { I: 1, C: 1 }, b: { R: 1 } } },
-    { id: 8, text: 'Creative freedom or clear structure?', a: 'Creative freedom', b: 'Clear structure', score: { a: { A: 1 }, b: { C: 1 } } },
-    { id: 9, text: 'Travel for work or stay local?', a: 'Travel', b: 'Stay local', score: { a: { E: 1, A: 1 }, b: { S: 1, C: 1 } } },
-    { id: 10, text: 'Solo focus or team energy?', a: 'Solo focus', b: 'Team energy', score: { a: { I: 1, A: 1 }, b: { S: 1, E: 1 } } },
-    { id: 11, text: 'Help directly or help through systems?', a: 'Directly', b: 'Through systems', score: { a: { S: 1 }, b: { I: 1, C: 1 } } },
-    { id: 12, text: 'Create something new or improve what exists?', a: 'Create new', b: 'Improve existing', score: { a: { A: 1, I: 1 }, b: { R: 1, C: 1 } } },
-    { id: 13, text: 'Fast-paced environment or steady rhythm?', a: 'Fast-paced', b: 'Steady rhythm', score: { a: { E: 1 }, b: { C: 1, R: 1 } } },
-    { id: 14, text: 'Express yourself or solve problems?', a: 'Express yourself', b: 'Solve problems', score: { a: { A: 1, S: 1 }, b: { I: 1, R: 1 } } },
-    { id: 15, text: 'Make money early or build for later?', a: 'Money early', b: 'Build for later', score: { a: { E: 1, R: 1 }, b: { I: 1, A: 1 } } }
+    { id: 1, text: 'Which sounds more satisfying?', a: 'Fixing something that is broken', b: 'Figuring out why it broke', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2, Numerical: 1 } } },
+    { id: 2, text: 'Which project would you rather do?', a: 'Design a poster, video, photo, or brand', b: 'Organize an event and get people to show up', score: { a: { A: 2 }, b: { E: 1, S: 1 } } },
+    { id: 3, text: 'When working on something important:', a: 'I like clear instructions', b: 'I like freedom to figure it out my own way', score: { a: { C: 2, Structure: 1 }, b: { A: 1, Explorer: 1, Flexibility: 1 } } },
+    { id: 4, text: 'Which sounds better?', a: 'Working with tools, machines, equipment, or materials', b: 'Working with ideas, data, or theories', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2 } } },
+    { id: 5, text: 'Which would you rather be known for?', a: 'Being dependable', b: 'Being original', score: { a: { C: 2 }, b: { A: 2 } } },
+    { id: 6, text: 'Which sounds more energizing?', a: 'Helping one person solve a problem', b: 'Convincing a group to support an idea', score: { a: { S: 2, Mission: 1 }, b: { E: 2, Leadership: 1 } } },
+    { id: 7, text: 'If you had a free Saturday:', a: 'Build, repair, cook, create, or work with your hands', b: 'Research something you became curious about', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2, Explorer: 1 } } },
+    { id: 8, text: 'Which class assignment sounds better?', a: 'Create something original', b: 'Analyze information and explain what it means', score: { a: { A: 2 }, b: { I: 2 } } },
+    { id: 9, text: 'You are put in charge of a group project:', a: 'I naturally start organizing people', b: 'I would rather take ownership of one important part', score: { a: { E: 2, Leadership: 1 }, b: { Independence: 2 } } },
+    { id: 10, text: 'Which environment sounds better?', a: 'Predictable schedule and expectations', b: 'Variety and changing challenges', score: { a: { C: 2, Structure: 1 }, b: { Explorer: 2, Flexibility: 1 } } },
+    { id: 11, text: 'Would you rather:', a: 'Teach someone a skill', b: 'Build them a tool that makes the skill easier', score: { a: { S: 2 }, b: { R: 1, I: 1 } } },
+    { id: 12, text: 'Would you rather:', a: 'Start a small business', b: 'Master a specialized technical skill', score: { a: { E: 2, Risk: 1 }, b: { I: 1, R: 1, Independence: 1 } } },
+    { id: 13, text: 'Which sounds more interesting?', a: 'Why people behave the way they do', b: 'How machines or systems work', score: { a: { S: 1, I: 1 }, b: { I: 2, R: 1 } } },
+    { id: 14, text: 'Which task would you pick?', a: 'Create the presentation', b: 'Check the numbers and facts', score: { a: { A: 2, Verbal: 1 }, b: { I: 2, Numerical: 1 } } },
+    { id: 15, text: 'At a new place:', a: 'I usually talk to people pretty quickly', b: 'I usually observe first', score: { a: { E: 1, S: 1, Verbal: 1 }, b: { I: 1, Independence: 1 } } },
+    { id: 16, text: 'Which would bother you more?', a: 'Rules that make no sense', b: 'A plan that keeps changing', score: { a: { Explorer: 1, A: 1 }, b: { C: 2, Structure: 1 } } },
+    { id: 17, text: 'Which sounds more meaningful?', a: 'Making something useful', b: 'Helping someone improve their life', score: { a: { R: 2, Practicality: 1 }, b: { S: 2, Mission: 1 } } },
+    { id: 18, text: 'Which sounds more fun?', a: 'Lead a competition/team', b: 'Solve a difficult puzzle', score: { a: { E: 2, Leadership: 1 }, b: { I: 2 } } },
+    { id: 19, text: 'Which result feels more rewarding?', a: '"That looks amazing."', b: '"That works perfectly."', score: { a: { A: 2 }, b: { R: 1, I: 1 } } },
+    { id: 20, text: 'Would you rather work:', a: 'Outdoors or moving around', b: 'Indoors at a desk or workstation', score: { a: { R: 1, Outdoor: 2 }, b: { C: 1, Indoor: 2 } } },
+    { id: 21, text: 'When learning:', a: 'Show me how and let me try', b: 'Explain how it works first', score: { a: { HandsOn: 2, R: 1 }, b: { I: 2 } } },
+    { id: 22, text: 'Which challenge sounds better?', a: 'Improve a real process', b: 'Invent a totally new idea', score: { a: { C: 1, R: 1, Practicality: 1 }, b: { A: 2, Explorer: 1 } } },
+    { id: 23, text: 'Would you rather:', a: 'Speak in front of 100 people', b: 'Spend 3 hours solving a difficult problem alone', score: { a: { E: 2, Verbal: 1 }, b: { I: 2, Independence: 1 } } },
+    { id: 24, text: 'What sounds better?', a: 'A job where every day is different', b: 'A job where you know exactly what is expected', score: { a: { Explorer: 2, Flexibility: 1 }, b: { C: 2, Structure: 1 } } },
+    { id: 25, text: 'Which would you rather improve?', a: "A person's experience", b: "A system's efficiency", score: { a: { S: 2 }, b: { I: 1, C: 1 } } },
+    { id: 26, text: 'Would you rather:', a: 'Create a YouTube channel', b: 'Build an app', score: { a: { A: 1, E: 1 }, b: { I: 1, R: 1 } } },
+    { id: 27, text: 'Would you rather:', a: 'Plan the trip', b: 'Be surprised by the trip', score: { a: { C: 2 }, b: { Explorer: 2 } } },
+    { id: 28, text: 'Which sounds more like you?', a: 'I notice details other people miss', b: 'I notice possibilities other people miss', score: { a: { C: 1, I: 1 }, b: { A: 1, E: 1 } } },
+    { id: 29, text: 'Would you rather:', a: 'Work in a small tight-knit team', b: 'Work in a big organization with many opportunities', score: { a: { Team: 2, SmallTeam: 2 }, b: { E: 1, LargeOrg: 2 } } },
+    { id: 30, text: 'Which sounds more satisfying?', a: 'Winning a competition', b: 'Helping the team succeed', score: { a: { E: 2 }, b: { S: 1, Team: 1 } } },
+    { id: 31, text: 'Would you rather:', a: 'Restore an old car', b: 'Design a new car concept', score: { a: { R: 2 }, b: { A: 1, I: 1 } } },
+    { id: 32, text: 'Would you rather:', a: 'Interview interesting people', b: 'Analyze a large dataset', score: { a: { S: 1, A: 1, Verbal: 1 }, b: { I: 2, Numerical: 1 } } },
+    { id: 33, text: 'Which sounds more appealing?', a: 'Run your own business', b: 'Have a stable career with clear advancement', score: { a: { E: 2, Risk: 2 }, b: { C: 2, Structure: 1 } } },
+    { id: 34, text: 'Would you rather:', a: 'Coach someone', b: 'Compete against someone', score: { a: { S: 2 }, b: { E: 2 } } },
+    { id: 35, text: 'Which sounds more fun?', a: 'Build furniture', b: 'Design the room', score: { a: { R: 2 }, b: { A: 2 } } },
+    { id: 36, text: 'Would you rather:', a: 'Work on one thing until you master it', b: 'Switch between different projects', score: { a: { Independence: 1, Structure: 1 }, b: { Explorer: 2, Flexibility: 1 } } },
+    { id: 37, text: 'Which role fits better?', a: 'The person with the big idea', b: 'The person who makes sure it gets done', score: { a: { A: 1, E: 1 }, b: { C: 2 } } },
+    { id: 38, text: 'Would you rather:', a: 'Help a customer face-to-face', b: 'Improve the process behind the scenes', score: { a: { S: 2, Verbal: 1 }, b: { I: 1, C: 1 } } },
+    { id: 39, text: 'Which would you choose?', a: 'A career with higher uncertainty but more upside', b: 'A career with more stability and predictability', score: { a: { Risk: 2, E: 1 }, b: { C: 2, Structure: 1 } } },
+    { id: 40, text: 'Which sounds more interesting?', a: 'Learn how to negotiate', b: 'Learn how to code', score: { a: { E: 2 }, b: { I: 2 } } },
+    { id: 41, text: 'Would you rather:', a: 'Spend a day shadowing a surgeon', b: 'Spend a day shadowing an architect', score: { a: { S: 1, I: 1 }, b: { A: 1, I: 1 } } },
+    { id: 42, text: 'Would you rather:', a: 'Volunteer at a community event', b: 'Compete in a business challenge', score: { a: { S: 2, Mission: 1 }, b: { E: 2 } } },
+    { id: 43, text: 'Which sounds better?', a: 'Be respected for expertise', b: 'Be known for leadership', score: { a: { I: 1, Independence: 1 }, b: { E: 2, Leadership: 1 } } },
+    { id: 44, text: 'Would you rather:', a: 'Create a new recipe', b: 'Perfect a classic recipe', score: { a: { A: 2, Explorer: 1 }, b: { C: 1, R: 1 } } },
+    { id: 45, text: 'Which sounds more satisfying?', a: 'Turn chaos into an organized plan', b: 'Turn a blank page into something new', score: { a: { C: 2 }, b: { A: 2 } } },
+    { id: 46, text: 'Would you rather:', a: 'Fix a difficult technical problem', b: 'Resolve a difficult disagreement', score: { a: { I: 2, R: 1 }, b: { S: 2, E: 1 } } },
+    { id: 47, text: 'Which sounds more like you?', a: 'I want my work to directly help people', b: 'I want my work to create something important', score: { a: { S: 2, Mission: 1 }, b: { A: 1, E: 1 } } },
+    { id: 48, text: 'Would you rather:', a: 'Follow a proven path to success', b: 'Try something no one around you has done', score: { a: { C: 2 }, b: { Explorer: 2, Risk: 1 } } },
+    { id: 49, text: 'Would you rather:', a: 'Be the expert everyone goes to', b: 'Be the leader everyone follows', score: { a: { I: 1, Independence: 1 }, b: { E: 2, Leadership: 1 } } },
+    { id: 50, text: 'What matters more in a future career?', a: 'Doing work that fits who I am', b: 'Having the strongest possible income and opportunity', score: { a: { Mission: 2 }, b: { E: 1, Practicality: 1 } } }
   ];
 
-  // Career clusters mapped to RIASEC
-  const CAREER_CLUSTERS = {
-    R: ['Construction', 'Engineering', 'Manufacturing', 'Agriculture', 'Mechanics', 'Military', 'Trades'],
-    I: ['Science', 'Technology', 'Medicine', 'Research', 'Data Analysis', 'Law', 'Psychology'],
-    A: ['Arts', 'Design', 'Music', 'Writing', 'Photography', 'Film', 'Architecture'],
-    S: ['Education', 'Healthcare', 'Social Work', 'Counseling', 'Nonprofits', 'Ministry'],
-    E: ['Business', 'Sales', 'Marketing', 'Entrepreneurship', 'Politics', 'Real Estate'],
-    C: ['Finance', 'Accounting', 'Administration', 'IT Support', 'Quality Control', 'Logistics']
+  // HIDDEN STRENGTHS by type combination
+  const HIDDEN_STRENGTHS = {
+    'RI': 'You can see both the big picture and the small details that make systems work.',
+    'IR': 'You can see both the big picture and the small details that make systems work.',
+    'RA': 'You bring ideas to life in tangible, beautiful ways that others can experience.',
+    'AR': 'You bring ideas to life in tangible, beautiful ways that others can experience.',
+    'RS': 'You help people by doing, not just talking. Your actions speak louder than words.',
+    'SR': 'You help people by doing, not just talking. Your actions speak louder than words.',
+    'RE': 'You lead by example and build things that create real-world impact.',
+    'ER': 'You lead by example and build things that create real-world impact.',
+    'RC': 'You bring reliability and precision to practical work that others can depend on.',
+    'CR': 'You bring reliability and precision to practical work that others can depend on.',
+    'IA': 'You often connect ideas that other people do not immediately see.',
+    'AI': 'You often connect ideas that other people do not immediately see.',
+    'IS': 'You understand people deeply and find logical solutions to emotional problems.',
+    'SI': 'You understand people deeply and find logical solutions to emotional problems.',
+    'IE': 'You see opportunities others miss and know how to act on them strategically.',
+    'EI': 'You see opportunities others miss and know how to act on them strategically.',
+    'IC': 'You find patterns in complexity that help others make sense of the world.',
+    'CI': 'You find patterns in complexity that help others make sense of the world.',
+    'AS': 'You express ideas in ways that make people feel understood and inspired.',
+    'SA': 'You express ideas in ways that make people feel understood and inspired.',
+    'AE': 'You inspire people with a vision they did not know they needed.',
+    'EA': 'You inspire people with a vision they did not know they needed.',
+    'AC': 'You create things that are both beautiful and well-organized.',
+    'CA': 'You create things that are both beautiful and well-organized.',
+    'SE': 'You bring people together and move them toward a shared goal.',
+    'ES': 'You bring people together and move them toward a shared goal.',
+    'SC': 'You keep groups running smoothly while making sure everyone feels valued.',
+    'CS': 'You keep groups running smoothly while making sure everyone feels valued.',
+    'EC': 'You turn ambitious plans into organized action that actually gets done.',
+    'CE': 'You turn ambitious plans into organized action that actually gets done.'
   };
 
+  // ENERGIZERS by dimension
+  const ENERGIZERS = {
+    R: ['Working with tools', 'Hands-on projects', 'Seeing tangible results', 'Physical activity', 'Building things'],
+    I: ['Solving complex problems', 'Research and discovery', 'Understanding why', 'Learning new concepts', 'Analyzing data'],
+    A: ['Creative expression', 'Original ideas', 'Aesthetic beauty', 'Freedom to experiment', 'Making something new'],
+    S: ['Helping others', 'Meaningful connections', 'Making a difference', 'Working with people', 'Teaching and mentoring'],
+    E: ['Leading projects', 'Persuading others', 'Taking charge', 'Competition', 'Starting new ventures'],
+    C: ['Organization', 'Clear procedures', 'Accuracy and detail', 'Planning', 'Reliable systems']
+  };
+
+  // DRAINERS by dimension
+  const DRAINERS = {
+    R: ['Too much desk work', 'Abstract concepts without application', 'Endless meetings'],
+    I: ['Repetitive tasks', 'Small talk', 'Work without learning', 'Rushing without understanding'],
+    A: ['Rigid rules', 'Lack of creative freedom', 'Cookie-cutter solutions', 'Repetitive work'],
+    S: ['Working in isolation', 'Conflict', 'Impersonal environments', 'Cutthroat competition'],
+    E: ['Following without input', 'Lack of influence', 'Too much micromanagement', 'Bureaucracy'],
+    C: ['Chaos and disorder', 'Ambiguity', 'Last-minute changes', 'Unclear expectations']
+  };
+
+  // WITH FRIENDS content by dimension
+  const WITH_FRIENDS = {
+    R: 'You may be the one who gets things done while others are still discussing. You solve real problems and help with practical matters.',
+    I: 'You may be the person who notices patterns and gives thoughtful advice. You observe before speaking and see things others miss.',
+    A: 'You may be the person who brings new ideas into the group or suggests unusual plans. You express yourself in unique ways.',
+    S: 'You may be the person who notices how everyone is feeling. You help people feel included and keep the group connected.',
+    E: 'You may be the one who organizes plans and gets things moving. You are comfortable making decisions for the group.',
+    C: 'You may be the person who remembers details and keeps everyone on track. You make sure plans actually happen.'
+  };
+
+  // WATCH OUTS by dimension
+  const WATCH_OUTS = {
+    R: 'You may get impatient with too much planning and want to just start doing.',
+    I: 'You may overthink decisions or get lost in research when action is needed.',
+    A: 'You may get excited about the next idea before finishing the one already in front of you.',
+    S: 'You may take on others\' problems as your own or avoid necessary conflict.',
+    E: 'You may jump into leading before fully understanding what the group needs.',
+    C: 'You may get stuck on details or resist changes that could actually be improvements.'
+  };
+
+  // CAREER SUGGESTIONS by type
+  const CAREER_SUGGESTIONS = {
+    'RI': ['Mechanical Engineer', 'Software Developer', 'Robotics Engineer', 'Data Scientist', 'Biomedical Engineer', 'Network Administrator', 'Automotive Technician', 'Quality Engineer'],
+    'IR': ['Mechanical Engineer', 'Software Developer', 'Robotics Engineer', 'Data Scientist', 'Biomedical Engineer', 'Research Scientist', 'Technical Analyst', 'Systems Engineer'],
+    'RA': ['Industrial Designer', 'Furniture Maker', 'Chef', 'Landscape Architect', 'Automotive Designer', 'Jeweler', 'Set Designer', 'Fabricator'],
+    'AR': ['Industrial Designer', 'Furniture Maker', 'Chef', 'Sculptor', 'Craftsperson', 'Product Designer', 'Art Director', 'Creative Technologist'],
+    'RS': ['Physical Therapist', 'Athletic Trainer', 'Occupational Therapist', 'Coach', 'Firefighter', 'EMT/Paramedic', 'Outdoor Educator', 'Rehabilitation Specialist'],
+    'SR': ['Physical Therapist', 'Athletic Trainer', 'Occupational Therapist', 'Coach', 'Recreation Therapist', 'Fitness Instructor', 'Sports Medicine', 'Adventure Guide'],
+    'RE': ['Construction Manager', 'Operations Manager', 'Restaurant Owner', 'General Contractor', 'Manufacturing Supervisor', 'Facilities Manager', 'Project Manager', 'Plant Manager'],
+    'ER': ['Entrepreneur', 'Business Owner', 'Construction Manager', 'Operations Executive', 'Real Estate Developer', 'Franchise Owner', 'Agricultural Manager', 'Fleet Manager'],
+    'RC': ['Quality Control Inspector', 'Machinist', 'Electrician', 'HVAC Technician', 'Medical Equipment Technician', 'Lab Technician', 'Precision Craftsperson', 'Technical Specialist'],
+    'CR': ['Quality Control Inspector', 'Lab Technician', 'Technical Writer', 'Compliance Inspector', 'Medical Records Technician', 'Calibration Specialist', 'Safety Inspector', 'Maintenance Planner'],
+    'IA': ['Product Designer', 'UX Researcher', 'Architect', 'Game Designer', 'Science Writer', 'Documentary Filmmaker', 'Medical Illustrator', 'Innovation Consultant'],
+    'AI': ['Product Designer', 'UX Designer', 'Architect', 'Creative Director', 'Photographer', 'Marketing Strategist', 'Software/Product Creator', 'Industrial Designer'],
+    'IS': ['Psychologist', 'School Counselor', 'Social Worker', 'Medical Doctor', 'Therapist', 'User Researcher', 'Healthcare Administrator', 'Nonprofit Director'],
+    'SI': ['Counselor', 'Therapist', 'Social Worker', 'School Psychologist', 'Life Coach', 'Mediator', 'Career Counselor', 'Patient Advocate'],
+    'IE': ['Management Consultant', 'Investment Analyst', 'Strategy Consultant', 'Medical Director', 'Policy Analyst', 'Tech Entrepreneur', 'Product Manager', 'Venture Capitalist'],
+    'EI': ['CEO', 'Management Consultant', 'Investment Banker', 'Strategy Director', 'Medical Practice Owner', 'Tech Executive', 'Private Equity', 'Healthcare Executive'],
+    'IC': ['Data Analyst', 'Research Scientist', 'Actuary', 'Statistician', 'Financial Analyst', 'Database Administrator', 'Operations Research Analyst', 'Epidemiologist'],
+    'CI': ['Data Analyst', 'Accountant', 'Auditor', 'Business Analyst', 'Research Administrator', 'Compliance Analyst', 'Intelligence Analyst', 'Quality Assurance'],
+    'AS': ['Teacher', 'Art Therapist', 'Writer', 'Journalist', 'Social Media Manager', 'Communications Director', 'Public Relations', 'Content Creator'],
+    'SA': ['Teacher', 'Art Therapist', 'Music Therapist', 'Drama Teacher', 'Youth Worker', 'Community Organizer', 'Event Planner', 'Recreational Therapist'],
+    'AE': ['Creative Director', 'Entrepreneur', 'Producer', 'Marketing Executive', 'Brand Strategist', 'Advertising Executive', 'Fashion Designer', 'Entertainment Executive'],
+    'EA': ['Producer', 'Creative Director', 'Marketing VP', 'Entertainment Executive', 'Brand Founder', 'Media Executive', 'Startup Founder', 'Design Entrepreneur'],
+    'AC': ['Graphic Designer', 'Web Designer', 'Interior Designer', 'Editor', 'Art Director', 'Brand Designer', 'Technical Illustrator', 'Package Designer'],
+    'CA': ['Editor', 'Archivist', 'Museum Curator', 'Technical Writer', 'Art Administrator', 'Design Operations', 'Production Manager', 'Quality Controller'],
+    'SE': ['Teacher', 'Sales Manager', 'Human Resources', 'Training Director', 'Community Organizer', 'Nonprofit Director', 'Healthcare Administrator', 'Political Organizer'],
+    'ES': ['Sales Director', 'HR Director', 'Nonprofit CEO', 'School Principal', 'Community Leader', 'Healthcare Executive', 'Recruiter', 'Customer Success Director'],
+    'SC': ['Administrative Assistant', 'Office Manager', 'Healthcare Administrator', 'Customer Service Manager', 'Event Coordinator', 'Executive Assistant', 'Case Manager', 'Program Coordinator'],
+    'CS': ['Administrative Manager', 'HR Coordinator', 'Office Manager', 'Customer Service', 'Patient Services', 'Program Administrator', 'Operations Coordinator', 'Benefits Administrator'],
+    'EC': ['Operations Manager', 'Project Manager', 'Business Manager', 'Financial Manager', 'Supply Chain Manager', 'Retail Manager', 'Bank Manager', 'Practice Manager'],
+    'CE': ['Controller', 'Finance Manager', 'Operations Director', 'Business Manager', 'Office Director', 'Administrative Director', 'Chief of Staff', 'Practice Administrator']
+  };
+
+  // Calculate maximum possible points per dimension
+  function calculateMaxPoints() {
+    const maxPoints = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+
+    // Calculate actual max by summing best possible score per question for each dimension
+    for (const dim of Object.keys(maxPoints)) {
+      let total = 0;
+      ASSESSMENT_QUESTIONS.forEach(q => {
+        const aScore = (q.score?.a?.[dim] || 0);
+        const bScore = (q.score?.b?.[dim] || 0);
+        total += Math.max(aScore, bScore);
+      });
+      maxPoints[dim] = total;
+    }
+
+    return maxPoints;
+  }
+
+  const MAX_POINTS = calculateMaxPoints();
+
   let scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+  let overlayScores = {};
   let answers = {};
   let profileComplete = false;
 
@@ -96,6 +274,7 @@ const VyliumProfile = (function() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       scores = saved.scores || { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+      overlayScores = saved.overlayScores || {};
       answers = saved.answers || {};
       profileComplete = saved.profileComplete || false;
     } catch (e) {
@@ -104,7 +283,7 @@ const VyliumProfile = (function() {
   }
 
   function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ scores, answers, profileComplete }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ scores, overlayScores, answers, profileComplete }));
   }
 
   function answer(questionId, choice) {
@@ -117,7 +296,12 @@ const VyliumProfile = (function() {
     if (question.score && question.score[choice]) {
       const scoreUpdate = question.score[choice];
       for (const [dim, points] of Object.entries(scoreUpdate)) {
-        scores[dim] = (scores[dim] || 0) + points;
+        if (DIMENSIONS[dim]) {
+          scores[dim] = (scores[dim] || 0) + points;
+        } else {
+          // Overlay trait
+          overlayScores[dim] = (overlayScores[dim] || 0) + points;
+        }
       }
     }
 
@@ -130,20 +314,27 @@ const VyliumProfile = (function() {
     return getProfile();
   }
 
-  function addScores(newScores) {
-    for (const [dim, points] of Object.entries(newScores)) {
-      scores[dim] = (scores[dim] || 0) + points;
+  function getNormalizedScores() {
+    // Independent 0-100 normalization for each dimension
+    const normalized = {};
+    for (const [dim, rawScore] of Object.entries(scores)) {
+      const max = MAX_POINTS[dim] || 1;
+      normalized[dim] = Math.round((rawScore / max) * 100);
+      // Clamp to 0-100
+      normalized[dim] = Math.max(0, Math.min(100, normalized[dim]));
     }
-    saveState();
+    return normalized;
   }
 
-  function getTopDimensions(count = 2) {
-    return Object.entries(scores)
+  function getTopDimensions(count = 3) {
+    const normalized = getNormalizedScores();
+    return Object.entries(normalized)
       .sort((a, b) => b[1] - a[1])
       .slice(0, count)
-      .map(([code, score]) => ({
+      .map(([code, normalizedScore]) => ({
         ...DIMENSIONS[code],
-        score
+        score: normalizedScore,
+        rawScore: scores[code]
       }));
   }
 
@@ -157,11 +348,14 @@ const VyliumProfile = (function() {
     const code = getTypeCode();
     if (!code) return null;
 
-    // Try exact match first, then reversed
     let type = TYPES[code];
     if (!type) {
+      // Try reversed
       const reversed = code[1] + code[0];
       type = TYPES[reversed];
+      if (type) {
+        return { code: reversed, ...type, topDimensions: getTopDimensions(2) };
+      }
     }
 
     if (!type) return null;
@@ -176,30 +370,34 @@ const VyliumProfile = (function() {
   function getProfile() {
     const top = getTopDimensions(3);
     const type = getPersonalityType();
-    const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+    const normalized = getNormalizedScores();
 
-    // Calculate percentages
-    const percentages = {};
-    for (const [dim, score] of Object.entries(scores)) {
-      percentages[dim] = totalScore > 0 ? Math.round((score / totalScore) * 100) : 0;
-    }
+    // Get overlay traits
+    const topOverlays = Object.entries(overlayScores)
+      .filter(([key]) => !DIMENSIONS[key])
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([key, score]) => ({
+        key,
+        score,
+        trait: OVERLAY_TRAITS[key] || { description: key }
+      }));
 
-    // Get career clusters
-    const careerClusters = [];
-    if (top.length > 0) {
-      top.forEach(d => {
-        careerClusters.push(...(CAREER_CLUSTERS[d.code] || []).slice(0, 3));
-      });
-    }
+    // Get career suggestions
+    const careers = type ? (CAREER_SUGGESTIONS[type.code] || []).slice(0, 8) : [];
 
     return {
       scores,
-      percentages,
+      normalizedScores: normalized,
       topDimensions: top,
       type,
-      careerClusters: [...new Set(careerClusters)].slice(0, 6),
+      overlayTraits: topOverlays,
+      careerSuggestions: careers,
+      hiddenStrength: type ? (HIDDEN_STRENGTHS[type.code] || '') : '',
       completionPercent: Math.round((Object.keys(answers).length / ASSESSMENT_QUESTIONS.length) * 100),
-      isComplete: profileComplete
+      isComplete: profileComplete,
+      questionCount: ASSESSMENT_QUESTIONS.length,
+      answeredCount: Object.keys(answers).length
     };
   }
 
@@ -207,47 +405,50 @@ const VyliumProfile = (function() {
     const top = getTopDimensions(2);
     const energizers = [];
 
-    const energizerMap = {
-      R: ['Working with tools', 'Physical activity', 'Seeing tangible results'],
-      I: ['Solving complex problems', 'Research and discovery', 'Understanding why'],
-      A: ['Creative expression', 'Original ideas', 'Aesthetic beauty'],
-      S: ['Helping others', 'Meaningful connections', 'Making a difference'],
-      E: ['Leading projects', 'Persuading others', 'Taking charge'],
-      C: ['Organization', 'Clear procedures', 'Accuracy and detail']
-    };
-
     top.forEach(d => {
-      energizers.push(...(energizerMap[d.code] || []));
+      energizers.push(...(ENERGIZERS[d.code] || []).slice(0, 2));
     });
 
-    return energizers.slice(0, 4);
+    return energizers.slice(0, 5);
   }
 
   function getDrains() {
-    const bottom = Object.entries(scores)
+    const normalized = getNormalizedScores();
+    const bottom = Object.entries(normalized)
       .sort((a, b) => a[1] - b[1])
       .slice(0, 2)
       .map(([code]) => code);
 
-    const drainMap = {
-      R: ['Too much desk work', 'Abstract concepts without application'],
-      I: ['Repetitive tasks', 'Small talk'],
-      A: ['Rigid rules', 'Lack of creative freedom'],
-      S: ['Working alone', 'Conflict'],
-      E: ['Following without input', 'Lack of influence'],
-      C: ['Chaos and disorder', 'Ambiguity']
-    };
-
     const drains = [];
     bottom.forEach(code => {
-      drains.push(...(drainMap[code] || []));
+      drains.push(...(DRAINERS[code] || []).slice(0, 2));
     });
 
-    return drains.slice(0, 3);
+    return drains.slice(0, 4);
+  }
+
+  function getWithFriends() {
+    const top = getTopDimensions(1);
+    if (top.length === 0) return '';
+    return WITH_FRIENDS[top[0].code] || '';
+  }
+
+  function getWatchOuts() {
+    const top = getTopDimensions(2);
+    const watchOuts = [];
+
+    top.forEach(d => {
+      if (WATCH_OUTS[d.code]) {
+        watchOuts.push(WATCH_OUTS[d.code]);
+      }
+    });
+
+    return watchOuts.slice(0, 2);
   }
 
   function reset() {
     scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+    overlayScores = {};
     answers = {};
     profileComplete = false;
     saveState();
@@ -258,7 +459,7 @@ const VyliumProfile = (function() {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    let currentIndex = 0;
+    let currentIndex = Object.keys(answers).length;
 
     function showQuestion(index) {
       if (index >= ASSESSMENT_QUESTIONS.length) {
@@ -269,19 +470,27 @@ const VyliumProfile = (function() {
       }
 
       const q = ASSESSMENT_QUESTIONS[index];
+      const progress = ((index + 1) / ASSESSMENT_QUESTIONS.length) * 100;
+
       container.innerHTML = `
-        <div class="vylium-progress">
-          <div class="vylium-progress-bar" style="width: ${((index + 1) / ASSESSMENT_QUESTIONS.length) * 100}%"></div>
-        </div>
-        <div class="vylium-question-number">${index + 1} of ${ASSESSMENT_QUESTIONS.length}</div>
-        <div class="vylium-question">${q.text}</div>
-        <div class="vylium-options">
-          <button class="vylium-option" data-choice="a">
-            <span class="vylium-option-text">${q.a}</span>
-          </button>
-          <button class="vylium-option" data-choice="b">
-            <span class="vylium-option-text">${q.b}</span>
-          </button>
+        <div class="vylium-assessment">
+          <div class="vylium-intro-note" style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 16px;">
+            There are no right or wrong answers. Go with your first instinct.
+          </div>
+          <div class="vylium-progress">
+            <div class="vylium-progress-bar" style="width: ${progress}%"></div>
+          </div>
+          <div class="vylium-question-number">${index + 1} of ${ASSESSMENT_QUESTIONS.length}</div>
+          <div class="vylium-question">${q.text}</div>
+          <div class="vylium-options">
+            <button class="vylium-option" data-choice="a">
+              <span class="vylium-option-text">${q.a}</span>
+            </button>
+            <button class="vylium-option" data-choice="b">
+              <span class="vylium-option-text">${q.b}</span>
+            </button>
+          </div>
+          ${index > 0 ? `<button class="vylium-back-btn" style="margin-top: 16px; color: #6b7280; background: none; border: none; cursor: pointer; font-size: 14px;">← Back</button>` : ''}
         </div>
       `;
 
@@ -292,12 +501,35 @@ const VyliumProfile = (function() {
           setTimeout(() => {
             currentIndex++;
             showQuestion(currentIndex);
-          }, 300);
+          }, 250);
         });
       });
+
+      const backBtn = container.querySelector('.vylium-back-btn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          const prevQ = ASSESSMENT_QUESTIONS[index - 1];
+          if (prevQ && answers[prevQ.id]) {
+            const prevChoice = answers[prevQ.id];
+            if (prevQ.score && prevQ.score[prevChoice]) {
+              for (const [dim, points] of Object.entries(prevQ.score[prevChoice])) {
+                if (DIMENSIONS[dim]) {
+                  scores[dim] = Math.max(0, (scores[dim] || 0) - points);
+                } else {
+                  overlayScores[dim] = Math.max(0, (overlayScores[dim] || 0) - points);
+                }
+              }
+            }
+            delete answers[prevQ.id];
+            saveState();
+          }
+          currentIndex--;
+          showQuestion(currentIndex);
+        });
+      }
     }
 
-    showQuestion(0);
+    showQuestion(currentIndex);
   }
 
   function renderResults(containerId, profile) {
@@ -307,30 +539,46 @@ const VyliumProfile = (function() {
     const type = profile.type;
     const energizers = getEnergizers();
     const drains = getDrains();
+    const withFriends = getWithFriends();
+    const watchOuts = getWatchOuts();
 
     container.innerHTML = `
       <div class="vylium-results">
         <div class="vylium-type-reveal">
+          <div class="vylium-type-badge">YOUR VYLIUM TYPE</div>
           <div class="vylium-type-emoji">${type?.emoji || '🌟'}</div>
           <div class="vylium-type-name">${type?.name || 'Your Profile'}</div>
+          <div class="vylium-type-tagline">${type?.tagline || ''}</div>
           <div class="vylium-type-desc">${type?.description || ''}</div>
         </div>
 
         <div class="vylium-traits">
-          <div class="vylium-traits-title">Your Top Traits</div>
+          <div class="vylium-traits-title">Your Top Three</div>
           <div class="vylium-traits-grid">
             ${profile.topDimensions.map(d => `
               <div class="vylium-trait" style="border-color: ${d.color}">
-                <div class="vylium-trait-label" style="color: ${d.color}">${d.label}</div>
-                <div class="vylium-trait-name">${d.name}</div>
-                <div class="vylium-trait-bar">
-                  <div class="vylium-trait-fill" style="width: ${profile.percentages[d.code]}%; background: ${d.color}"></div>
+                <div class="vylium-trait-header">
+                  <div class="vylium-trait-label" style="color: ${d.color}">${d.label.toUpperCase()}</div>
+                  <div class="vylium-trait-score">${d.score}</div>
                 </div>
-                <div class="vylium-trait-percent">${profile.percentages[d.code]}%</div>
+                <div class="vylium-trait-keywords">${d.keywords.join(' • ')}</div>
+                <div class="vylium-trait-bar">
+                  <div class="vylium-trait-fill" style="width: ${d.score}%; background: ${d.color}"></div>
+                </div>
               </div>
             `).join('')}
           </div>
+          <div class="vylium-score-note">
+            These scores reflect how strongly your answers matched each dimension (0-100).
+          </div>
         </div>
+
+        ${profile.hiddenStrength ? `
+        <div class="vylium-section">
+          <div class="vylium-section-title">🔮 Your Hidden Strength</div>
+          <div class="vylium-section-content">"${profile.hiddenStrength}"</div>
+        </div>
+        ` : ''}
 
         <div class="vylium-section">
           <div class="vylium-section-title">⚡ What Energizes You</div>
@@ -346,11 +594,26 @@ const VyliumProfile = (function() {
           </div>
         </div>
 
+        ${withFriends ? `
         <div class="vylium-section">
-          <div class="vylium-section-title">🎯 Career Clusters to Explore</div>
-          <div class="vylium-tags">
-            ${profile.careerClusters.map(c => `<span class="vylium-tag">${c}</span>`).join('')}
+          <div class="vylium-section-title">👋 With Friends</div>
+          <div class="vylium-section-content">"${withFriends}"</div>
+        </div>
+        ` : ''}
+
+        ${watchOuts.length > 0 ? `
+        <div class="vylium-section">
+          <div class="vylium-section-title">👀 Watch Out For</div>
+          ${watchOuts.map(w => `<div class="vylium-section-content" style="margin-bottom: 8px;">"${w}"</div>`).join('')}
+        </div>
+        ` : ''}
+
+        <div class="vylium-section">
+          <div class="vylium-section-title">🎯 Careers Worth Exploring</div>
+          <div class="vylium-careers-grid">
+            ${profile.careerSuggestions.map(c => `<span class="vylium-career-tag">${c}</span>`).join('')}
           </div>
+          <div class="vylium-careers-note">These are starting points based on your profile, not predictions.</div>
         </div>
 
         <div class="vylium-footer">
@@ -368,7 +631,7 @@ const VyliumProfile = (function() {
 
         <div class="share-privacy-note" style="margin: 0 0 20px;">
           <span class="privacy-icon">🔒</span>
-          <span>Only your Future Type and traits are shared. No personal info.</span>
+          <span>Only your Vylium Type and traits are shared. No personal info.</span>
         </div>
 
         <button class="btn btn-secondary btn-block" onclick="VyliumProfile.reset(); location.reload();">Retake Assessment</button>
@@ -387,8 +650,8 @@ const VyliumProfile = (function() {
         <div class="vylium-mini vylium-mini-start">
           <div class="vylium-mini-icon">🧭</div>
           <div class="vylium-mini-text">
-            <div class="vylium-mini-title">Discover Your Future Profile</div>
-            <div class="vylium-mini-desc">Answer 15 quick questions to unlock your personality type</div>
+            <div class="vylium-mini-title">Discover Your Vylium Type</div>
+            <div class="vylium-mini-desc">Answer ${ASSESSMENT_QUESTIONS.length} quick questions to unlock your profile</div>
           </div>
           <button class="btn btn-primary btn-small" onclick="openVyliumAssessment()">Start</button>
         </div>
@@ -411,7 +674,6 @@ const VyliumProfile = (function() {
     `;
   }
 
-  // Scholarship matching boost
   // Share result using ViralShare service
   async function shareResult() {
     if (typeof ViralShare === 'undefined') {
@@ -425,7 +687,6 @@ const VyliumProfile = (function() {
       return false;
     }
 
-    // Create share and trigger native sharing
     const share = ViralShare.createShare();
     if (share) {
       await ViralShare.shareNative(share);
@@ -434,6 +695,7 @@ const VyliumProfile = (function() {
     return false;
   }
 
+  // Scholarship matching boost
   function getScholarshipBoost(scholarshipCategories) {
     const profile = getProfile();
     const top = profile.topDimensions;
@@ -462,6 +724,35 @@ const VyliumProfile = (function() {
     return Math.min(boost, 25);
   }
 
+  // For comparison feature
+  function compareProfiles(otherProfile) {
+    const myProfile = getProfile();
+    if (!myProfile.isComplete || !otherProfile) return null;
+
+    const myTop = myProfile.topDimensions.map(d => d.code);
+    const otherTop = otherProfile.topDimensions?.map(d => d.code) || [];
+
+    const sharedDimensions = myTop.filter(d => otherTop.includes(d));
+    const similarityScore = Math.round((sharedDimensions.length / 3) * 100);
+
+    const myTopCode = myTop[0];
+    const otherTopCode = otherTop[0];
+
+    let biggestDiff = null;
+    if (myTopCode !== otherTopCode) {
+      biggestDiff = {
+        you: DIMENSIONS[myTopCode]?.label || myTopCode,
+        friend: DIMENSIONS[otherTopCode]?.label || otherTopCode
+      };
+    }
+
+    return {
+      similarityScore,
+      sharedDimensions: sharedDimensions.map(c => DIMENSIONS[c]?.label || c),
+      biggestDifference: biggestDiff
+    };
+  }
+
   init();
 
   return {
@@ -469,17 +760,20 @@ const VyliumProfile = (function() {
     TYPES,
     ASSESSMENT_QUESTIONS,
     answer,
-    addScores,
     getProfile,
     getPersonalityType,
     getTopDimensions,
+    getNormalizedScores,
     getEnergizers,
     getDrains,
+    getWithFriends,
+    getWatchOuts,
     reset,
     renderAssessment,
     renderResults,
     renderMiniProfile,
     getScholarshipBoost,
-    shareResult
+    shareResult,
+    compareProfiles
   };
 })();
