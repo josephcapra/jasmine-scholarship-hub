@@ -476,14 +476,32 @@ const ParentAuth = (function() {
 
   let googleInitialized = false;
   let googleInitializing = false;
+  let googleScriptInjected = false;
 
-  async function waitForGoogle(maxWait = 5000) {
+  function injectGoogleScript() {
+    if (googleScriptInjected) return;
+    if (document.querySelector('script[src*="accounts.google.com/gsi/client"]')) {
+      googleScriptInjected = true;
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    document.head.appendChild(script);
+    googleScriptInjected = true;
+    console.log('Injected Google Identity Services script');
+  }
+
+  async function waitForGoogle(maxWait = 8000) {
+    // Try to inject the script if not present
+    injectGoogleScript();
+
     const start = Date.now();
     while (Date.now() - start < maxWait) {
       if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
         return true;
       }
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 200));
     }
     return false;
   }
