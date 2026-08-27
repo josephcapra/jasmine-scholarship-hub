@@ -2024,6 +2024,609 @@
       color: #92400e;
       border-color: #fde68a;
     }
+
+    /* Phase 3: Career Discovery Styles */
+    .career-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+    .career-card-header {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .career-emoji {
+      font-size: 2.5rem;
+      flex-shrink: 0;
+    }
+    .career-title-block { flex: 1; }
+    .career-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+    .career-riasec {
+      font-size: 0.8rem;
+      color: var(--jazz-purple);
+      font-weight: 600;
+    }
+    .career-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .career-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .career-stat {
+      background: #f5f3ff;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
+    :root[data-theme="dark"] .career-stat,
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .career-stat { background: #3b2d4d; } }
+    .stat-label {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .career-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .skills-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .skill-chip {
+      background: #ede9fe;
+      color: var(--jazz-purple);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .career-lifestyle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .career-fit {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .fit-icon { font-size: 1.2rem; }
+    .fit-text { font-size: 0.85rem; color: #78350f; font-weight: 600; }
+    .career-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .career-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.2s;
+    }
+    .career-btn:active { transform: scale(0.97); }
+    .career-dismiss {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .career-save {
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+    }
+    .career-progress {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .career-complete {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .career-complete-icon { font-size: 3rem; margin-bottom: 12px; }
+    .career-complete h3 { margin-bottom: 8px; }
+    .saved-careers-mini {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .saved-career-chip {
+      background: #ede9fe;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+    }
+
+    /* Trades Grid */
+    .trades-header, .college-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .trades-header h3, .college-header h3 {
+      font-size: 1.3rem;
+      margin-bottom: 6px;
+    }
+    .trades-header p, .college-header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .trades-grid, .college-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .trade-card, .college-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .trade-emoji, .college-emoji {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    .trade-name, .college-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    .trade-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .trade-demand {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .trade-demand-very-high { background: #dcfce7; color: #166534; }
+    .trade-demand-high { background: #fef9c3; color: #854d0e; }
+    .trade-demand-stable { background: #e0e7ff; color: #3730a3; }
+    .trade-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .trade-union {
+      font-size: 0.75rem;
+      color: var(--jazz-purple);
+    }
+    .college-size {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .college-vibe {
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--jazz-purple);
+      margin-bottom: 10px;
+    }
+    .college-pros, .college-cons {
+      text-align: left;
+      margin-bottom: 8px;
+    }
+    .pros-label, .cons-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .pro-chip, .con-chip {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 8px;
+      margin: 2px;
+    }
+    .pro-chip { background: #dcfce7; color: #166534; }
+    .con-chip { background: #fef3c7; color: #92400e; }
+
+    /* Career Widget */
+    .career-widget {
+      background: linear-gradient(135deg, #f5f3ff, #fdf4ff);
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .career-widget:hover { transform: translateY(-2px); }
+    .career-widget-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .career-widget-icon { font-size: 1.3rem; }
+    .career-widget-title { font-weight: 700; font-size: 0.95rem; }
+    .career-widget-match {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .match-emoji { font-size: 1.5rem; }
+    .match-text { font-size: 0.85rem; color: var(--muted); }
+    .career-widget-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+    .saved-count { color: var(--muted); }
+    .explore-cta { color: var(--jazz-purple); font-weight: 700; }
+
+    /* Phase 4: Engagement & Gamification */
+    .xp-bar-container {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .xp-level {
+      font-weight: 800;
+      color: var(--jazz-purple);
+      margin-bottom: 6px;
+    }
+    .xp-bar {
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--jazz-purple), var(--jazz-pink));
+      border-radius: 5px;
+      transition: width 0.5s;
+    }
+    .xp-text {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Badges */
+    .badges-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .badges-header h3 { font-size: 1.1rem; margin: 0; }
+    .badges-count { color: var(--muted); font-size: 0.9rem; }
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+    }
+    .badge-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .badge-item.earned {
+      border: 2px solid var(--jazz-gold);
+    }
+    .badge-item.locked {
+      opacity: 0.5;
+    }
+    .badge-emoji {
+      font-size: 1.8rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .badge-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-hint {
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Missions */
+    .missions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .missions-header h3 { margin: 0; font-size: 1rem; }
+    .missions-progress {
+      background: var(--jazz-purple);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .missions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .mission-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .mission-item.completed {
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+    }
+    .mission-emoji { font-size: 1.5rem; flex-shrink: 0; }
+    .mission-content { flex: 1; }
+    .mission-name { font-weight: 700; font-size: 0.9rem; }
+    .mission-desc { font-size: 0.8rem; color: var(--muted); }
+    .mission-reward {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--jazz-purple);
+    }
+
+    /* Notifications */
+    .badge-notification, .level-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      z-index: 100000;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .badge-notification.show, .level-notification.show {
+      transform: translateX(-50%) translateY(0);
+    }
+    .badge-popup, .level-popup {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .badge-popup-emoji, .level-popup-icon {
+      font-size: 2.5rem;
+    }
+    .badge-popup-title, .level-popup-title {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .badge-popup-name, .level-popup-level {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+    }
+    .badge-popup-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .badge-popup-xp {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--jazz-gold);
+      margin-top: 4px;
+    }
+
+    .toast-notification {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: #1f2937;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      z-index: 100000;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast-notification.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Shareable Card */
+    .share-card {
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      border-radius: 20px;
+      padding: 24px;
+      color: white;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .share-card-header {
+      margin-bottom: 16px;
+    }
+    .share-logo { font-size: 2rem; margin-bottom: 8px; }
+    .share-title { font-size: 1.2rem; font-weight: 800; }
+    .share-card-body { margin-bottom: 16px; }
+    .share-level {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .share-level-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .share-xp { font-size: 0.9rem; opacity: 0.9; }
+    .share-personality {
+      margin-bottom: 12px;
+    }
+    .share-personality-emoji { font-size: 1.5rem; }
+    .share-personality-name { font-weight: 700; margin-left: 8px; }
+    .share-badges {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .share-badge { font-size: 1.5rem; }
+    .share-careers {
+      text-align: left;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .share-careers-label {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .share-career {
+      display: inline-block;
+      font-size: 0.85rem;
+      margin-right: 8px;
+    }
+    .share-card-footer {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      font-style: italic;
+    }
+    .share-actions {
+      text-align: center;
+    }
+    .btn-share {
+      background: var(--card);
+      color: var(--jazz-purple);
+      border: none;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Parent Encouragements */
+    .encouragements-empty {
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
+    .encouragements-header {
+      margin-bottom: 12px;
+    }
+    .encouragements-header h3 { margin: 0; font-size: 1rem; }
+    .encouragements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .encouragement-item {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      border-left: 4px solid var(--jazz-pink);
+    }
+    .encouragement-item.unread {
+      background: #fdf4ff;
+    }
+    .encouragement-from {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--jazz-purple);
+      margin-bottom: 4px;
+    }
+    .encouragement-message {
+      font-size: 0.9rem;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .encouragement-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Discover Section Tabs */
+    .discover-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+    .discover-tab {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .discover-tab.active {
+      background: var(--jazz-purple);
+      color: white;
+      border-color: var(--jazz-purple);
+    }
+    .discover-content > div {
+      display: none;
+    }
+    .discover-content > div.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -2161,10 +2764,10 @@
 
     <div class="nav-tabs">
       <button class="nav-tab active" data-section="profile" onclick="window.switchSection('profile')">👤 Profile</button>
-      <button class="nav-tab" data-section="goals" onclick="window.switchSection('goals')">🎯 Goals</button>
-      <button class="nav-tab" data-section="scholarships" onclick="window.switchSection('scholarships')">🎓 Scholarships</button>
+      <button class="nav-tab" data-section="discover" onclick="window.switchSection('discover')">🔭 Discover</button>
+      <button class="nav-tab" data-section="scholarships" onclick="window.switchSection('scholarships')">💰 Money</button>
       <button class="nav-tab" data-section="essays" onclick="window.switchSection('essays')">📝 Essays</button>
-      <button class="nav-tab" data-section="documents" onclick="window.switchSection('documents')">📂 Docs</button>
+      <button class="nav-tab" data-section="goals" onclick="window.switchSection('goals')">📋 Plan</button>
     </div>
 
     <!-- HOME SECTION - Next Actions Dashboard -->
@@ -2436,6 +3039,69 @@
       <button onclick="resetAccount()" style="width: 100%; margin-top: 12px; padding: 12px; background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; border-radius: 10px; font-weight: 600; cursor: pointer;">
         🔄 Reset Account (Start Fresh)
       </button>
+    </section>
+
+    <!-- DISCOVER Section - Phase 3: Career Discovery + Phase 4: Engagement -->
+    <section class="section" id="section-discover">
+      <h2 class="section-title">🔭 Discover Your Future</h2>
+
+      <!-- XP Bar -->
+      <div id="xp-bar-container"></div>
+
+      <!-- Daily Missions -->
+      <div class="card" style="margin-bottom: 16px;">
+        <div id="daily-missions-container"></div>
+      </div>
+
+      <!-- Discover Sub-Tabs -->
+      <div class="discover-tabs">
+        <button class="discover-tab active" onclick="switchDiscoverTab('careers')">🎯 Careers</button>
+        <button class="discover-tab" onclick="switchDiscoverTab('trades')">🔧 Trades</button>
+        <button class="discover-tab" onclick="switchDiscoverTab('colleges')">🎓 Colleges</button>
+        <button class="discover-tab" onclick="switchDiscoverTab('badges')">🏆 Badges</button>
+        <button class="discover-tab" onclick="switchDiscoverTab('share')">📤 Share</button>
+      </div>
+
+      <!-- Discover Content Areas -->
+      <div class="discover-content">
+        <!-- Careers Tab -->
+        <div id="discover-careers" class="active">
+          <div class="card" style="margin-bottom: 16px; text-align: center;">
+            <h3 style="margin-bottom: 8px;">🎯 Find Careers That Fit You</h3>
+            <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 16px;">
+              Based on your VYLIUM personality profile, we'll show you careers that match your strengths.
+            </p>
+            <button class="btn btn-primary" onclick="openCareerExplorer()">
+              Start Exploring Careers
+            </button>
+          </div>
+          <div id="career-explorer-container"></div>
+        </div>
+
+        <!-- Trades Tab -->
+        <div id="discover-trades">
+          <div id="trades-explorer-container"></div>
+        </div>
+
+        <!-- Colleges Tab -->
+        <div id="discover-colleges">
+          <div id="colleges-explorer-container"></div>
+        </div>
+
+        <!-- Badges Tab -->
+        <div id="discover-badges">
+          <div id="badges-grid-container"></div>
+        </div>
+
+        <!-- Share Tab -->
+        <div id="discover-share">
+          <div id="shareable-card-container"></div>
+          <div class="card" style="margin-top: 16px;">
+            <h3 style="margin-bottom: 12px;">💌 Family Messages</h3>
+            <div id="parent-encouragements-container"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Essays Section -->
@@ -3439,6 +4105,9 @@
   <script src="data/would-you-rather.js"></script>
   <script src="services/would-you-rather.js"></script>
   <script src="services/vylium-profile.js"></script>
+  <script src="data/careers.js"></script>
+  <script src="services/career-discovery.js"></script>
+  <script src="services/engagement.js"></script>
   <script src="services/badges.js"></script>
   <script src="services/knowledge-vault.js"></script>
   <script src="services/next-actions.js"></script>
@@ -3554,6 +4223,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       setTimeout(initDailyWYR, 500);
       setTimeout(initVyliumMini, 600);
+      setTimeout(initDiscoverSection, 700);
     });
 
     // VYLIUM Profile Functions
@@ -3587,6 +4257,58 @@
       document.getElementById('vylium-modal').classList.remove('active');
       initVyliumMini();
     }
+
+    // Phase 3 & 4: Discover Section Functions
+    function initDiscoverSection() {
+      // XP Bar
+      if (typeof Engagement !== 'undefined') {
+        Engagement.renderXPBar('xp-bar-container');
+        Engagement.renderDailyMissions('daily-missions-container');
+        Engagement.renderBadgeGrid('badges-grid-container');
+        Engagement.renderShareableCard('shareable-card-container');
+        Engagement.renderParentEncouragements('parent-encouragements-container');
+        Engagement.checkBadges();
+      }
+
+      // Career Widget on home/profile if needed
+      if (typeof CareerDiscovery !== 'undefined') {
+        CareerDiscovery.renderTradesExplorer('trades-explorer-container');
+        CareerDiscovery.renderCollegeTypes('colleges-explorer-container');
+      }
+    }
+
+    function switchDiscoverTab(tabId) {
+      document.querySelectorAll('.discover-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.discover-content > div').forEach(d => d.classList.remove('active'));
+
+      document.querySelector(`.discover-tab[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById('discover-' + tabId).classList.add('active');
+
+      // Load content on demand
+      if (tabId === 'badges' && typeof Engagement !== 'undefined') {
+        Engagement.renderBadgeGrid('badges-grid-container');
+      }
+      if (tabId === 'share' && typeof Engagement !== 'undefined') {
+        Engagement.renderShareableCard('shareable-card-container');
+        Engagement.renderParentEncouragements('parent-encouragements-container');
+      }
+    }
+
+    function openCareerExplorer() {
+      if (typeof CareerDiscovery !== 'undefined') {
+        CareerDiscovery.renderExplorer('career-explorer-container', function(savedCareers) {
+          // Award badge if 3+ careers saved
+          if (savedCareers.length >= 3 && typeof Engagement !== 'undefined') {
+            Engagement.awardBadge('career_saver');
+          }
+          showToast('Careers saved! Check your profile.');
+        });
+      }
+    }
+
+    // Make Discover functions global
+    window.switchDiscoverTab = switchDiscoverTab;
+    window.openCareerExplorer = openCareerExplorer;
 
     // Progress Ring Generator
     function createProgressRing(percent, size = 48) {
@@ -3791,6 +4513,9 @@
       }
       if (sectionId === 'profile' && typeof loadProfileSection === 'function') {
         loadProfileSection();
+      }
+      if (sectionId === 'discover' && typeof initDiscoverSection === 'function') {
+        initDiscoverSection();
       }
 
       // Scroll to top of section
