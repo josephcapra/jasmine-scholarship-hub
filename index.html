@@ -2753,58 +2753,23 @@
       </div>
 
       <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 12px;">🌟 Achievement Badges</h3>
-      <div class="badges-grid">
-        <div class="badge-item">
-          <div class="badge-icon">🌟</div>
-          <div class="badge-name">First Steps</div>
-          <div class="badge-desc">Started your journey</div>
-        </div>
-        <div class="badge-item">
-          <div class="badge-icon">📝</div>
-          <div class="badge-name">Wordsmith</div>
-          <div class="badge-desc">Wrote first essay</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">🔥</div>
-          <div class="badge-name">On Fire</div>
-          <div class="badge-desc">7-day streak</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">🎯</div>
-          <div class="badge-name">Goal Getter</div>
-          <div class="badge-desc">Complete 5 goals</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">📮</div>
-          <div class="badge-name">Sender</div>
-          <div class="badge-desc">Submit first app</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">💪</div>
-          <div class="badge-name">Unstoppable</div>
-          <div class="badge-desc">5 apps submitted</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">🎓</div>
-          <div class="badge-name">Scholar</div>
-          <div class="badge-desc">Win a scholarship!</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">👑</div>
-          <div class="badge-name">Queen</div>
-          <div class="badge-desc">10+ scholarships</div>
-        </div>
-        <div class="badge-item locked">
-          <div class="badge-icon">🦋</div>
-          <div class="badge-name">Transformed</div>
-          <div class="badge-desc">Complete all essays</div>
-        </div>
+      <div class="badges-grid" id="badges-grid">
+        <!-- Dynamically rendered by BadgeService -->
       </div>
 
       <div class="card" style="margin-top: 20px; text-align: center;">
         <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 8px;">Badges Unlocked</div>
-        <div style="font-size: 2rem; font-weight: 800; color: var(--jazz-purple);">2 / 9</div>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--jazz-purple);" data-badge-counter>0 / 12</div>
       </div>
+
+      <script>
+        // Render badges when section loads
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof BadgeService !== 'undefined') {
+            BadgeService.renderBadgesGrid('badges-grid');
+          }
+        });
+      </script>
     </section>
 
     <!-- Essay Modal -->
@@ -2982,7 +2947,18 @@
             <button class="btn btn-secondary btn-small" onclick="downloadGeneratedEssay('txt')">.txt</button>
             <button class="btn btn-secondary btn-small" onclick="downloadGeneratedEssay('docx')">.docx</button>
             <button class="btn btn-secondary btn-small" onclick="downloadGeneratedEssay('pdf')">.pdf</button>
+            <button id="ai-feedback-btn" class="btn btn-secondary btn-small" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af;" onclick="getAIFeedback()">🤖 Get AI Score</button>
             <button class="btn btn-primary" style="flex: 1; min-width: 100px;" onclick="saveFinalDraft()">💾 Save Draft</button>
+          </div>
+
+          <!-- AI Feedback Display -->
+          <div id="ai-feedback-panel" style="display: none; margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; border: 2px solid #86efac;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="font-weight: 800; color: #166534; font-size: 1.1rem;">🎯 Essay Score</div>
+              <div id="ai-overall-score" style="font-size: 2rem; font-weight: 800; color: #059669;">--</div>
+            </div>
+            <div id="ai-score-bars" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;"></div>
+            <div id="ai-feedback-text" style="font-size: 0.9rem; color: #166534;"></div>
           </div>
         </div>
 
@@ -3122,6 +3098,7 @@
   </div><!-- end main-app -->
 
   <!-- Service modules loaded before main scripts -->
+  <script src="services/badges.js"></script>
   <script src="services/knowledge-vault.js"></script>
   <script src="services/next-actions.js"></script>
   <script src="services/scholarship-search.js"></script>
@@ -3923,6 +3900,82 @@
       const content = el.value !== undefined ? el.value : el.textContent;
       navigator.clipboard?.writeText(content);
       showToast('Essay copied! 📋');
+    }
+
+    async function getAIFeedback() {
+      const el = document.getElementById('essay-preview-content');
+      const essay = el.innerText || el.value || '';
+
+      if (essay.trim().length < 100) {
+        showToast('Write at least 100 characters first');
+        return;
+      }
+
+      const btn = document.getElementById('ai-feedback-btn');
+      btn.classList.add('loading');
+      btn.textContent = 'Analyzing...';
+
+      try {
+        const response = await fetch('/api/essay-feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            essay: essay,
+            prompt: currentEssay ? essayTemplates[currentEssay]?.prompts?.[0] : null,
+            wordLimit: parseInt(document.getElementById('review-word-goal')?.textContent || 500)
+          })
+        });
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error);
+
+        const feedback = data.feedback;
+        const panel = document.getElementById('ai-feedback-panel');
+        panel.style.display = 'block';
+
+        // Show overall score with color
+        const scoreEl = document.getElementById('ai-overall-score');
+        const score = feedback.overallScore || 75;
+        scoreEl.textContent = score + '/100';
+        scoreEl.style.color = score >= 80 ? '#059669' : score >= 60 ? '#d97706' : '#dc2626';
+
+        // Show score bars
+        const barsEl = document.getElementById('ai-score-bars');
+        const scores = feedback.scores || {};
+        barsEl.innerHTML = Object.entries(scores).map(([key, val]) => `
+          <div style="background: white; padding: 8px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 0.75rem; text-transform: capitalize;">${key}</span>
+              <span style="font-weight: 700; font-size: 0.8rem;">${val}%</span>
+            </div>
+            <div style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+              <div style="width: ${val}%; height: 100%; background: ${val >= 80 ? '#10b981' : val >= 60 ? '#f59e0b' : '#ef4444'}; border-radius: 3px;"></div>
+            </div>
+          </div>
+        `).join('');
+
+        // Show feedback text
+        const textEl = document.getElementById('ai-feedback-text');
+        textEl.innerHTML = `
+          <div style="margin-bottom: 8px;"><strong>✨ Strengths:</strong> ${(feedback.strengths || []).join(', ')}</div>
+          <div style="margin-bottom: 8px;"><strong>🎯 To Improve:</strong> ${feedback.oneThingToFix || (feedback.improvements || [])[0] || 'Great job!'}</div>
+          ${feedback.hookSuggestion ? `<div><strong>💡 Hook idea:</strong> ${feedback.hookSuggestion}</div>` : ''}
+        `;
+
+        showToast('Essay analyzed! 🎯');
+
+        // Award badge if not already earned
+        if (typeof BadgeService !== 'undefined') {
+          BadgeService.onAction('essay_feedback');
+        }
+
+      } catch (error) {
+        console.error('AI Feedback error:', error);
+        showToast('Could not get feedback. Try again.');
+      } finally {
+        btn.classList.remove('loading');
+        btn.textContent = '🤖 Get AI Score';
+      }
     }
 
     function editGeneratedEssay() {
