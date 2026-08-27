@@ -4036,8 +4036,8 @@
 
       <!-- Quick Links -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn btn-primary" onclick="window.switchSection('scholarships')" style="padding: 16px;">
-          🎓 Find Scholarships
+        <button class="btn btn-primary" onclick="ScholarshipSearch.showSearchModal()" style="padding: 16px;">
+          🔍 Find Scholarships
         </button>
         <button class="btn btn-secondary" onclick="window.switchSection('essays')" style="padding: 16px;">
           📝 Write Essay
@@ -4297,6 +4297,20 @@
       <!-- XP Bar -->
       <div id="xp-bar-container"></div>
 
+      <!-- Find Scholarships Quick Link -->
+      <div class="card" style="margin-bottom: 16px; background: linear-gradient(135deg, #10b981, #059669); padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 2rem;">💰</div>
+          <div style="flex: 1; color: white;">
+            <div style="font-weight: 700;">Ready to find money for your future?</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Personalized scholarship search based on your profile</div>
+          </div>
+          <button onclick="ScholarshipSearch.showSearchModal()" style="background: white; color: #059669; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+            Find Scholarships
+          </button>
+        </div>
+      </div>
+
       <!-- Daily Missions -->
       <div class="card" style="margin-bottom: 16px;">
         <div id="daily-missions-container"></div>
@@ -4523,8 +4537,8 @@
 
       <!-- Action Buttons -->
       <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button class="btn btn-primary" style="flex: 1;" onclick="openAddScholarship()">➕ Add Custom</button>
-        <button class="btn btn-secondary" style="flex: 1;" onclick="ScholarshipSearch.showSearchModal()">🔍 AI Search</button>
+        <button class="btn btn-primary" style="flex: 1;" onclick="ScholarshipSearch.showSearchModal()">🔍 Find For Me</button>
+        <button class="btn btn-secondary" style="flex: 1;" onclick="openAddScholarship()">➕ Add Custom</button>
       </div>
 
       <!-- Priority View: Due Soon -->
