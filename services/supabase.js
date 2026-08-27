@@ -14,9 +14,16 @@ const SupabaseClient = (function() {
 
   async function request(endpoint, options = {}) {
     const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+
+    // Use auth token if available, otherwise fall back to anon key
+    const authToken = (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.getAccessToken)
+      ? SupabaseAuth.getAccessToken()
+      : null;
+    const token = authToken || SUPABASE_ANON_KEY;
+
     const headers = {
       'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
       'Prefer': options.prefer || 'return=representation'
     };
