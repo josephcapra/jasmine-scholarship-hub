@@ -235,7 +235,7 @@ const Onboarding = (function() {
               <div class="ob-value-card ob-value-guide">
                 <div class="ob-value-icon">🧭</div>
                 <div class="ob-value-label">GUIDE</div>
-                <div class="ob-value-text">AI helps you write winning essays & track deadlines</div>
+                <div class="ob-value-text">Essay writing tools & deadline tracking</div>
               </div>
               <div class="ob-value-card ob-value-win">
                 <div class="ob-value-icon">🏆</div>
@@ -286,7 +286,7 @@ const Onboarding = (function() {
               <ul class="ob-consent-list">
                 <li>✓ We do NOT sell your personal information</li>
                 <li>✓ We do NOT use your data for targeted advertising</li>
-                <li>✓ AI helps you write - YOU remain the author</li>
+                <li>✓ Essay tools help you improve - YOU remain the author</li>
                 <li>✓ Your data is stored securely and you can delete it anytime</li>
               </ul>
             </div>

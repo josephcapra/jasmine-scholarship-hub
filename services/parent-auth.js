@@ -495,12 +495,17 @@ const ParentAuth = (function() {
           }
         });
       } else {
-        // Library not loaded yet, wait and retry
+        // Library not loaded yet, wait and retry silently
         setTimeout(() => {
           if (typeof google !== 'undefined' && google.accounts) {
             signInWithGoogle();
           } else {
-            alert('Google Sign-In is loading. Please try again in a moment, or use email/Face ID.');
+            // Show subtle toast instead of blocking alert
+            const toast = document.createElement('div');
+            toast.textContent = 'Google Sign-In loading... Please try again.';
+            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:12px 24px;border-radius:25px;z-index:10000;font-size:14px;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
           }
         }, 1000);
       }
