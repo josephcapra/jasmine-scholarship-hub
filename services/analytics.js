@@ -30,6 +30,19 @@ const Analytics = (function() {
     }
   }
 
+  function refresh() {
+    loadEvents();
+  }
+
+  function getStoredEvents() {
+    // Always read fresh from localStorage for queries
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
   function saveEvents() {
     // Keep max events
     if (events.length > MAX_EVENTS) {
@@ -202,7 +215,7 @@ const Analytics = (function() {
   // ===========================================
 
   function getEvents(filter = {}) {
-    let filtered = [...events];
+    let filtered = getStoredEvents();
 
     if (filter.event) {
       filtered = filtered.filter(e => e.event === filter.event);
@@ -239,7 +252,8 @@ const Analytics = (function() {
       };
     }
 
-    events.forEach(e => {
+    const allEvents = getStoredEvents();
+    allEvents.forEach(e => {
       if (!stats[e.date]) return;
 
       if (e.event === 'page_view') stats[e.date].pageViews++;
@@ -259,7 +273,8 @@ const Analytics = (function() {
   }
 
   function getClickStats() {
-    const clicks = events.filter(e => e.event === 'click');
+    const allEvents = getStoredEvents();
+    const clicks = allEvents.filter(e => e.event === 'click');
     const byElement = {};
 
     clicks.forEach(c => {
@@ -282,7 +297,8 @@ const Analytics = (function() {
   }
 
   function getFeatureStats() {
-    const features = events.filter(e => e.event.startsWith('feature_'));
+    const allEvents = getStoredEvents();
+    const features = allEvents.filter(e => e.event.startsWith('feature_'));
     const byFeature = {};
 
     features.forEach(f => {
@@ -302,8 +318,9 @@ const Analytics = (function() {
   }
 
   function getAssessmentStats() {
-    const starts = events.filter(e => e.event === 'assessment_start').length;
-    const completes = events.filter(e => e.event === 'assessment_complete');
+    const allEvents = getStoredEvents();
+    const starts = allEvents.filter(e => e.event === 'assessment_start').length;
+    const completes = allEvents.filter(e => e.event === 'assessment_complete');
 
     // Type distribution
     const typeDistribution = {};
@@ -323,13 +340,14 @@ const Analytics = (function() {
   }
 
   function getViralStats() {
-    const shareCreated = events.filter(e => e.event === 'share_created').length;
-    const shareStarted = events.filter(e => e.event === 'share_started').length;
-    const shareCompleted = events.filter(e => e.event === 'share_completed').length;
-    const linkOpened = events.filter(e => e.event === 'share_link_opened').length;
-    const guestStarts = events.filter(e => e.event === 'guest_test_started').length;
-    const guestCompletes = events.filter(e => e.event === 'guest_test_completed').length;
-    const reShares = events.filter(e => e.event === 'share_created' && e.generation > 0).length;
+    const allEvents = getStoredEvents();
+    const shareCreated = allEvents.filter(e => e.event === 'share_created').length;
+    const shareStarted = allEvents.filter(e => e.event === 'share_started').length;
+    const shareCompleted = allEvents.filter(e => e.event === 'share_completed').length;
+    const linkOpened = allEvents.filter(e => e.event === 'share_link_opened').length;
+    const guestStarts = allEvents.filter(e => e.event === 'guest_session_started').length;
+    const guestCompletes = allEvents.filter(e => e.event === 'guest_test_completed').length;
+    const reShares = allEvents.filter(e => e.event === 'share_created' && e.generation > 0).length;
 
     return {
       sharesCreated: shareCreated,
@@ -348,7 +366,8 @@ const Analytics = (function() {
   }
 
   function getSessionStats() {
-    const sessions = events.filter(e => e.event === 'session_end');
+    const allEvents = getStoredEvents();
+    const sessions = allEvents.filter(e => e.event === 'session_end');
 
     if (sessions.length === 0) return { avgDuration: 0, avgPageViews: 0, avgClicks: 0 };
 
@@ -365,8 +384,9 @@ const Analytics = (function() {
   }
 
   function getSummary() {
+    const allEvents = getStoredEvents();
     return {
-      totalEvents: events.length,
+      totalEvents: allEvents.length,
       daily: getDailyStats(7),
       clicks: getClickStats().slice(0, 20),
       features: getFeatureStats(),
@@ -377,9 +397,10 @@ const Analytics = (function() {
   }
 
   function exportData() {
+    const allEvents = getStoredEvents();
     return JSON.stringify({
       exportedAt: new Date().toISOString(),
-      events: events,
+      events: allEvents,
       summary: getSummary()
     }, null, 2);
   }
@@ -410,7 +431,8 @@ const Analytics = (function() {
     getSessionStats,
     getSummary,
     exportData,
-    clearData
+    clearData,
+    refresh
   };
 })();
 
