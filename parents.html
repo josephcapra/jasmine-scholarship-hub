@@ -544,8 +544,28 @@
       // Create trust banner
       TrustBanner.createBanner('trust-banner', { style: 'purple', interval: 4000 });
 
+      // Check for invite code in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteCode = urlParams.get('code');
+      if (inviteCode) {
+        const codeInput = document.getElementById('quick-code-input');
+        if (codeInput) {
+          codeInput.value = inviteCode.toUpperCase();
+          // Highlight the input to draw attention
+          codeInput.style.borderColor = '#be185d';
+          codeInput.style.boxShadow = '0 0 0 3px rgba(190, 24, 93, 0.2)';
+        }
+      }
+
       if (ParentAuth.isLoggedIn()) {
         await loadParentDashboard();
+        // If we have an invite code and parent is logged in, try to auto-connect
+        if (inviteCode && !linkedStudents?.length) {
+          const codeInput = document.getElementById('quick-code-input');
+          if (codeInput) {
+            codeInput.value = inviteCode.toUpperCase();
+          }
+        }
       } else {
         document.getElementById('not-logged-in').style.display = 'block';
       }

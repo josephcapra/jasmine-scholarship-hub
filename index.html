@@ -3481,6 +3481,156 @@
     }
     .privacy-icon { font-size: 1rem; }
 
+    /* Scholarship Journey CTA */
+    .vylium-journey-cta {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin: 24px 0;
+      text-align: center;
+      border: 2px solid #f59e0b;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.25);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .vylium-journey-cta {
+        background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+        border-color: #f59e0b;
+      }
+    }
+    :root[data-theme="dark"] .vylium-journey-cta {
+      background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+      border-color: #f59e0b;
+    }
+    .vylium-journey-header {
+      margin-bottom: 16px;
+    }
+    .vylium-journey-badge {
+      display: inline-block;
+      background: #f59e0b;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 6px 16px;
+      border-radius: 50px;
+      margin-bottom: 12px;
+    }
+    .vylium-journey-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #78350f;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .vylium-journey-title {
+        color: #fef3c7;
+      }
+    }
+    :root[data-theme="dark"] .vylium-journey-title {
+      color: #fef3c7;
+    }
+    .vylium-journey-preview {
+      margin: 20px 0;
+    }
+    .vylium-match-count {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .match-number {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #f59e0b;
+      line-height: 1;
+    }
+    .match-label {
+      font-size: 0.95rem;
+      color: #92400e;
+      font-weight: 600;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .match-label {
+        color: #fde68a;
+      }
+    }
+    :root[data-theme="dark"] .match-label {
+      color: #fde68a;
+    }
+    .vylium-journey-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      font-size: 1.3rem;
+      font-weight: 800;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 16px;
+    }
+    .vylium-journey-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.5);
+    }
+    .vylium-journey-btn:active {
+      transform: translateY(0);
+    }
+    .vylium-journey-footer {
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .vylium-journey-footer {
+        color: #fde68a;
+      }
+    }
+    :root[data-theme="dark"] .vylium-journey-footer {
+      color: #fde68a;
+    }
+
+    /* Secondary Share Button */
+    .share-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+    .share-divider::before,
+    .share-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .btn-share-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--jazz-purple);
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 24px;
+      border: 2px solid var(--jazz-purple);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-share-secondary:hover {
+      background: var(--jazz-purple);
+      color: white;
+    }
+
     .result-disclaimer {
       text-align: center;
       font-size: 0.75rem;
@@ -3945,6 +4095,18 @@
         <div id="profile-background"></div>
       </div>
 
+      <!-- Vylium Personality -->
+      <div class="card" id="profile-vylium-card" style="margin-bottom: 16px; background: linear-gradient(135deg, #f0abfc, #c084fc);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <div class="card-title" style="margin: 0; color: #581c87;">🧭 Vylium Type</div>
+            <div style="font-size: 0.8rem; color: #7e22ce;">Your personality profile for scholarship matching</div>
+          </div>
+          <button class="btn btn-secondary" style="padding: 8px 16px; width: auto; background: #9333ea; color: white; border: none;" onclick="openVyliumAssessment()">Take/Retake</button>
+        </div>
+        <div id="profile-vylium-summary"></div>
+      </div>
+
       <!-- Achievement Library -->
       <div class="card" style="margin-bottom: 16px; background: linear-gradient(135deg, #fef3c7, #fde68a);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -4065,9 +4227,10 @@
         <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;">Let your parents track your progress and send encouragement (up to 2 parents).</p>
 
         <div id="parent-invite-code" style="background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 12px;">
-          <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px;">Share this code with your parents:</div>
+          <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px;">Your parent invite code:</div>
           <div id="my-invite-code" style="font-size: 1.8rem; font-weight: 800; letter-spacing: 4px; color: #be185d;">--------</div>
-          <button onclick="copyInviteCode()" style="margin-top: 8px; padding: 8px 16px; background: #be185d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📋 Copy Code</button>
+          <button onclick="copyInviteCode()" style="margin-top: 12px; padding: 10px 20px; background: #be185d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📋 Copy Invite Link</button>
+          <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 8px;">Copies a message with link - just paste and send!</div>
         </div>
 
         <div id="linked-parents" style="display: none;">
@@ -9766,13 +9929,17 @@
         loadParentInviteCode();
         return;
       }
-      navigator.clipboard.writeText(code).then(() => {
+      // Create shareable message with link
+      const inviteLink = `https://jasminescholarshiphub.com/parents.html?code=${code}`;
+      const message = `I invited you to track my scholarship progress! Click here to connect:\n${inviteLink}`;
+
+      navigator.clipboard.writeText(message).then(() => {
         const btn = event.target;
         btn.textContent = '✓ Copied!';
-        setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+        setTimeout(() => btn.textContent = '📋 Copy Invite', 2000);
       }).catch(() => {
         // Fallback for older browsers
-        prompt('Copy this code:', code);
+        prompt('Copy and send this to your parent:', message);
       });
     }
 
@@ -10139,7 +10306,6 @@
           ${formatField('City', profile.city)}
           ${formatField('State', profile.state)}
           ${formatField('ZIP Code', profile.zipCode)}
-          ${formatField('Citizenship', profile.citizenship)}
 
           <div style="font-weight: 700; font-size: 0.85rem; color: var(--jazz-purple); margin-bottom: 8px; margin-top: 16px;">Education</div>
           ${formatField('High School', profile.school)}
@@ -10195,6 +10361,38 @@
         background.innerHTML = items.length > 0
           ? items.map(i => `<div style="padding: 8px 0; border-bottom: 1px solid #eee;">${i}</div>`).join('')
           : '<p style="color: var(--muted);">No background factors selected</p>';
+      }
+
+      // Vylium Personality Summary
+      const vyliumSummary = document.getElementById('profile-vylium-summary');
+      if (vyliumSummary && typeof VyliumProfile !== 'undefined') {
+        const vyliumData = VyliumProfile.getProfile();
+        if (vyliumData.isComplete && vyliumData.type) {
+          const topThree = vyliumData.topDimensions || [];
+          vyliumSummary.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-size: 2rem;">${vyliumData.type.emoji || '🌟'}</span>
+              <div>
+                <div style="font-weight: 800; font-size: 1.1rem; color: #581c87;">${vyliumData.type.name}</div>
+                <div style="font-size: 0.85rem; color: #7e22ce;">${vyliumData.type.tagline}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${topThree.map(d => `
+                <span style="padding: 4px 10px; background: white; color: ${d.color}; border: 2px solid ${d.color}; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+                  ${d.label} ${d.score}
+                </span>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          const progress = vyliumData.completionPercent || 0;
+          vyliumSummary.innerHTML = `
+            <p style="color: #7e22ce; margin-bottom: 8px;">
+              ${progress > 0 ? `${progress}% complete - continue to discover your type!` : 'Take the personality quiz to discover your Vylium Type and unlock better scholarship matches!'}
+            </p>
+          `;
+        }
       }
 
       // Fit tags
@@ -10344,13 +10542,6 @@
               <input type="text" id="bi-state" placeholder="State" value="${profile.state || ''}" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; min-width: 0; box-sizing: border-box;">
               <input type="text" id="bi-zip" placeholder="ZIP" value="${profile.zipCode || ''}" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; min-width: 0; box-sizing: border-box;">
             </div>
-            <select id="bi-citizenship" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; margin-bottom: 16px;">
-              <option value="">Citizenship Status</option>
-              <option value="US Citizen" ${profile.citizenship === 'US Citizen' ? 'selected' : ''}>US Citizen</option>
-              <option value="Permanent Resident" ${profile.citizenship === 'Permanent Resident' ? 'selected' : ''}>Permanent Resident</option>
-              <option value="DACA" ${profile.citizenship === 'DACA' ? 'selected' : ''}>DACA Recipient</option>
-              <option value="International" ${profile.citizenship === 'International' ? 'selected' : ''}>International Student</option>
-            </select>
 
             <div style="font-weight: 700; font-size: 0.9rem; color: var(--jazz-purple); margin-bottom: 12px;">Education</div>
             <input type="text" id="bi-school" placeholder="High School Name" value="${profile.school || ''}" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; margin-bottom: 10px;">
@@ -10433,7 +10624,6 @@
       profile.city = document.getElementById('bi-city')?.value.trim() || profile.city;
       profile.state = document.getElementById('bi-state')?.value.trim() || profile.state;
       profile.zipCode = document.getElementById('bi-zip')?.value.trim() || profile.zipCode;
-      profile.citizenship = document.getElementById('bi-citizenship')?.value || profile.citizenship;
 
       // Education
       profile.school = document.getElementById('bi-school')?.value.trim() || profile.school;

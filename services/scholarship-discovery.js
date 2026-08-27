@@ -126,6 +126,46 @@ const ScholarshipDiscovery = (function() {
       score += 15;
     }
 
+    // Vylium personality type matching (15 points)
+    if (typeof VyliumProfile !== 'undefined') {
+      maxScore += 15;
+      const vyliumProfile = VyliumProfile.getProfile();
+      if (vyliumProfile && vyliumProfile.isComplete && vyliumProfile.topDimensions) {
+        const topCodes = vyliumProfile.topDimensions.map(d => d.code);
+        // Map categories to Vylium dimensions
+        const categoryDimensionMap = {
+          'stem': ['R', 'I'],
+          'science': ['I'],
+          'technology': ['I', 'R'],
+          'engineering': ['R', 'I'],
+          'arts': ['A'],
+          'creative': ['A'],
+          'photography': ['A'],
+          'music': ['A'],
+          'writing': ['A', 'S'],
+          'leadership': ['E'],
+          'business': ['E', 'C'],
+          'entrepreneurship': ['E'],
+          'service': ['S'],
+          'community': ['S'],
+          'volunteer': ['S'],
+          'healthcare': ['S', 'I'],
+          'education': ['S'],
+          'trades': ['R'],
+          'vocational': ['R'],
+          'athletic': ['R'],
+          'military': ['R', 'E']
+        };
+        const matchDimensions = categoryDimensionMap[category] || [];
+        const vyliumMatch = topCodes.some(c => matchDimensions.includes(c));
+        if (vyliumMatch) {
+          score += 15;
+          const typeName = vyliumProfile.type?.name || 'Your personality type';
+          reasons.push(`${typeName} matches this field`);
+        }
+      }
+    }
+
     // Military family (10 points)
     if (scholarship.militaryFamily || (scholarship.category || '').toLowerCase().includes('military') ||
         (scholarship.category || '').toLowerCase().includes('veteran')) {

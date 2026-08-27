@@ -5,8 +5,8 @@
  * Based on Holland RIASEC + overlay traits
  * Non-clinical, education and career discovery assessment
  *
- * Version: August 27, 2026
- * Full 50-question assessment with independent 0-100 scoring
+ * Version: v3_30q_six_core - August 27, 2026
+ * 30-question assessment with independent 0-100 scoring
  */
 
 const VyliumProfile = (function() {
@@ -85,59 +85,46 @@ const VyliumProfile = (function() {
     'CE': { name: 'The Executor', emoji: '📈', tagline: 'Organized leader', description: 'You blend organization with business sense. You plan and execute efficiently.' }
   };
 
-  // 50 ASSESSMENT QUESTIONS from spec
+  // 30 ASSESSMENT QUESTIONS - v3_30q_six_core
+  // Dimensions: R=Builder, I=Analyst, A=Creator, S=Connector, E=Leader, C=Organizer
   const ASSESSMENT_QUESTIONS = [
-    { id: 1, text: 'Which sounds more satisfying?', a: 'Fixing something that is broken', b: 'Figuring out why it broke', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2, Numerical: 1 } } },
-    { id: 2, text: 'Which project would you rather do?', a: 'Design a poster, video, photo, or brand', b: 'Organize an event and get people to show up', score: { a: { A: 2 }, b: { E: 1, S: 1 } } },
-    { id: 3, text: 'When working on something important:', a: 'I like clear instructions', b: 'I like freedom to figure it out my own way', score: { a: { C: 2, Structure: 1 }, b: { A: 1, Explorer: 1, Flexibility: 1 } } },
-    { id: 4, text: 'Which sounds better?', a: 'Working with tools, machines, equipment, or materials', b: 'Working with ideas, data, or theories', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2 } } },
-    { id: 5, text: 'Which would you rather be known for?', a: 'Being dependable', b: 'Being original', score: { a: { C: 2 }, b: { A: 2 } } },
-    { id: 6, text: 'Which sounds more energizing?', a: 'Helping one person solve a problem', b: 'Convincing a group to support an idea', score: { a: { S: 2, Mission: 1 }, b: { E: 2, Leadership: 1 } } },
-    { id: 7, text: 'If you had a free Saturday:', a: 'Build, repair, cook, create, or work with your hands', b: 'Research something you became curious about', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2, Explorer: 1 } } },
-    { id: 8, text: 'Which class assignment sounds better?', a: 'Create something original', b: 'Analyze information and explain what it means', score: { a: { A: 2 }, b: { I: 2 } } },
-    { id: 9, text: 'You are put in charge of a group project:', a: 'I naturally start organizing people', b: 'I would rather take ownership of one important part', score: { a: { E: 2, Leadership: 1 }, b: { Independence: 2 } } },
-    { id: 10, text: 'Which environment sounds better?', a: 'Predictable schedule and expectations', b: 'Variety and changing challenges', score: { a: { C: 2, Structure: 1 }, b: { Explorer: 2, Flexibility: 1 } } },
-    { id: 11, text: 'Would you rather:', a: 'Teach someone a skill', b: 'Build them a tool that makes the skill easier', score: { a: { S: 2 }, b: { R: 1, I: 1 } } },
-    { id: 12, text: 'Would you rather:', a: 'Start a small business', b: 'Master a specialized technical skill', score: { a: { E: 2, Risk: 1 }, b: { I: 1, R: 1, Independence: 1 } } },
-    { id: 13, text: 'Which sounds more interesting?', a: 'Why people behave the way they do', b: 'How machines or systems work', score: { a: { S: 1, I: 1 }, b: { I: 2, R: 1 } } },
-    { id: 14, text: 'Which task would you pick?', a: 'Create the presentation', b: 'Check the numbers and facts', score: { a: { A: 2, Verbal: 1 }, b: { I: 2, Numerical: 1 } } },
-    { id: 15, text: 'At a new place:', a: 'I usually talk to people pretty quickly', b: 'I usually observe first', score: { a: { E: 1, S: 1, Verbal: 1 }, b: { I: 1, Independence: 1 } } },
-    { id: 16, text: 'Which would bother you more?', a: 'Rules that make no sense', b: 'A plan that keeps changing', score: { a: { Explorer: 1, A: 1 }, b: { C: 2, Structure: 1 } } },
-    { id: 17, text: 'Which sounds more meaningful?', a: 'Making something useful', b: 'Helping someone improve their life', score: { a: { R: 2, Practicality: 1 }, b: { S: 2, Mission: 1 } } },
-    { id: 18, text: 'Which sounds more fun?', a: 'Lead a competition/team', b: 'Solve a difficult puzzle', score: { a: { E: 2, Leadership: 1 }, b: { I: 2 } } },
-    { id: 19, text: 'Which result feels more rewarding?', a: '"That looks amazing."', b: '"That works perfectly."', score: { a: { A: 2 }, b: { R: 1, I: 1 } } },
-    { id: 20, text: 'Would you rather work:', a: 'Outdoors or moving around', b: 'Indoors at a desk or workstation', score: { a: { R: 1, Outdoor: 2 }, b: { C: 1, Indoor: 2 } } },
-    { id: 21, text: 'When learning:', a: 'Show me how and let me try', b: 'Explain how it works first', score: { a: { HandsOn: 2, R: 1 }, b: { I: 2 } } },
-    { id: 22, text: 'Which challenge sounds better?', a: 'Improve a real process', b: 'Invent a totally new idea', score: { a: { C: 1, R: 1, Practicality: 1 }, b: { A: 2, Explorer: 1 } } },
-    { id: 23, text: 'Would you rather:', a: 'Speak in front of 100 people', b: 'Spend 3 hours solving a difficult problem alone', score: { a: { E: 2, Verbal: 1 }, b: { I: 2, Independence: 1 } } },
-    { id: 24, text: 'What sounds better?', a: 'A job where every day is different', b: 'A job where you know exactly what is expected', score: { a: { Explorer: 2, Flexibility: 1 }, b: { C: 2, Structure: 1 } } },
-    { id: 25, text: 'Which would you rather improve?', a: "A person's experience", b: "A system's efficiency", score: { a: { S: 2 }, b: { I: 1, C: 1 } } },
-    { id: 26, text: 'Would you rather:', a: 'Create a YouTube channel', b: 'Build an app', score: { a: { A: 1, E: 1 }, b: { I: 1, R: 1 } } },
-    { id: 27, text: 'Would you rather:', a: 'Plan the trip', b: 'Be surprised by the trip', score: { a: { C: 2 }, b: { Explorer: 2 } } },
-    { id: 28, text: 'Which sounds more like you?', a: 'I notice details other people miss', b: 'I notice possibilities other people miss', score: { a: { C: 1, I: 1 }, b: { A: 1, E: 1 } } },
-    { id: 29, text: 'Would you rather:', a: 'Work in a small tight-knit team', b: 'Work in a big organization with many opportunities', score: { a: { Team: 2, SmallTeam: 2 }, b: { E: 1, LargeOrg: 2 } } },
-    { id: 30, text: 'Which sounds more satisfying?', a: 'Winning a competition', b: 'Helping the team succeed', score: { a: { E: 2 }, b: { S: 1, Team: 1 } } },
-    { id: 31, text: 'Would you rather:', a: 'Restore an old car', b: 'Design a new car concept', score: { a: { R: 2 }, b: { A: 1, I: 1 } } },
-    { id: 32, text: 'Would you rather:', a: 'Interview interesting people', b: 'Analyze a large dataset', score: { a: { S: 1, A: 1, Verbal: 1 }, b: { I: 2, Numerical: 1 } } },
-    { id: 33, text: 'Which sounds more appealing?', a: 'Run your own business', b: 'Have a stable career with clear advancement', score: { a: { E: 2, Risk: 2 }, b: { C: 2, Structure: 1 } } },
-    { id: 34, text: 'Would you rather:', a: 'Coach someone', b: 'Compete against someone', score: { a: { S: 2 }, b: { E: 2 } } },
-    { id: 35, text: 'Which sounds more fun?', a: 'Build furniture', b: 'Design the room', score: { a: { R: 2 }, b: { A: 2 } } },
-    { id: 36, text: 'Would you rather:', a: 'Work on one thing until you master it', b: 'Switch between different projects', score: { a: { Independence: 1, Structure: 1 }, b: { Explorer: 2, Flexibility: 1 } } },
-    { id: 37, text: 'Which role fits better?', a: 'The person with the big idea', b: 'The person who makes sure it gets done', score: { a: { A: 1, E: 1 }, b: { C: 2 } } },
-    { id: 38, text: 'Would you rather:', a: 'Help a customer face-to-face', b: 'Improve the process behind the scenes', score: { a: { S: 2, Verbal: 1 }, b: { I: 1, C: 1 } } },
-    { id: 39, text: 'Which would you choose?', a: 'A career with higher uncertainty but more upside', b: 'A career with more stability and predictability', score: { a: { Risk: 2, E: 1 }, b: { C: 2, Structure: 1 } } },
-    { id: 40, text: 'Which sounds more interesting?', a: 'Learn how to negotiate', b: 'Learn how to code', score: { a: { E: 2 }, b: { I: 2 } } },
-    { id: 41, text: 'Would you rather:', a: 'Spend a day shadowing a surgeon', b: 'Spend a day shadowing an architect', score: { a: { S: 1, I: 1 }, b: { A: 1, I: 1 } } },
-    { id: 42, text: 'Would you rather:', a: 'Volunteer at a community event', b: 'Compete in a business challenge', score: { a: { S: 2, Mission: 1 }, b: { E: 2 } } },
-    { id: 43, text: 'Which sounds better?', a: 'Be respected for expertise', b: 'Be known for leadership', score: { a: { I: 1, Independence: 1 }, b: { E: 2, Leadership: 1 } } },
-    { id: 44, text: 'Would you rather:', a: 'Create a new recipe', b: 'Perfect a classic recipe', score: { a: { A: 2, Explorer: 1 }, b: { C: 1, R: 1 } } },
-    { id: 45, text: 'Which sounds more satisfying?', a: 'Turn chaos into an organized plan', b: 'Turn a blank page into something new', score: { a: { C: 2 }, b: { A: 2 } } },
-    { id: 46, text: 'Would you rather:', a: 'Fix a difficult technical problem', b: 'Resolve a difficult disagreement', score: { a: { I: 2, R: 1 }, b: { S: 2, E: 1 } } },
-    { id: 47, text: 'Which sounds more like you?', a: 'I want my work to directly help people', b: 'I want my work to create something important', score: { a: { S: 2, Mission: 1 }, b: { A: 1, E: 1 } } },
-    { id: 48, text: 'Would you rather:', a: 'Follow a proven path to success', b: 'Try something no one around you has done', score: { a: { C: 2 }, b: { Explorer: 2, Risk: 1 } } },
-    { id: 49, text: 'Would you rather:', a: 'Be the expert everyone goes to', b: 'Be the leader everyone follows', score: { a: { I: 1, Independence: 1 }, b: { E: 2, Leadership: 1 } } },
-    { id: 50, text: 'What matters more in a future career?', a: 'Doing work that fits who I am', b: 'Having the strongest possible income and opportunity', score: { a: { Mission: 2 }, b: { E: 1, Practicality: 1 } } }
+    // PART 1 - CORE FORCED CHOICE (Q1-Q18)
+    { id: 1, text: 'Which sounds more satisfying?', a: 'Fixing or building something with your hands', b: 'Figuring out why something works', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2 } } },
+    { id: 2, text: 'Which project sounds better?', a: 'Design a poster, video, photo, brand, or other original creation', b: 'Organize an event and get people excited about it', score: { a: { A: 2 }, b: { E: 1, S: 1 } } },
+    { id: 3, text: 'When something important needs to get done:', a: 'I like a clear plan and knowing the steps', b: 'I like freedom to figure out my own approach', score: { a: { C: 2, Structure: 1 }, b: { A: 1, Explorer: 1, Flexibility: 1 } } },
+    { id: 4, text: 'Which sounds more interesting?', a: 'Working with tools, equipment, materials, or physical objects', b: 'Working with ideas, information, data, or theories', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2 } } },
+    { id: 5, text: 'Which would you rather be known for?', a: 'Being dependable and prepared', b: 'Being original and imaginative', score: { a: { C: 2 }, b: { A: 2 } } },
+    { id: 6, text: 'Which sounds more energizing?', a: 'Helping someone solve a problem', b: 'Convincing people to support an idea', score: { a: { S: 2, Mission: 1 }, b: { E: 2, Leadership: 1 } } },
+    { id: 7, text: 'If you had several free hours:', a: 'Make, repair, cook, build, or create something tangible', b: 'Research something you suddenly became curious about', score: { a: { R: 2, HandsOn: 1 }, b: { I: 2, Explorer: 1 } } },
+    { id: 8, text: 'Which assignment would you rather receive?', a: 'Create something original', b: 'Analyze information and explain what it means', score: { a: { A: 2 }, b: { I: 2 } } },
+    { id: 9, text: 'During a group project:', a: 'I naturally start organizing people and decisions', b: 'I would rather own one important part and do it well', score: { a: { E: 2, Leadership: 1 }, b: { Independence: 2 } } },
+    { id: 10, text: 'Which environment sounds better?', a: 'A predictable schedule with clear expectations', b: 'Variety, change, and new challenges', score: { a: { C: 2, Structure: 1 }, b: { Explorer: 2, Flexibility: 1 } } },
+    { id: 11, text: 'Which sounds more rewarding?', a: 'Teaching or helping someone improve', b: 'Making a tool or solution that helps solve the problem', score: { a: { S: 2 }, b: { R: 1, I: 1 } } },
+    { id: 12, text: 'Which sounds more exciting?', a: 'Starting or running something of your own', b: 'Becoming highly skilled at something difficult', score: { a: { E: 2, Risk: 1 }, b: { I: 1, R: 1, Independence: 1 } } },
+    { id: 13, text: 'Which would you rather understand?', a: 'Why people think and behave the way they do', b: 'How a complicated system works', score: { a: { S: 1, I: 1 }, b: { I: 2, R: 1 } } },
+    { id: 14, text: 'Which task would you choose?', a: 'Create the presentation and make it memorable', b: 'Check the facts, numbers, and logic', score: { a: { A: 2 }, b: { I: 2 } } },
+    { id: 15, text: 'At a new place where you do not know many people:', a: 'I usually start talking to people fairly quickly', b: 'I usually observe and get comfortable first', score: { a: { S: 1, E: 1 }, b: { I: 1, Independence: 1 } } },
+    { id: 16, text: 'Which would bother you more?', a: 'Rules that do not seem to have a purpose', b: 'A plan that keeps changing at the last minute', score: { a: { A: 1, Explorer: 1 }, b: { C: 2, Structure: 1 } } },
+    { id: 17, text: 'Which feels more meaningful?', a: 'Making something useful that people can actually use', b: 'Directly helping someone improve their situation', score: { a: { R: 2 }, b: { S: 2, Mission: 1 } } },
+    { id: 18, text: 'Which challenge sounds better?', a: 'Lead a team in a competition or project', b: 'Solve a difficult puzzle or problem', score: { a: { E: 2 }, b: { I: 2 } } },
+    // PART 2 - WOULD YOU RATHER (Q19-Q24)
+    { id: 19, text: 'Would you rather:', a: 'Build or restore something real', b: 'Design what the finished version should look like', score: { a: { R: 2 }, b: { A: 2 } } },
+    { id: 20, text: 'Would you rather:', a: 'Coach someone who is struggling', b: 'Compete against someone really good', score: { a: { S: 2 }, b: { E: 2 } } },
+    { id: 21, text: 'Would you rather:', a: 'Plan the entire trip', b: 'Find out where you are going when you get there', score: { a: { C: 2, Structure: 1 }, b: { Explorer: 2, Flexibility: 1 } } },
+    { id: 22, text: 'Would you rather:', a: 'Interview someone with an interesting story', b: 'Analyze a large set of information to discover a pattern', score: { a: { S: 1, A: 1 }, b: { I: 2 } } },
+    { id: 23, text: 'Would you rather:', a: 'Turn a messy situation into an organized plan', b: 'Turn a blank page into something nobody has seen before', score: { a: { C: 2 }, b: { A: 2 } } },
+    { id: 24, text: 'Would you rather:', a: 'Fix a difficult technical problem', b: 'Resolve a difficult disagreement between people', score: { a: { I: 1, R: 1 }, b: { S: 2, E: 1 } } },
+    // PART 3 - VALIDATION RATINGS (Q25-Q30) - "How much does this sound like you?"
+    { id: 25, type: 'rating', text: 'I enjoy making, fixing, or working with things I can see and touch.', dimension: 'R', label: 'Builder' },
+    { id: 26, type: 'rating', text: 'I enjoy figuring out how things work and solving difficult problems.', dimension: 'I', label: 'Analyst' },
+    { id: 27, type: 'rating', text: 'I like creating original ideas, designs, stories, images, or other things that express my imagination.', dimension: 'A', label: 'Creator' },
+    { id: 28, type: 'rating', text: 'I enjoy helping, teaching, encouraging, or connecting with other people.', dimension: 'S', label: 'Connector' },
+    { id: 29, type: 'rating', text: 'I like taking initiative, influencing decisions, or leading when something needs to happen.', dimension: 'E', label: 'Leader' },
+    { id: 30, type: 'rating', text: 'I like organizing information, planning ahead, and knowing important details are handled.', dimension: 'C', label: 'Organizer' }
   ];
+
+  // Rating weights for validation questions
+  const RATING_WEIGHTS = { 1: 0, 2: 0.5, 3: 1, 4: 1.5, 5: 2 };
 
   // HIDDEN STRENGTHS by type combination
   const HIDDEN_STRENGTHS = {
@@ -669,6 +656,13 @@ const VyliumProfile = (function() {
       const q = ASSESSMENT_QUESTIONS[index];
       const progress = ((index + 1) / ASSESSMENT_QUESTIONS.length) * 100;
 
+      // Check if this is a rating question
+      if (q.type === 'rating') {
+        renderRatingQuestion(container, q, index, progress);
+        return;
+      }
+
+      // Regular A/B question
       container.innerHTML = `
         <div class="vylium-assessment">
           <div class="vylium-intro-note" style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 16px;">
@@ -702,14 +696,87 @@ const VyliumProfile = (function() {
         });
       });
 
+      setupBackButton(container, index);
+    }
+
+    function renderRatingQuestion(container, q, index, progress) {
+      const isFirstRating = ASSESSMENT_QUESTIONS[index - 1]?.type !== 'rating';
+
+      container.innerHTML = `
+        <div class="vylium-assessment">
+          ${isFirstRating ? `
+            <div class="vylium-intro-note" style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 16px;">
+              Almost done! Rate how much each statement sounds like you.
+            </div>
+          ` : ''}
+          <div class="vylium-progress">
+            <div class="vylium-progress-bar" style="width: ${progress}%"></div>
+          </div>
+          <div class="vylium-question-number">${index + 1} of ${ASSESSMENT_QUESTIONS.length}</div>
+          <div class="vylium-question">${q.text}</div>
+          <div class="vylium-rating-options" style="display: flex; justify-content: center; gap: 8px; margin: 24px 0;">
+            ${[1,2,3,4,5].map(n => `
+              <button class="vylium-rating-btn" data-rating="${n}" style="
+                width: 52px; height: 52px;
+                border-radius: 50%;
+                border: 2px solid ${n <= 2 ? '#ef4444' : n === 3 ? '#f59e0b' : '#10b981'};
+                background: transparent;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: ${n <= 2 ? '#ef4444' : n === 3 ? '#f59e0b' : '#10b981'};
+                cursor: pointer;
+                transition: all 0.2s;
+              ">${n}</button>
+            `).join('')}
+          </div>
+          <div class="vylium-rating-labels" style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; padding: 0 8px;">
+            <span>Not me</span>
+            <span>Very me</span>
+          </div>
+          ${index > 0 ? `<button class="vylium-back-btn" style="margin-top: 16px; color: #6b7280; background: none; border: none; cursor: pointer; font-size: 14px;">← Back</button>` : ''}
+        </div>
+      `;
+
+      container.querySelectorAll('.vylium-rating-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rating = parseInt(btn.dataset.rating);
+          btn.style.background = btn.style.borderColor;
+          btn.style.color = 'white';
+          btn.style.transform = 'scale(1.1)';
+
+          // Apply rating weight to dimension
+          const weight = RATING_WEIGHTS[rating] || 0;
+          if (DIMENSIONS[q.dimension]) {
+            scores[q.dimension] = (scores[q.dimension] || 0) + weight;
+          }
+          answers[q.id] = rating;
+          saveState();
+
+          setTimeout(() => {
+            currentIndex++;
+            showQuestion(currentIndex);
+          }, 300);
+        });
+      });
+
+      setupBackButton(container, index);
+    }
+
+    function setupBackButton(container, index) {
       const backBtn = container.querySelector('.vylium-back-btn');
       if (backBtn) {
         backBtn.addEventListener('click', () => {
           const prevQ = ASSESSMENT_QUESTIONS[index - 1];
           if (prevQ && answers[prevQ.id]) {
-            const prevChoice = answers[prevQ.id];
-            if (prevQ.score && prevQ.score[prevChoice]) {
-              for (const [dim, points] of Object.entries(prevQ.score[prevChoice])) {
+            const prevAnswer = answers[prevQ.id];
+
+            if (prevQ.type === 'rating') {
+              const weight = RATING_WEIGHTS[prevAnswer] || 0;
+              if (DIMENSIONS[prevQ.dimension]) {
+                scores[prevQ.dimension] = Math.max(0, (scores[prevQ.dimension] || 0) - weight);
+              }
+            } else if (prevQ.score && prevQ.score[prevAnswer]) {
+              for (const [dim, points] of Object.entries(prevQ.score[prevAnswer])) {
                 if (DIMENSIONS[dim]) {
                   scores[dim] = Math.max(0, (scores[dim] || 0) - points);
                 } else {
@@ -817,13 +884,35 @@ const VyliumProfile = (function() {
           <em>Your profile can change as you answer more questions and explore.</em>
         </div>
 
-        <!-- Share CTA -->
-        <div class="share-cta-section" style="padding: 24px 0;">
-          <button class="btn-share-primary" onclick="VyliumProfile.shareResult()">
-            <span class="share-icon">📤</span>
-            <span class="share-text">Share My Result</span>
+        <!-- Scholarship Journey CTA - Primary Action -->
+        <div class="vylium-journey-cta">
+          <div class="vylium-journey-header">
+            <div class="vylium-journey-badge">YOUR MATCHES ARE READY</div>
+            <div class="vylium-journey-title">We Found Scholarships for ${type?.name || 'You'}</div>
+          </div>
+          <div class="vylium-journey-preview">
+            <div class="vylium-match-count">
+              <span class="match-number">12+</span>
+              <span class="match-label">scholarships matched to your profile</span>
+            </div>
+          </div>
+          <button class="vylium-journey-btn" onclick="VyliumProfile.startScholarshipJourney()">
+            <span>Get That Money 💰</span>
           </button>
-          <p class="share-subtext">Challenge a friend to see what they get!</p>
+          <div class="vylium-journey-footer">
+            <span>⏱️ 5 min to see your matches</span>
+          </div>
+        </div>
+
+        <!-- Share CTA - Secondary -->
+        <div class="share-cta-section" style="padding: 16px 0;">
+          <div class="share-divider">
+            <span>or share your results first</span>
+          </div>
+          <button class="btn-share-secondary" onclick="VyliumProfile.shareResult()">
+            <span class="share-icon">📤</span>
+            <span class="share-text">Challenge a Friend</span>
+          </button>
         </div>
 
         <div class="share-privacy-note" style="margin: 0 0 20px;">
@@ -869,6 +958,36 @@ const VyliumProfile = (function() {
         <button class="btn btn-secondary btn-small" onclick="openVyliumAssessment()">View</button>
       </div>
     `;
+  }
+
+  // Start scholarship journey - redirect to scholarship matching
+  function startScholarshipJourney() {
+    const profile = getProfile();
+    if (!profile || !profile.type) {
+      console.warn('Profile not complete');
+      return;
+    }
+    // Close the modal if open
+    const modal = document.getElementById('vylium-modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    // Navigate to scholarships section or trigger search
+    if (typeof ScholarshipSearch !== 'undefined' && ScholarshipSearch.openSearch) {
+      ScholarshipSearch.openSearch();
+    } else if (typeof ScholarshipDiscovery !== 'undefined' && ScholarshipDiscovery.showRecommended) {
+      ScholarshipDiscovery.showRecommended();
+    } else {
+      // Fallback: scroll to scholarships section
+      const scholarshipsSection = document.getElementById('scholarships-section');
+      if (scholarshipsSection) {
+        scholarshipsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    // Track engagement
+    if (typeof EngagementTracker !== 'undefined') {
+      EngagementTracker.track('scholarship_journey_started', { type: profile.type.name });
+    }
   }
 
   // Share result using ViralShare service
@@ -972,6 +1091,7 @@ const VyliumProfile = (function() {
     getScholarshipBoost,
     shareResult,
     compareProfiles,
+    startScholarshipJourney,
     // Supabase sync
     syncNow: saveToSupabase,
     convertGuestToUser,
