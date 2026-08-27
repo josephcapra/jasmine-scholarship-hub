@@ -357,7 +357,21 @@ const VyliumProfile = (function() {
           <em>Your profile can change as you answer more questions and explore.</em>
         </div>
 
-        <button class="btn btn-primary btn-block" onclick="VyliumProfile.reset(); location.reload();">Retake Assessment</button>
+        <!-- Share CTA -->
+        <div class="share-cta-section" style="padding: 24px 0;">
+          <button class="btn-share-primary" onclick="VyliumProfile.shareResult()">
+            <span class="share-icon">📤</span>
+            <span class="share-text">Share My Result</span>
+          </button>
+          <p class="share-subtext">Challenge a friend to see what they get!</p>
+        </div>
+
+        <div class="share-privacy-note" style="margin: 0 0 20px;">
+          <span class="privacy-icon">🔒</span>
+          <span>Only your Future Type and traits are shared. No personal info.</span>
+        </div>
+
+        <button class="btn btn-secondary btn-block" onclick="VyliumProfile.reset(); location.reload();">Retake Assessment</button>
       </div>
     `;
   }
@@ -398,6 +412,28 @@ const VyliumProfile = (function() {
   }
 
   // Scholarship matching boost
+  // Share result using ViralShare service
+  async function shareResult() {
+    if (typeof ViralShare === 'undefined') {
+      console.warn('ViralShare service not loaded');
+      return false;
+    }
+
+    const profile = getProfile();
+    if (!profile || !profile.type) {
+      console.warn('Profile not complete');
+      return false;
+    }
+
+    // Create share and trigger native sharing
+    const share = ViralShare.createShare();
+    if (share) {
+      await ViralShare.shareNative(share);
+      return true;
+    }
+    return false;
+  }
+
   function getScholarshipBoost(scholarshipCategories) {
     const profile = getProfile();
     const top = profile.topDimensions;
@@ -443,6 +479,7 @@ const VyliumProfile = (function() {
     renderAssessment,
     renderResults,
     renderMiniProfile,
-    getScholarshipBoost
+    getScholarshipBoost,
+    shareResult
   };
 })();

@@ -10,6 +10,8 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%237c3aed' width='100' height='100' rx='20'/><text y='.9em' x='10' font-size='70'>🌟</text></svg>">
   <meta name="theme-color" content="#7c3aed">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="scholarships-data.js"></script>
   <script src="services/onboarding.js?v=2"></script>
   <script src="services/encrypted-storage.js"></script>
@@ -3159,6 +3161,403 @@
       margin-bottom: 12px;
       color: #9d174d;
     }
+
+    /* ===========================================
+       VIRAL SHARE STYLES
+       =========================================== */
+
+    /* Share Result Page */
+    .share-result-page {
+      padding-bottom: 40px;
+    }
+
+    .type-reveal-card {
+      background: linear-gradient(135deg, var(--jazz-purple) 0%, var(--jazz-pink) 100%);
+      color: white;
+      padding: 48px 24px;
+      text-align: center;
+      border-radius: 0 0 30px 30px;
+      margin: -20px -20px 0;
+    }
+    .type-emoji-large {
+      font-size: 5rem;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .type-name-large {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .type-tagline {
+      font-size: 1rem;
+      opacity: 0.9;
+      max-width: 300px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .traits-section {
+      background: var(--card);
+      padding: 24px;
+      margin: -20px 0 0;
+      border-radius: 20px;
+      position: relative;
+      z-index: 1;
+      box-shadow: var(--shadow);
+    }
+    .traits-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .traits-bars { }
+    .trait-bar-item { margin-bottom: 18px; }
+    .trait-bar-item:last-child { margin-bottom: 0; }
+    .trait-bar-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .trait-bar-label {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .trait-bar-percent {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .trait-bar-track {
+      background: var(--border);
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .trait-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.8s ease-out;
+    }
+
+    .directions-section {
+      padding: 24px;
+      text-align: center;
+    }
+    .directions-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--muted);
+    }
+    .directions-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .direction-tag {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(236,72,153,0.1));
+      color: var(--jazz-purple);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .directions-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Primary Share CTA */
+    .share-cta-section {
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .btn-share-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 800;
+      padding: 20px 48px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(124,58,237,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      max-width: 320px;
+    }
+    .btn-share-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(124,58,237,0.5);
+    }
+    .btn-share-primary:active {
+      transform: translateY(0);
+    }
+    .share-icon { font-size: 1.4rem; }
+    .share-text { }
+    .share-subtext {
+      color: var(--muted);
+      margin-top: 14px;
+      font-size: 0.95rem;
+    }
+
+    .share-privacy-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 16px 24px;
+      background: var(--card);
+      border-radius: 12px;
+      margin: 0 24px;
+    }
+    .privacy-icon { font-size: 1rem; }
+
+    .result-disclaimer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 24px;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    /* Comparison Styles */
+    .comparison-page {
+      padding: 20px;
+    }
+    .comparison-header {
+      text-align: center;
+      padding: 16px 0 24px;
+    }
+    .comparison-header h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    .comparison-types {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .comparison-type-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      flex: 1;
+      max-width: 140px;
+    }
+    .comparison-type-card.highlight {
+      border-color: var(--jazz-purple);
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(236,72,153,0.08));
+    }
+    .comparison-type-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+    .comparison-type-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+    .comparison-type-name { font-size: 0.95rem; font-weight: 800; margin-top: 4px; }
+    .comparison-vs {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--muted);
+      padding: 0 8px;
+    }
+    .compatibility-section {
+      text-align: center;
+      padding: 28px;
+      background: var(--card);
+      border-radius: 20px;
+      margin: 20px 0;
+      box-shadow: var(--shadow);
+    }
+    .compatibility-score {
+      font-size: 3.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .compatibility-label {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 4px;
+    }
+    .comparison-section { margin: 20px 0; }
+    .comparison-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .comparison-list { list-style: none; padding: 0; }
+    .comparison-list li {
+      background: var(--card);
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+    }
+    .comparison-list.differences li {
+      background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(249,115,22,0.08));
+      border-color: rgba(236,72,153,0.2);
+    }
+    .challenge-section {
+      text-align: center;
+      padding: 32px 24px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(236,72,153,0.1));
+      border-radius: 24px;
+      margin: 28px 0;
+    }
+    .challenge-heading {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .challenge-subtext {
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+    .btn-challenge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--jazz-purple);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 16px 36px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(124,58,237,0.3);
+    }
+    .continue-section {
+      text-align: center;
+      padding: 32px 20px;
+      border-top: 1px solid var(--border);
+      margin-top: 28px;
+    }
+    .continue-section h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .continue-section p {
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .btn-continue {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .btn-skip {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 12px;
+    }
+
+    /* Share Settings Card */
+    .share-settings-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px;
+      box-shadow: var(--shadow);
+    }
+    .share-settings-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .share-link-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .share-link-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .share-link-copy {
+      padding: 12px 16px;
+      background: var(--jazz-purple);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .share-active-links {
+      margin-top: 20px;
+    }
+    .share-active-links-title {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .share-link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .share-link-info { }
+    .share-link-type { font-weight: 600; font-size: 0.9rem; }
+    .share-link-stats { font-size: 0.8rem; color: var(--muted); }
+    .share-link-disable {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -4669,6 +5068,8 @@
   <script src="services/friends.js"></script>
   <script src="services/weekly-report.js"></script>
   <script src="services/badges.js"></script>
+  <script src="services/viral-share.js"></script>
+  <script src="services/share-image.js"></script>
   <script src="services/knowledge-vault.js"></script>
   <script src="services/next-actions.js"></script>
   <script src="services/scholarship-search.js"></script>

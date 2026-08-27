@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- OG Meta Tags (dynamic via JS) -->
+  <meta property="og:title" content="What Future Type are you?">
+  <meta property="og:description" content="Take the 3-minute test and discover your Future Type.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- No indexing for privacy -->
+  <meta name="robots" content="noindex, nofollow">
+
+  <title>Future Type Challenge</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --jazz-purple: #7c3aed;
+      --jazz-purple-dark: #5b21b6;
+      --jazz-pink: #ec4899;
+      --jazz-gold: #f59e0b;
+      --bg: #faf5ff;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1a1025;
+        --card: #2d2235;
+        --text: #f3e8ff;
+        --muted: #a78bfa;
+        --border: #4c1d95;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1a1025;
+      --card: #2d2235;
+      --text: #f3e8ff;
+      --muted: #a78bfa;
+      --border: #4c1d95;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Loading State */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border);
+      border-top-color: var(--jazz-purple);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error State */
+    .error-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .error-icon { font-size: 4rem; margin-bottom: 20px; }
+    .error-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+    .error-message { color: var(--muted); margin-bottom: 30px; }
+
+    /* Landing Page */
+    .landing-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--jazz-purple) 0%, var(--jazz-pink) 100%);
+      color: white;
+      padding: 60px 24px 80px;
+      text-align: center;
+      position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--bg);
+      border-radius: 50% 50% 0 0;
+    }
+
+    .friend-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .friend-type-emoji {
+      font-size: 5rem;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .friend-type-name {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .challenge-text {
+      font-size: 1.2rem;
+      opacity: 0.95;
+      font-weight: 600;
+    }
+
+    /* Content Section */
+    .content {
+      flex: 1;
+      padding: 40px 24px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .prompt-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .subtext {
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-size: 1rem;
+    }
+
+    /* CTA Button */
+    .btn-take-test {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: linear-gradient(135deg, var(--jazz-purple) 0%, var(--jazz-pink) 100%);
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 800;
+      padding: 18px 48px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      max-width: 320px;
+    }
+    .btn-take-test:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(124, 58, 237, 0.5);
+    }
+    .btn-take-test:active {
+      transform: translateY(0);
+    }
+
+    .time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card);
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* No Account Notice */
+    .no-account-notice {
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-top: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .no-account-notice {
+        background: #064e3b;
+        color: #a7f3d0;
+      }
+    }
+
+    /* Test Container */
+    .test-container {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .test-container.active { display: flex; }
+
+    .test-header {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .test-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .test-subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .test-progress {
+      background: var(--border);
+      height: 8px;
+      border-radius: 4px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .test-progress-fill {
+      background: linear-gradient(90deg, var(--jazz-purple), var(--jazz-pink));
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .test-question-number {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .test-question {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 0 10px;
+    }
+
+    .test-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .test-option {
+      background: var(--card);
+      border: 2px solid var(--border);
+      padding: 20px 24px;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .test-option:hover {
+      border-color: var(--jazz-purple);
+      transform: translateY(-2px);
+    }
+    .test-option.selected {
+      background: var(--jazz-purple);
+      border-color: var(--jazz-purple);
+      color: white;
+    }
+
+    /* Result Container */
+    .result-container {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .result-container.active { display: flex; }
+
+    /* Comparison Container */
+    .comparison-container {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .comparison-container.active { display: flex; }
+
+    /* Share result styles (from main app) */
+    .type-reveal-card {
+      background: linear-gradient(135deg, var(--jazz-purple) 0%, var(--jazz-pink) 100%);
+      color: white;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .type-emoji-large { font-size: 5rem; margin-bottom: 16px; }
+    .type-name-large { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
+    .type-tagline { font-size: 1rem; opacity: 0.9; max-width: 300px; margin: 0 auto; }
+
+    .traits-section {
+      background: var(--card);
+      padding: 24px;
+      margin: -20px 16px 0;
+      border-radius: 20px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .traits-heading {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--muted);
+    }
+    .trait-bar-item { margin-bottom: 16px; }
+    .trait-bar-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .trait-bar-label { font-weight: 700; }
+    .trait-bar-percent { color: var(--muted); font-weight: 600; }
+    .trait-bar-track { background: var(--border); height: 10px; border-radius: 5px; overflow: hidden; }
+    .trait-bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+
+    .share-cta-section {
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .btn-share-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 800;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 25px rgba(124,58,237,0.35);
+      width: 100%;
+      max-width: 320px;
+    }
+    .share-subtext { color: var(--muted); margin-top: 12px; font-size: 0.9rem; }
+
+    /* Comparison styles */
+    .comparison-header { text-align: center; padding: 20px 0; }
+    .comparison-header h2 { font-size: 1.5rem; font-weight: 800; }
+
+    .comparison-types {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .comparison-type-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      flex: 1;
+      max-width: 140px;
+    }
+    .comparison-type-card.highlight {
+      border-color: var(--jazz-purple);
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(236,72,153,0.1));
+    }
+    .comparison-type-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+    .comparison-type-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+    .comparison-type-name { font-size: 0.95rem; font-weight: 800; }
+    .comparison-vs { font-size: 1rem; font-weight: 800; color: var(--muted); }
+
+    .compatibility-section {
+      text-align: center;
+      padding: 24px;
+      background: var(--card);
+      border-radius: 20px;
+      margin: 16px 0;
+    }
+    .compatibility-score {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .compatibility-label { color: var(--muted); font-weight: 600; }
+
+    .comparison-section { margin: 16px 0; }
+    .comparison-section-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+    .comparison-list { list-style: none; padding: 0; }
+    .comparison-list li {
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+    .comparison-list.differences li { background: rgba(236,72,153,0.1); }
+
+    .challenge-section {
+      text-align: center;
+      padding: 32px 20px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(236,72,153,0.1));
+      border-radius: 20px;
+      margin: 24px 0;
+    }
+    .challenge-heading { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    .challenge-subtext { color: var(--muted); margin-bottom: 20px; }
+    .btn-challenge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--jazz-purple);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 16px 32px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+
+    .continue-section {
+      text-align: center;
+      padding: 32px 20px;
+      border-top: 1px solid var(--border);
+      margin-top: 24px;
+    }
+    .continue-section h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .continue-section p { color: var(--muted); margin-bottom: 20px; font-size: 0.9rem; }
+    .btn-continue {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto 12px;
+      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .btn-skip {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .footer a { color: var(--jazz-purple); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <!-- Loading State -->
+  <div id="loading-view" class="loading-container">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Error State -->
+  <div id="error-view" class="error-container" style="display: none;">
+    <div class="error-icon">😕</div>
+    <div class="error-title">This link isn't available</div>
+    <div class="error-message">The shared result may have expired or been removed.</div>
+    <a href="/index.html" class="btn-take-test" style="max-width: 280px;">
+      Take the Future Type Test
+    </a>
+  </div>
+
+  <!-- Landing Page -->
+  <div id="landing-view" class="landing-container" style="display: none;">
+    <div class="hero">
+      <div class="friend-badge" id="friend-badge">A friend challenged you!</div>
+      <div class="friend-type-emoji" id="friend-emoji">🧭</div>
+      <div class="friend-type-name" id="friend-type">Future Type</div>
+      <div class="challenge-text">Think you'll get the same result?</div>
+    </div>
+
+    <div class="content">
+      <div class="prompt-text">What Future Type are you?</div>
+      <div class="subtext">15 quick questions. Find out how you compare.</div>
+
+      <button class="btn-take-test" id="start-test-btn">
+        <span>🚀</span>
+        <span>Take the 3-Minute Test</span>
+      </button>
+
+      <div class="time-badge">
+        <span>⏱️</span>
+        <span>~3 minutes</span>
+      </div>
+
+      <div class="no-account-notice">
+        <span>✓</span>
+        <span>No account needed to see your result</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      Built for my daughter and shared with the world
+    </div>
+  </div>
+
+  <!-- Test View -->
+  <div id="test-view" class="test-container">
+    <div class="test-header">
+      <div class="test-title">🧭 Future Type</div>
+      <div class="test-subtitle">Answer honestly — there are no wrong answers</div>
+    </div>
+    <div class="test-progress">
+      <div class="test-progress-fill" id="test-progress-fill" style="width: 0%"></div>
+    </div>
+    <div class="test-question-number" id="test-question-number">1 of 15</div>
+    <div class="test-question" id="test-question">Loading...</div>
+    <div class="test-options" id="test-options"></div>
+  </div>
+
+  <!-- Result View -->
+  <div id="result-view" class="result-container"></div>
+
+  <!-- Comparison View -->
+  <div id="comparison-view" class="comparison-container"></div>
+
+  <!-- Scripts -->
+  <script src="services/vylium-profile.js"></script>
+  <script src="services/engagement.js"></script>
+  <script src="services/viral-share.js"></script>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // Views
+      const loadingView = document.getElementById('loading-view');
+      const errorView = document.getElementById('error-view');
+      const landingView = document.getElementById('landing-view');
+      const testView = document.getElementById('test-view');
+      const resultView = document.getElementById('result-view');
+      const comparisonView = document.getElementById('comparison-view');
+
+      // State
+      let referralToken = null;
+      let referralData = null;
+      let currentQuestionIndex = 0;
+
+      // Get referral token from URL
+      function getReferralToken() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('t') || params.get('share');
+      }
+
+      // Show a specific view
+      function showView(view) {
+        [loadingView, errorView, landingView, testView, resultView, comparisonView].forEach(v => {
+          v.style.display = 'none';
+          v.classList.remove('active');
+        });
+        view.style.display = 'flex';
+        view.classList.add('active');
+      }
+
+      // Initialize
+      async function init() {
+        referralToken = getReferralToken();
+
+        if (!referralToken) {
+          // No token - direct access, show generic landing
+          showGenericLanding();
+          return;
+        }
+
+        // Start guest session
+        ViralShare.startGuestSession(referralToken);
+        ViralShare.trackEvent('referral_landing_viewed', { token: referralToken });
+
+        // Try to get referral data
+        referralData = ViralShare.getReferralData(referralToken);
+
+        if (referralData && referralData.isValid !== false) {
+          showReferralLanding(referralData);
+        } else {
+          // Try to fetch from server (or show generic if not found)
+          // For now, show generic since we don't have server-side storage yet
+          showGenericLanding();
+        }
+      }
+
+      function showGenericLanding() {
+        document.getElementById('friend-badge').textContent = 'Discover your Future Type';
+        document.getElementById('friend-emoji').textContent = '🧭';
+        document.getElementById('friend-type').textContent = 'Future Type';
+        showView(landingView);
+      }
+
+      function showReferralLanding(data) {
+        const friendName = data.firstName || 'A friend';
+        document.getElementById('friend-badge').textContent = `${friendName} challenged you!`;
+        document.getElementById('friend-emoji').textContent = data.typeEmoji || '🧭';
+        document.getElementById('friend-type').textContent = data.futureType || 'Future Type';
+
+        // Update OG tags dynamically
+        document.querySelector('meta[property="og:title"]').content = `${friendName} got ${data.futureType}. What will you get?`;
+
+        showView(landingView);
+      }
+
+      function showError() {
+        showView(errorView);
+      }
+
+      // Start test
+      function startTest() {
+        ViralShare.trackEvent('guest_test_started', { referralToken });
+        ViralShare.updateGuestSession({ testStarted: true });
+
+        // Reset VyliumProfile for fresh test
+        VyliumProfile.reset();
+
+        currentQuestionIndex = 0;
+        showView(testView);
+        showQuestion(currentQuestionIndex);
+      }
+
+      // Show question
+      function showQuestion(index) {
+        const questions = VyliumProfile.ASSESSMENT_QUESTIONS;
+        if (index >= questions.length) {
+          completeTest();
+          return;
+        }
+
+        const q = questions[index];
+        const progress = ((index + 1) / questions.length) * 100;
+
+        document.getElementById('test-progress-fill').style.width = progress + '%';
+        document.getElementById('test-question-number').textContent = `${index + 1} of ${questions.length}`;
+        document.getElementById('test-question').textContent = q.text;
+
+        const optionsContainer = document.getElementById('test-options');
+        optionsContainer.innerHTML = `
+          <button class="test-option" data-choice="a">${q.a}</button>
+          <button class="test-option" data-choice="b">${q.b}</button>
+        `;
+
+        optionsContainer.querySelectorAll('.test-option').forEach(btn => {
+          btn.addEventListener('click', () => handleAnswer(q.id, btn.dataset.choice, btn));
+        });
+      }
+
+      function handleAnswer(questionId, choice, btn) {
+        btn.classList.add('selected');
+        VyliumProfile.answer(questionId, choice);
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          showQuestion(currentQuestionIndex);
+        }, 300);
+      }
+
+      // Complete test
+      function completeTest() {
+        const profile = VyliumProfile.getProfile();
+
+        ViralShare.trackEvent('guest_test_completed', {
+          referralToken,
+          futureType: profile.type?.name
+        });
+
+        ViralShare.updateGuestSession({
+          testCompleted: true,
+          profile: profile
+        });
+
+        // Show result, then comparison if we have referral data
+        if (referralData && referralData.futureType) {
+          showComparison(profile);
+        } else {
+          showResult(profile);
+        }
+      }
+
+      // Show result
+      function showResult(profile) {
+        ViralShare.renderShareResult('result-view', (share) => {
+          ViralShare.trackEvent('share_from_result', { token: share.token });
+        });
+        showView(resultView);
+      }
+
+      // Show comparison
+      function showComparison(profile) {
+        ViralShare.renderComparison('comparison-view', profile, referralData, (share) => {
+          ViralShare.trackEvent('challenge_friend_clicked', { token: share.token });
+        });
+        showView(comparisonView);
+      }
+
+      // Event listeners
+      document.getElementById('start-test-btn').addEventListener('click', startTest);
+
+      // Initialize on load
+      init();
+    })();
+  </script>
+</body>
+</html>

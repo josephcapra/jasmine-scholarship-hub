@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Jasmine's Scholarship Hub - AI-powered scholarship discovery and application assistant",
   "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js"
+  },
   "dependencies": {
     "mammoth": "^1.6.0",
     "pdf-parse": "^1.1.1",
