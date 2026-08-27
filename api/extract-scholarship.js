@@ -55,22 +55,49 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Could not fetch the scholarship page. The site may be blocking requests.' });
     }
 
-    // Use OpenAI to extract scholarship information
-    const systemPrompt = `You are a scholarship information extractor. Given the text content of a scholarship webpage, extract the key details and return them as JSON.
+    // Use OpenAI to extract scholarship information with standardized fields
+    const systemPrompt = `You are a scholarship information extractor. Given the text content of a scholarship webpage, extract ALL available details and return them as JSON.
+
+IMPORTANT: Be thorough. Extract every piece of information you can find. Standardize all data.
 
 Return ONLY valid JSON with this structure (use null for fields you cannot find):
 {
-  "name": "Full scholarship name",
-  "sponsor": "Organization offering the scholarship",
-  "amount": "$X,XXX or range like $1,000 - $5,000",
-  "deadline": "Month Day, Year format (e.g., October 31, 2026)",
-  "description": "Brief 1-2 sentence description of the scholarship",
-  "requirements": ["requirement 1", "requirement 2"],
-  "eligibility": ["eligibility criteria 1", "criteria 2"],
-  "essayRequired": true or false,
-  "essayTopic": "Essay prompt or topic if mentioned",
-  "applicationUrl": "Direct application link if different from main URL",
-  "category": "arts, military, academic, service, business, stem, or general"
+  "name": "Full official scholarship name",
+  "sponsor": "Organization/company offering the scholarship",
+  "amount": "$X,XXX (single number or range like $1,000 - $5,000)",
+  "amountNumeric": 1000,
+  "deadline": "YYYY-MM-DD format",
+  "deadlineType": "rolling, annual, or one-time",
+  "description": "2-3 sentence description of what the scholarship is for",
+
+  "eligibility": [
+    {"type": "gpa", "value": "3.0+", "required": true},
+    {"type": "grade", "value": "High school senior", "required": true},
+    {"type": "location", "value": "Florida resident", "required": false},
+    {"type": "major", "value": "STEM fields", "required": false},
+    {"type": "citizenship", "value": "US Citizen", "required": true}
+  ],
+
+  "requirements": {
+    "essay": {"required": true, "prompt": "Essay topic/prompt if stated", "wordLimit": 500, "format": "PDF or online"},
+    "recommendation": {"required": false, "count": 0, "from": "teacher, counselor, etc"},
+    "transcript": {"required": true, "type": "official or unofficial"},
+    "financialInfo": {"required": false, "type": "FAFSA, income docs, etc"},
+    "portfolio": {"required": false, "type": "art, writing, etc"},
+    "interview": {"required": false},
+    "video": {"required": false, "length": "2 minutes"},
+    "other": ["Any other requirements not listed above"]
+  },
+
+  "applicationUrl": "Direct application link",
+  "howToApply": "Step-by-step application instructions",
+  "selectionCriteria": ["Academic achievement", "Community service", "Financial need"],
+  "category": "stem, arts, business, service, military, athletic, academic, need-based, or general",
+  "renewable": false,
+  "renewalTerms": "If renewable, terms for renewal",
+  "awardCount": 10,
+  "competitionLevel": "low, medium, or high (based on award count vs typical applicants)",
+  "tips": ["Specific tips for winning this scholarship based on what they emphasize"]
 }`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

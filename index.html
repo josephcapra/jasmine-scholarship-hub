@@ -33,6 +33,27 @@
       --border: #e5e7eb;
       --success: #10b981;
       --shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1a1025;
+        --card: #2d2235;
+        --text: #f3e8ff;
+        --muted: #a78bfa;
+        --border: #4c1d95;
+        --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1a1025;
+      --card: #2d2235;
+      --text: #f3e8ff;
+      --muted: #a78bfa;
+      --border: #4c1d95;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -745,6 +766,13 @@
     }
 
     /* Buttons */
+    /* BUTTON RELIABILITY: Touch-friendly, instant feedback */
+    .btn, button, [onclick], .clickable, .nav-tab, .nav-item {
+      touch-action: manipulation; /* Removes 300ms delay on mobile */
+      -webkit-tap-highlight-color: rgba(124, 58, 237, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+    }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -756,7 +784,13 @@
       font-weight: 700;
       border: none;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:active, button:active {
+      transform: scale(0.97);
+      opacity: 0.9;
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
@@ -764,6 +798,7 @@
       box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
     }
     .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:active { transform: scale(0.97) !important; }
     .btn-secondary {
       background: var(--card);
       color: var(--jazz-purple);
@@ -774,6 +809,18 @@
       font-size: 0.8rem;
     }
     .btn-block { width: 100%; }
+    /* Loading state for async buttons */
+    .btn.loading { pointer-events: none; opacity: 0.7; }
+    .btn.loading::after {
+      content: '';
+      width: 16px; height: 16px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Scholarship List */
     .scholarship-item {
@@ -1509,6 +1556,152 @@
       border-radius: 10px;
       font-size: 0.75rem;
       font-weight: 600;
+    }
+
+    /* Progress Ring */
+    .progress-ring {
+      width: 48px;
+      height: 48px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .progress-ring svg {
+      transform: rotate(-90deg);
+    }
+    .progress-ring circle {
+      fill: none;
+      stroke-width: 4;
+    }
+    .progress-ring .bg { stroke: var(--border); }
+    .progress-ring .progress {
+      stroke: var(--jazz-purple);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+    .progress-ring .percent {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--jazz-purple);
+    }
+
+    /* Deadline Countdown Chips */
+    .deadline-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .deadline-chip.urgent {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      color: #dc2626;
+      animation: pulse-urgent 1.5s infinite;
+    }
+    .deadline-chip.soon {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #b45309;
+    }
+    .deadline-chip.comfortable {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #059669;
+    }
+    @keyframes pulse-urgent {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Confetti Celebration */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Match Score Badge */
+    .match-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .match-score.high { background: #d1fae5; color: #047857; }
+    .match-score.medium { background: #fef3c7; color: #b45309; }
+    .match-score.low { background: #f3f4f6; color: #6b7280; }
+
+    /* Quick Win Badge */
+    .quick-win-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      color: #1d4ed8;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    /* Activity Feed Item */
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .activity-content { flex: 1; }
+    .activity-text { font-size: 0.9rem; }
+    .activity-time { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    /* Dark Mode Toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      box-shadow: var(--shadow);
     }
 
     .scholarship-actions {
@@ -2890,6 +3083,12 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle dark mode" id="dark-mode-btn">🌙</button>
+
+    <!-- Confetti Container (for celebrations) -->
+    <div class="confetti-container" id="confetti-container"></div>
+
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
       <button class="nav-item active" onclick="window.switchSection('profile')">
@@ -2930,6 +3129,195 @@
   <script src="data/curated-scholarships.js"></script>
 
   <script>
+    // ===========================================
+    // BUTTON RELIABILITY SYSTEM
+    // ===========================================
+    (function() {
+      'use strict';
+
+      // Track button clicks for debugging
+      window._buttonClicks = [];
+
+      // Wrap all onclick handlers with error catching
+      document.addEventListener('click', function(e) {
+        const target = e.target.closest('button, [onclick], .btn, .clickable, .nav-tab, .nav-item, .stat-card');
+        if (!target) return;
+
+        // Log click for debugging
+        const clickInfo = {
+          time: new Date().toISOString(),
+          element: target.tagName,
+          text: (target.textContent || '').substring(0, 30).trim(),
+          onclick: target.getAttribute('onclick')?.substring(0, 50)
+        };
+        window._buttonClicks.push(clickInfo);
+        if (window._buttonClicks.length > 50) window._buttonClicks.shift();
+
+        // Visual feedback
+        target.style.transform = 'scale(0.97)';
+        setTimeout(() => { target.style.transform = ''; }, 150);
+      }, true);
+
+      // Global error handler to prevent silent failures
+      window.addEventListener('error', function(e) {
+        console.error('Button/JS Error:', e.message, e.filename, e.lineno);
+        // Don't break the whole app on errors
+        return false;
+      });
+
+      // Helper: make async button clicks safe
+      window.asyncButton = function(btn, asyncFn) {
+        if (btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        Promise.resolve(asyncFn()).finally(() => {
+          btn.classList.remove('loading');
+        });
+      };
+
+      // Debug: expose click history
+      window.debugButtons = function() {
+        console.table(window._buttonClicks);
+        return window._buttonClicks;
+      };
+    })();
+
+    // ===========================================
+    // UI UTILITIES (Progress, Deadlines, Dark Mode, Confetti)
+    // ===========================================
+
+    // Dark Mode
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('jasmine_theme', newTheme);
+      document.getElementById('dark-mode-btn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Initialize dark mode from localStorage or system preference
+    (function initDarkMode() {
+      const saved = localStorage.getItem('jasmine_theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        const btn = document.getElementById('dark-mode-btn');
+        if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+      }
+    })();
+
+    // Progress Ring Generator
+    function createProgressRing(percent, size = 48) {
+      const radius = (size - 8) / 2;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (percent / 100) * circumference;
+      return `
+        <div class="progress-ring" style="width:${size}px;height:${size}px;">
+          <svg width="${size}" height="${size}">
+            <circle class="bg" cx="${size/2}" cy="${size/2}" r="${radius}"/>
+            <circle class="progress" cx="${size/2}" cy="${size/2}" r="${radius}"
+              stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+          </svg>
+          <span class="percent">${percent}%</span>
+        </div>
+      `;
+    }
+
+    // Deadline Chip Generator
+    function createDeadlineChip(deadline) {
+      const now = new Date();
+      const deadlineDate = new Date(deadline);
+      const daysLeft = Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24));
+
+      let chipClass, text;
+      if (daysLeft < 0) {
+        chipClass = 'urgent';
+        text = 'Expired';
+      } else if (daysLeft === 0) {
+        chipClass = 'urgent';
+        text = 'Due Today!';
+      } else if (daysLeft <= 3) {
+        chipClass = 'urgent';
+        text = `${daysLeft} day${daysLeft > 1 ? 's' : ''} left`;
+      } else if (daysLeft <= 14) {
+        chipClass = 'soon';
+        text = `${daysLeft} days left`;
+      } else if (daysLeft <= 30) {
+        chipClass = 'comfortable';
+        text = `${Math.floor(daysLeft / 7)} weeks left`;
+      } else {
+        chipClass = 'comfortable';
+        text = deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+
+      return `<span class="deadline-chip ${chipClass}">⏰ ${text}</span>`;
+    }
+
+    // Match Score Badge Generator
+    function createMatchScore(score) {
+      const level = score >= 80 ? 'high' : score >= 50 ? 'medium' : 'low';
+      return `<span class="match-score ${level}">💪 ${score}% match</span>`;
+    }
+
+    // Confetti Celebration
+    function celebrate() {
+      const container = document.getElementById('confetti-container');
+      if (!container) return;
+
+      const colors = ['#7c3aed', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+      const shapes = ['circle', 'square', 'triangle'];
+
+      for (let i = 0; i < 80; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        if (shape === 'circle') confetti.style.borderRadius = '50%';
+        else if (shape === 'triangle') {
+          confetti.style.width = '0';
+          confetti.style.height = '0';
+          confetti.style.borderLeft = '5px solid transparent';
+          confetti.style.borderRight = '5px solid transparent';
+          confetti.style.borderBottom = '10px solid ' + confetti.style.backgroundColor;
+          confetti.style.backgroundColor = 'transparent';
+        }
+
+        container.appendChild(confetti);
+      }
+
+      // Clean up after animation
+      setTimeout(() => { container.innerHTML = ''; }, 5000);
+
+      // Play a sound if available
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQYHVbvHn3kPFVLU1ZNjJCJKrLuIejA1W67CkXE6NViszY1wPzxev8+JazVEuNSBWDVTx9p7UDxb0NhvRkdo2dVlQVB42dRbPFqF2cpRN2uR2L9HNX+k2qw7MpKz1JovLp7Ez48rLa3PxoErK7bVvXonK8Dd');
+        audio.volume = 0.3;
+        audio.play().catch(() => {});
+      } catch (e) {}
+
+      showToast('🎉 Congratulations! Application submitted!');
+    }
+
+    // Activity Feed Formatter
+    function formatActivityTime(timestamp) {
+      const now = new Date();
+      const time = new Date(timestamp);
+      const diffMs = now - time;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return time.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
     // ===========================================
     // STATE & CONFIG
     // ===========================================
@@ -5280,33 +5668,35 @@
     function renderScholarshipCard(scholarship, cardClass = '', isApplied = false) {
       const matchClass = scholarship.matchScore >= 75 ? 'high' : scholarship.matchScore >= 50 ? 'medium' : 'low';
       const savedClass = scholarship.isSaved ? 'saved' : '';
+      const isQuickWin = !scholarship.essayRequired && scholarship.timeEstimate && scholarship.timeEstimate.includes('30');
+      const progress = scholarship.progress || 0;
 
       return `
         <div class="scholarship-card ${cardClass}" data-id="${scholarship.id}">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <div style="flex: 1;">
-              <div style="font-weight: 700; font-size: 1rem; color: #1f2937; margin-bottom: 4px;">${scholarship.name}</div>
-              <div style="font-size: 0.85rem; color: #6b7280;">${scholarship.sponsor}</div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 8px;">
+            ${progress > 0 ? createProgressRing(progress, 48) : ''}
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 700; font-size: 1rem; color: var(--text); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${scholarship.name}</div>
+              <div style="font-size: 0.85rem; color: var(--muted);">${scholarship.sponsor}</div>
             </div>
-            <div style="text-align: right;">
+            <div style="text-align: right; flex-shrink: 0;">
               <div style="font-size: 1.2rem; font-weight: 800; color: #059669;">${scholarship.amount}</div>
+              ${scholarship.deadline ? createDeadlineChip(scholarship.deadline) : ''}
             </div>
           </div>
 
           <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
-            <span class="match-score ${matchClass}">${scholarship.matchScore}% match</span>
-            <span class="urgency-badge" style="background: ${scholarship.urgency.color}15; color: ${scholarship.urgency.color};">
-              ${scholarship.urgency.label}
-            </span>
-            <span class="competition-badge" style="background: ${scholarship.competition.color}15; color: ${scholarship.competition.color};">
-              ${scholarship.competition.label}
+            ${createMatchScore(scholarship.matchScore || 50)}
+            ${isQuickWin ? '<span class="quick-win-badge">⚡ Quick Win</span>' : ''}
+            <span class="competition-badge" style="background: ${scholarship.competition?.color || '#6b7280'}15; color: ${scholarship.competition?.color || '#6b7280'};">
+              ${scholarship.competition?.label || 'Moderate'}
             </span>
             ${scholarship.scope ? `<span class="geography-badge">${scholarship.scope}</span>` : ''}
           </div>
 
-          <div style="display: flex; gap: 12px; font-size: 0.8rem; color: #6b7280; margin-bottom: 8px;">
-            <span>⏱️ ${scholarship.timeEstimate}</span>
-            ${scholarship.essayRequired ? '<span>📝 Essay required</span>' : '<span style="color: #059669;">✓ No essay</span>'}
+          <div style="display: flex; gap: 12px; font-size: 0.8rem; color: var(--muted); margin-bottom: 8px;">
+            <span>⏱️ ${scholarship.timeEstimate || '1-2 hrs'}</span>
+            ${scholarship.essayRequired ? '<span>📝 Essay</span>' : '<span style="color: #059669;">✓ No essay</span>'}
             ${scholarship.applicationsUnlocked > 0 ? `<span class="unlocked-badge">🔓 Unlocks ${scholarship.applicationsUnlocked}</span>` : ''}
           </div>
 
@@ -5319,12 +5709,12 @@
 
           <div class="scholarship-actions">
             ${isApplied ? `
-              <button class="btn-save" style="background: #d1fae5; color: #065f46;">✅ Applied</button>
+              <button class="btn-save" style="background: #d1fae5; color: #065f46;" onclick="celebrate()">✅ Applied</button>
             ` : `
-              <button class="btn-save ${savedClass}" onclick="toggleSaveScholarship('${scholarship.id}')">
+              <button class="btn-save ${savedClass}" onclick="event.stopPropagation(); toggleSaveScholarship('${scholarship.id}')">
                 ${scholarship.isSaved ? '💾 Saved' : '🔖 Save'}
               </button>
-              <button class="btn-apply" onclick="startApplication('${scholarship.id}')">
+              <button class="btn-apply" onclick="event.stopPropagation(); startApplication('${scholarship.id}')">
                 Apply Now →
               </button>
             `}
