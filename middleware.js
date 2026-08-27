@@ -1,12 +1,13 @@
 /**
  * Vercel Edge Middleware - Rate Limiting
  * Protects AI endpoints from abuse
+ * Uses standard Web APIs (no Next.js dependency)
  */
-
-import { NextResponse } from 'next/server';
 
 const RATE_LIMIT_WINDOW = 3600000; // 1 hour in ms
 const MAX_AI_REQUESTS = 30; // max AI requests per hour
+
+// In-memory rate limit store (resets on cold start, which is fine for edge)
 const rateLimitStore = new Map();
 
 function getClientIP(request) {
@@ -24,8 +25,9 @@ function cleanupOldEntries() {
   }
 }
 
-export function middleware(request) {
-  const { pathname } = request.nextUrl;
+export default function middleware(request) {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
 
   // Only rate limit AI endpoints
   const aiEndpoints = [
@@ -42,7 +44,7 @@ export function middleware(request) {
   ];
 
   if (!aiEndpoints.some(ep => pathname.startsWith(ep))) {
-    return NextResponse.next();
+    return; // Let request continue without modification
   }
 
   // Clean up old entries periodically
@@ -62,7 +64,7 @@ export function middleware(request) {
 
   if (clientData.count > MAX_AI_REQUESTS) {
     const resetTime = new Date(clientData.windowStart + RATE_LIMIT_WINDOW).toISOString();
-    return new NextResponse(
+    return new Response(
       JSON.stringify({
         error: 'Rate limit exceeded',
         message: `Too many AI requests. Limit: ${MAX_AI_REQUESTS} per hour.`,
@@ -81,11 +83,8 @@ export function middleware(request) {
     );
   }
 
-  const response = NextResponse.next();
-  response.headers.set('X-RateLimit-Limit', MAX_AI_REQUESTS.toString());
-  response.headers.set('X-RateLimit-Remaining', (MAX_AI_REQUESTS - clientData.count).toString());
-
-  return response;
+  // Continue with request - rate limit headers will be added by the API function
+  return;
 }
 
 export const config = {
