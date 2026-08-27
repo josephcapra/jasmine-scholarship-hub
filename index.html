@@ -6140,6 +6140,7 @@
 
     function loadScholarships() {
       const list = document.getElementById('scholarship-list');
+      if (!list) return; // Element doesn't exist in new UI
       if (!window.JASMINE_SCHOLARSHIPS) { list.innerHTML = '<p>Loading scholarships...</p>'; return; }
 
       // Combine built-in scholarships with parent-added custom ones
