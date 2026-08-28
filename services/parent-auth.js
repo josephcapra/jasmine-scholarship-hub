@@ -666,19 +666,25 @@ const ParentAuth = (function() {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then(user => {
+      .then(async user => {
         console.log('Google user info:', user);
-        // Prefill form and proceed
-        setTimeout(() => {
-          startAuth();
+        // Directly create/login parent profile
+        try {
+          const parent = await signup(user.name || 'Parent', user.email);
+          console.log('Parent profile created/found:', parent);
+          showToast('Signed in as ' + user.email, 'success');
+          // Show step 2 (connect with student)
           setTimeout(() => {
-            const nameInput = document.getElementById('pam-name');
-            const emailInput = document.getElementById('pam-email');
-            if (nameInput) nameInput.value = user.name || '';
-            if (emailInput) emailInput.value = user.email || '';
-            handleStep1();
-          }, 500);
-        }, 100);
+            startAuth();
+            setTimeout(() => {
+              document.getElementById('pam-step-1').style.display = 'none';
+              document.getElementById('pam-step-2').style.display = 'block';
+            }, 100);
+          }, 100);
+        } catch (e) {
+          console.error('Profile creation error:', e);
+          showToast('Error creating profile: ' + e.message, 'error');
+        }
       })
       .catch(e => {
         console.error('OAuth callback error:', e);

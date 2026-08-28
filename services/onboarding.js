@@ -245,9 +245,14 @@ const Onboarding = (function() {
             </div>
 
             <div class="ob-auth-buttons">
-              <button type="button" class="ob-btn ob-btn-primary ob-btn-large" onclick="Onboarding.next()">
-                Get Started Free →
+              <button type="button" class="ob-btn ob-btn-primary ob-btn-large" onclick="Onboarding.selectRole('student'); Onboarding.next();">
+                I'm a Student →
               </button>
+              <button type="button" class="ob-btn ob-btn-secondary ob-btn-large" onclick="window.location.href='parents.html'">
+                I'm a Parent →
+              </button>
+            </div>
+            <div style="text-align: center; margin-top: 12px;">
               <button type="button" class="ob-btn ob-btn-link" onclick="Onboarding.showLogin()">
                 Already have an account? Sign in
               </button>
@@ -260,10 +265,10 @@ const Onboarding = (function() {
             </div>
 
             <div class="ob-beta-notice">
-              <div class="ob-beta-badge">🧪 BETA</div>
+              <div class="ob-beta-badge">🎉 INVITED</div>
               <div class="ob-beta-text">
-                <strong>You're invited to our limited beta!</strong>
-                <p>Free access in exchange for periodic feedback to help us improve.</p>
+                <strong>You've been invited to join our Beta Testing Team!</strong>
+                <p>Get full access to all features completely free in exchange for answering periodic survey questions to help us improve.</p>
               </div>
             </div>
           </div>`;
