@@ -936,7 +936,7 @@ const VyliumProfile = (function() {
         <div class="vylium-mini vylium-mini-start">
           <div class="vylium-mini-icon">🧭</div>
           <div class="vylium-mini-text">
-            <div class="vylium-mini-title">Discover Your Vylium Type</div>
+            <div class="vylium-mini-title">Discover Your Vylium Personality Type</div>
             <div class="vylium-mini-desc">Answer ${ASSESSMENT_QUESTIONS.length} quick questions to unlock your profile</div>
           </div>
           <button class="btn btn-primary btn-small" onclick="openVyliumAssessment()">Start</button>
