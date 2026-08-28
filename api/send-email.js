@@ -12,7 +12,8 @@ export default async function handler(req, res) {
 
   const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
   const JASMINE_EMAIL = 'jasminecapra848@gmail.com';
-  const FROM_EMAIL = 'joe@josephcapra.com';
+  const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'notifications@jasminescholarship.app';
+  const FEEDBACK_TO_EMAIL = 'joe@josephcapra.com';
 
   if (!SENDGRID_API_KEY) {
     return res.status(500).json({ error: 'Email service not configured' });
@@ -84,7 +85,7 @@ export default async function handler(req, res) {
         </div>`;
     } else if (body.to && body.subject && body.text) {
       // Direct email format (for feedback, etc.)
-      const toEmail = body.to === 'joe@josephcapra.com' ? body.to : FROM_EMAIL; // Only allow sending to Joe
+      const toEmail = FEEDBACK_TO_EMAIL; // Always send feedback to Joe
       subject = body.subject;
       htmlContent = `
         <div style="font-family: 'Nunito', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
