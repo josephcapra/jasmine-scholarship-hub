@@ -9,6 +9,22 @@ const ParentAuth = (function() {
   const PARENT_ID_KEY = 'jasmine_parent_id';
   const PARENT_EMAIL_KEY = 'jasmine_parent_email';
 
+  function showParentError(message, isSuccess = false) {
+    let errorEl = document.getElementById('pam-inline-error');
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.id = 'pam-inline-error';
+      const box = document.querySelector('.pam-box');
+      if (box) box.insertBefore(errorEl, box.firstChild);
+    }
+    errorEl.style.cssText = isSuccess
+      ? 'background: #d1fae5; border: 2px solid #6ee7b7; color: #065f46; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; text-align: center;'
+      : 'background: #fef2f2; border: 2px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; text-align: center;';
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    setTimeout(() => { if (errorEl) errorEl.style.display = 'none'; }, 5000);
+  }
+
   function isLoggedIn() {
     return !!localStorage.getItem(PARENT_ID_KEY);
   }
@@ -461,7 +477,7 @@ const ParentAuth = (function() {
     const email = document.getElementById('pam-email').value.trim();
 
     if (!name || !email) {
-      alert('Please fill in all fields');
+      showParentError('Please fill in all fields');
       return;
     }
 
@@ -470,7 +486,7 @@ const ParentAuth = (function() {
       document.getElementById('pam-step-1').style.display = 'none';
       document.getElementById('pam-step-2').style.display = 'block';
     } catch (e) {
-      alert('Error: ' + e.message);
+      showParentError('Error: ' + e.message);
     }
   }
 
@@ -719,7 +735,7 @@ const ParentAuth = (function() {
       handleStep1();
     } catch (e) {
       console.error('Error parsing Google response:', e);
-      alert('Error with Google Sign-In. Please try again.');
+      showParentError('Error with Google Sign-In. Please try again.');
     }
   }
 
@@ -754,7 +770,7 @@ const ParentAuth = (function() {
       }
     } catch (e) {
       console.error('Passkey auth error:', e);
-      alert(e.message || 'Face ID authentication failed');
+      showParentError(e.message || 'Face ID authentication failed');
     }
   }
 
@@ -763,7 +779,7 @@ const ParentAuth = (function() {
     const email = document.getElementById('pam-email').value.trim();
 
     if (!name || !email) {
-      alert('Please enter your name and email first');
+      showParentError('Please enter your name and email first');
       return;
     }
 
@@ -773,10 +789,10 @@ const ParentAuth = (function() {
       }
 
       await PasskeyAuth.register(name, email);
-      alert('Face ID set up successfully! You can now sign in with Face ID.');
+      showParentError('Face ID set up successfully!', true);
     } catch (e) {
       console.error('Passkey setup error:', e);
-      alert(e.message || 'Failed to set up Face ID');
+      showParentError(e.message || 'Failed to set up Face ID');
     }
   }
 

@@ -371,7 +371,7 @@ const ScholarshipSearch = (function() {
     };
 
     addCustomScholarship(data);
-    alert('Scholarship added! You can find it in your Scholarships tab.');
+    if (typeof showToast === 'function') showToast('Scholarship added!'); else console.log('Scholarship added');
     closeModal();
 
     // Refresh scholarship list if function exists
@@ -580,7 +580,7 @@ const ScholarshipSearch = (function() {
     const textarea = document.getElementById('ss-paste-list');
     const content = textarea?.value.trim();
     if (!content) {
-      alert('Please paste a scholarship list first');
+      if (typeof showToast === 'function') showToast('Please paste a scholarship list first'); else console.warn('Please paste a scholarship list first');
       return;
     }
     await parseAndImportList(content, 'pasted-list');

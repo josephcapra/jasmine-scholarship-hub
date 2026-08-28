@@ -5351,21 +5351,21 @@
     <div class="confetti-container" id="confetti-container"></div>
 
     <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-      <button class="nav-item active" onclick="window.switchSection('profile')">
-        <span class="icon">👤</span>
+    <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+      <button class="nav-item active" onclick="window.switchSection('profile')" aria-label="View your profile">
+        <span class="icon" aria-hidden="true">👤</span>
         Profile
       </button>
-      <button class="nav-item" onclick="window.switchSection('goals')">
-        <span class="icon">🎯</span>
+      <button class="nav-item" onclick="window.switchSection('goals')" aria-label="Set and track goals">
+        <span class="icon" aria-hidden="true">🎯</span>
         Goals
       </button>
-      <button class="nav-item" onclick="window.switchSection('scholarships')">
-        <span class="icon">🎓</span>
+      <button class="nav-item" onclick="window.switchSection('scholarships')" aria-label="Browse scholarships">
+        <span class="icon" aria-hidden="true">🎓</span>
         Scholarships
       </button>
-      <button class="nav-item" onclick="window.switchSection('documents')">
-        <span class="icon">📂</span>
+      <button class="nav-item" onclick="window.switchSection('documents')" aria-label="Manage documents">
+        <span class="icon" aria-hidden="true">📂</span>
         Docs
       </button>
     </nav>
@@ -5376,7 +5376,7 @@
     </div>
 
     <!-- Feedback Button -->
-    <button onclick="window.showFeedbackModal()" style="
+    <button onclick="window.showFeedbackModal()" aria-label="Open chat and support" style="
       position: fixed; bottom: 80px; right: 16px; z-index: 1000;
       background: linear-gradient(135deg, #7c3aed, #ec4899);
       color: white; border: none; border-radius: 50%;

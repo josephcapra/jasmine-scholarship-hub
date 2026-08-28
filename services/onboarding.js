@@ -122,6 +122,21 @@ const Onboarding = (function() {
     return age;
   }
 
+  function showInlineError(message) {
+    let errorEl = document.getElementById('ob-inline-error');
+    if (!errorEl) {
+      errorEl = document.createElement('div');
+      errorEl.id = 'ob-inline-error';
+      errorEl.style.cssText = 'background: #fef2f2; border: 2px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; text-align: center;';
+      const container = document.getElementById('onboarding-container');
+      const card = container?.querySelector('.ob-card');
+      if (card) card.insertBefore(errorEl, card.firstChild);
+    }
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    setTimeout(() => { if (errorEl) errorEl.style.display = 'none'; }, 5000);
+  }
+
   function show(manual = false) {
     if (!manual) {
       localStorage.setItem('jasmine_wizard_seen', 'true');
@@ -526,7 +541,7 @@ const Onboarding = (function() {
       const month = formData.birthMonth;
       const year = formData.birthYear;
       if (!month || !year) {
-        alert('Please select your birth month and year.');
+        showInlineError('Please select your birth month and year.');
         return;
       }
       const age = calculateAge(month, year);
@@ -540,7 +555,7 @@ const Onboarding = (function() {
     // Consent validation
     if (step.id === 'consent') {
       if (!formData.privacyAccepted || !formData.termsAccepted || !formData.ageConfirmed) {
-        alert('Please accept all required items to continue.');
+        showInlineError('Please accept all required items to continue.');
         return;
       }
       // Record consent
@@ -556,7 +571,7 @@ const Onboarding = (function() {
     // Required field validation
     for (const f of step.fields) {
       if (f.required && !formData[f.id] && f.type !== 'consent') {
-        alert('Please fill in: ' + f.label);
+        showInlineError('Please fill in: ' + f.label);
         return;
       }
     }
@@ -836,7 +851,7 @@ const Onboarding = (function() {
 
     } catch (error) {
       console.error('[Onboarding] Error completing setup:', error);
-      alert('There was an error saving your profile. Please try again.');
+      showInlineError('There was an error saving your profile. Please try again.');
     }
   }
 
@@ -853,7 +868,7 @@ const Onboarding = (function() {
 
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) {
-        alert(`${file.name} is too large (max 10MB)`);
+        showInlineError(`${file.name} is too large (max 10MB)`);
         continue;
       }
 
