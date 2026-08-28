@@ -53,15 +53,15 @@ const TrustBanner = (function() {
           margin-bottom: 20px;
         }
         .trust-banner-default {
-          background: linear-gradient(135deg, #dcfce7, #d1fae5);
-          border: 1px solid #86efac;
+          background: transparent;
+          border: none;
         }
         .trust-banner-purple {
-          background: linear-gradient(135deg, #ede9fe, #fae8ff);
-          border: 1px solid #c4b5fd;
+          background: transparent;
+          border: none;
         }
         .trust-banner-dark {
-          background: linear-gradient(135deg, #1f2937, #374151);
+          background: transparent;
           color: white;
         }
         .trust-content {
