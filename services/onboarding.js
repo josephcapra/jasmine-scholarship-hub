@@ -54,6 +54,19 @@ const Onboarding = (function() {
       ]
     },
     {
+      id: 'profile',
+      title: 'Your Profile',
+      subtitle: 'Review and complete your information',
+      fields: [
+        { id: 'firstName', type: 'text', label: 'First Name', required: true },
+        { id: 'lastName', type: 'text', label: 'Last Name', required: true },
+        { id: 'email', type: 'text', label: 'Email (optional)' },
+        { id: 'school', type: 'text', label: 'School' },
+        { id: 'graduationYear', type: 'select', label: 'Graduation Year', options: ['2025', '2026', '2027', '2028', '2029', '2030'] },
+        { id: 'gpa', type: 'text', label: 'GPA (optional)' }
+      ]
+    },
+    {
       id: 'reportcards',
       title: 'Report Cards & Transcripts',
       subtitle: 'Upload your report cards or transcripts (optional)',
