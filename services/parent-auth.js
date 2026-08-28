@@ -612,9 +612,10 @@ const ParentAuth = (function() {
       const initialized = await initializeGoogle();
 
       if (!initialized) {
-        loadingToast.textContent = 'Google Sign-In unavailable. Try email sign-in.';
-        loadingToast.style.background = '#dc2626';
-        setTimeout(() => loadingToast.remove(), 3000);
+        loadingToast.textContent = 'Redirecting to Google...';
+        // Fallback: use redirect-based OAuth flow
+        redirectToGoogleOAuth();
+        setTimeout(() => loadingToast.remove(), 1000);
         return;
       }
 
@@ -652,6 +653,62 @@ const ParentAuth = (function() {
       document.getElementById('google-btn-target'),
       { theme: 'outline', size: 'large', width: 280 }
     );
+  }
+
+  function redirectToGoogleOAuth() {
+    // Fallback OAuth redirect flow when GSI script is blocked
+    const clientId = '383923649216-diemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
+    const redirectUri = window.location.origin + '/parents.html';
+    const scope = 'email profile';
+    const state = btoa(JSON.stringify({ returnUrl: window.location.href }));
+
+    const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'token',
+      scope: scope,
+      state: state,
+      prompt: 'select_account'
+    }).toString();
+
+    window.location.href = authUrl;
+  }
+
+  function handleOAuthCallback() {
+    // Check for OAuth callback in URL hash (implicit flow returns token in hash)
+    const hash = window.location.hash.substring(1);
+    if (!hash || !hash.includes('access_token')) return false;
+
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+
+    if (accessToken) {
+      // Fetch user info from Google
+      fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+      .then(r => r.json())
+      .then(user => {
+        // Clear the hash
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+
+        // Prefill form and proceed
+        setTimeout(() => {
+          startAuth();
+          setTimeout(() => {
+            const nameInput = document.getElementById('pam-name');
+            const emailInput = document.getElementById('pam-email');
+            if (nameInput) nameInput.value = user.name || '';
+            if (emailInput) emailInput.value = user.email || '';
+            handleStep1();
+          }, 500);
+        }, 100);
+      })
+      .catch(e => console.error('OAuth callback error:', e));
+
+      return true;
+    }
+    return false;
   }
 
   function handleGoogleResponse(response) {
@@ -885,6 +942,13 @@ const ParentAuth = (function() {
     }
   }
 
+  // Auto-check for OAuth callback on load
+  if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+      handleOAuthCallback();
+    });
+  }
+
   return {
     isLoggedIn,
     getParentId,
@@ -901,6 +965,7 @@ const ParentAuth = (function() {
     signInWithPasskey,
     setupPasskey,
     handleGoogleResponse,
+    handleOAuthCallback,
     showCodeEntry,
     showInviteStudent,
     showSetupChild,
