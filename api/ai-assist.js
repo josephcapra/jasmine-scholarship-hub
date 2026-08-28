@@ -16,7 +16,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!ANTHROPIC_API_KEY && !OPENAI_API_KEY) {
     return res.status(500).json({ error: 'AI service not configured' });
   }
 
@@ -82,27 +84,54 @@ Be encouraging, supportive, and concise. Keep responses under 150 words unless m
 
 ${contextInfo.length > 0 ? `\nStudent context:\n${contextInfo.join('\n')}` : ''}`;
 
-      const chatResponse = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 500,
-          system: chatSystemPrompt,
-          messages: [{ role: 'user', content: message }],
-        }),
-      });
+      // Try Anthropic first, fall back to OpenAI
+      if (ANTHROPIC_API_KEY) {
+        const chatResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 500,
+            system: chatSystemPrompt,
+            messages: [{ role: 'user', content: message }],
+          }),
+        });
 
-      if (chatResponse.ok) {
-        const data = await chatResponse.json();
-        return res.status(200).json({ response: data.content[0].text });
-      } else {
-        return res.status(200).json({ response: "I'm here to help with your scholarship journey! Try asking about scholarships, essays, or your profile." });
+        if (chatResponse.ok) {
+          const data = await chatResponse.json();
+          return res.status(200).json({ response: data.content[0].text });
+        }
       }
+
+      // Fallback to OpenAI
+      if (OPENAI_API_KEY) {
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            max_tokens: 500,
+            messages: [
+              { role: 'system', content: chatSystemPrompt },
+              { role: 'user', content: message }
+            ],
+          }),
+        });
+
+        if (openaiResponse.ok) {
+          const data = await openaiResponse.json();
+          return res.status(200).json({ response: data.choices[0].message.content });
+        }
+      }
+
+      return res.status(200).json({ response: "I'm here to help with your scholarship journey! Try asking about scholarships, essays, or your profile." });
     }
 
     // Validate input for essay actions
