@@ -602,38 +602,8 @@ const ParentAuth = (function() {
   }
 
   async function signInWithGoogle() {
-    // Show loading indicator
-    const loadingToast = document.createElement('div');
-    loadingToast.textContent = 'Loading Google Sign-In...';
-    loadingToast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:12px 24px;border-radius:25px;z-index:10000;font-size:14px;';
-    document.body.appendChild(loadingToast);
-
-    try {
-      const initialized = await initializeGoogle();
-
-      if (!initialized) {
-        loadingToast.textContent = 'Redirecting to Google...';
-        // Fallback: use redirect-based OAuth flow
-        redirectToGoogleOAuth();
-        setTimeout(() => loadingToast.remove(), 1000);
-        return;
-      }
-
-      loadingToast.remove();
-
-      // Show the One Tap prompt or button
-      google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          console.log('One Tap not displayed, showing button');
-          showGoogleButton();
-        }
-      });
-    } catch (e) {
-      console.error('Google Sign-In error:', e);
-      loadingToast.textContent = 'Sign-in error. Try email instead.';
-      loadingToast.style.background = '#dc2626';
-      setTimeout(() => loadingToast.remove(), 3000);
-    }
+    // Direct redirect to Google OAuth - faster and more reliable than GSI popup
+    redirectToGoogleOAuth();
   }
 
   function showGoogleButton() {

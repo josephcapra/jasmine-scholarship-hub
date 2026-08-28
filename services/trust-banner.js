@@ -7,16 +7,27 @@ const TrustBanner = (function() {
   'use strict';
 
   const MESSAGES = [
-    { icon: '🔒', text: 'Your data is encrypted with bank-level security (AES-256)' },
-    { icon: '🚫', text: 'We never sell your data. Ever. Period.' },
-    { icon: '👨‍👩‍👧', text: 'Parents: You control what you see. Students control what they share.' },
-    { icon: '🛡️', text: 'Student essays are YOUR work — AI helps, never writes for you' },
-    { icon: '🤖', text: 'AI never trains on your data — zero retention policy' },
-    { icon: '🔐', text: 'Max 2 parents per student — you choose who connects' },
-    { icon: '📍', text: 'Data stored on secure US servers, encrypted at rest' },
-    { icon: '✨', text: 'No ads. No tracking. No selling your future.' },
-    { icon: '👁️', text: 'Your scholarship search is private — only you see it' },
-    { icon: '🗑️', text: 'Delete your account anytime — we erase everything' }
+    { icon: '🎯', text: 'The right scholarship may already exist. You just have to find it.' },
+    { icon: '⏰', text: 'Missing one deadline can mean missing the entire opportunity.' },
+    { icon: '🏘️', text: 'Local scholarships often face less competition than national awards.' },
+    { icon: '🚀', text: 'Starting earlier gives students more scholarships to pursue.' },
+    { icon: '✍️', text: 'One strong essay can often be adapted for multiple applications.' },
+    { icon: '📋', text: 'Better organization makes it easier to submit more applications on time.' },
+    { icon: '💰', text: 'Scholarships can make a more expensive college surprisingly affordable.' },
+    { icon: '🎓', text: 'The best college financially may not have the lowest sticker price.' },
+    { icon: '⚖️', text: 'Comparing financial aid can change which college offers the best value.' },
+    { icon: '🌟', text: 'Scholarships exist for interests, achievements, careers, communities, and backgrounds.' },
+    { icon: '🪙', text: 'Smaller scholarships can add up to meaningful college savings.' },
+    { icon: '📈', text: 'Applying to more well-matched scholarships creates more chances to win.' },
+    { icon: '🔍', text: 'A scholarship you never discover is an opportunity you cannot apply for.' },
+    { icon: '📅', text: 'Tracking deadlines helps turn opportunities into completed applications.' },
+    { icon: '📁', text: 'Keeping achievements in one place makes future applications easier.' },
+    { icon: '⏱️', text: 'Finding opportunities matched to you can save hours of searching.' },
+    { icon: '🧭', text: 'Knowing what to do next can make college planning less overwhelming.' },
+    { icon: '👤', text: 'The earlier students build their profile, the more time they have to discover opportunities.' },
+    { icon: '🏆', text: 'Your achievements may qualify you for opportunities you do not know exist.' },
+    { icon: '📊', text: 'A better plan can turn scholarship searching into consistent progress.' },
+    { icon: '✨', text: 'The opportunities are out there. Vylium helps you find the ones that fit you.' }
   ];
 
   let currentIndex = 0;
@@ -73,12 +84,28 @@ const TrustBanner = (function() {
         }
         .trust-icon {
           font-size: 1.3rem;
-          animation: trustPulse 2s ease-in-out infinite;
+          transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .trust-icon.fade-out {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        .trust-icon.fade-in {
+          opacity: 1;
+          transform: scale(1);
         }
         .trust-text {
           font-weight: 600;
           font-size: 0.95rem;
-          transition: opacity 0.3s ease;
+          transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .trust-text.fade-out {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        .trust-text.fade-in {
+          opacity: 1;
+          transform: translateY(0);
         }
         .trust-dots {
           display: flex;
@@ -130,17 +157,29 @@ const TrustBanner = (function() {
 
     function showMessage(index) {
       currentIndex = index;
-      textEl.style.opacity = '0';
+
+      // Fade out current content
+      iconEl.classList.add('fade-out');
+      iconEl.classList.remove('fade-in');
+      textEl.classList.add('fade-out');
+      textEl.classList.remove('fade-in');
 
       setTimeout(() => {
+        // Update content
         iconEl.textContent = MESSAGES[index].icon;
         textEl.textContent = MESSAGES[index].text;
-        textEl.style.opacity = '1';
 
+        // Fade in new content
+        iconEl.classList.remove('fade-out');
+        iconEl.classList.add('fade-in');
+        textEl.classList.remove('fade-out');
+        textEl.classList.add('fade-in');
+
+        // Update dots
         dots.forEach((dot, i) => {
           dot.classList.toggle('active', i === index);
         });
-      }, 200);
+      }, 500);
     }
 
     // Click handlers for dots
