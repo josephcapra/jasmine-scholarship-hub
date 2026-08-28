@@ -1,21 +1,21 @@
 // Service Worker for Jasmine's Scholarship Hub - PWA offline support + notifications
 
-const CACHE_NAME = 'jasmine-scholarship-hub-v2';
+const CACHE_NAME = 'jasmine-scholarship-hub-v3';
 const urlsToCache = [
   '/jasmine/',
   '/jasmine/index.html',
   '/jasmine/parents.html',
 ];
 
-// Daily reminder messages from Mom & Daddy Dog
+// Daily reminder messages
 const DAILY_MESSAGES = [
-  "Time to work on scholarships! You've got this, Jasmine! 🌟",
-  "Hey superstar! 15 minutes on essays today? We believe in you! 💜",
-  "Carnegie Hall was just the beginning! Keep building that future! 🎓",
-  "Mom & Daddy Dog are SO proud of you. Let's get those scholarships! 🔥",
-  "Your hard work is paying off! Check in on your goals today! ✨",
-  "From jazz.ysphotos to college scholarships - you're unstoppable! 📸",
-  "Quick check-in: any deadlines coming up? We've got your back! 💪",
+  "Time to work on scholarships! You've got this! 🌟",
+  "Hey superstar! 15 minutes on essays today? You can do it! 💜",
+  "Keep building that future! 🎓",
+  "Your hard work is paying off! Let's get those scholarships! 🔥",
+  "Check in on your goals today! ✨",
+  "You're making progress every day! 📸",
+  "Quick check-in: any deadlines coming up? 💪",
 ];
 
 // Install event - cache resources

@@ -41,8 +41,8 @@ export default async function handler(req, res) {
             </div>
           </div>
           <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); padding: 20px; border-radius: 16px; margin-top: 20px; color: #78350f;">
-            <p style="font-weight: bold; margin: 0 0 8px;">💜 From Mom & Daddy Dog:</p>
-            <p style="margin: 0;">Amazing work, Jasmine! Every word you write brings you closer to your dreams. We're SO proud of you! Keep going, superstar!</p>
+            <p style="font-weight: bold; margin: 0 0 8px;">💜 Great work!</p>
+            <p style="margin: 0;">Amazing work! Every word you write brings you closer to your dreams. Keep going!</p>
           </div>
         </div>`;
     } else if (type === 'resume') {
