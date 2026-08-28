@@ -537,20 +537,94 @@ const ViralShare = (function() {
         <div class="share-cta-section">
           <button class="btn-share-primary" id="share-result-btn">
             <span class="share-icon">📤</span>
-            <span class="share-text">Share My Result</span>
+            <span class="share-text">Share & Challenge a Friend</span>
           </button>
-          <p class="share-subtext">Challenge a friend to see what they get!</p>
+          <p class="share-subtext">See if they get the same result!</p>
+        </div>
+
+        <!-- VIRAL CONVERSION SECTION -->
+        <div class="conversion-section">
+          <h2 class="conversion-headline">Now turn this into action</h2>
+          <p class="conversion-subline">Your Vylium Type unlocks scholarships & opportunities matched to YOU</p>
+
+          <!-- Value Props -->
+          <div class="value-props">
+            <div class="value-prop">
+              <div class="value-prop-icon">💰</div>
+              <div class="value-prop-title">AI Scholarship Match</div>
+              <div class="value-prop-desc">Find scholarships that fit YOUR profile</div>
+            </div>
+            <div class="value-prop">
+              <div class="value-prop-icon">📝</div>
+              <div class="value-prop-title">Essay Builder</div>
+              <div class="value-prop-desc">AI-powered help for winning essays</div>
+            </div>
+            <div class="value-prop">
+              <div class="value-prop-icon">🎯</div>
+              <div class="value-prop-title">Goal Tracker</div>
+              <div class="value-prop-desc">Never miss a deadline</div>
+            </div>
+            <div class="value-prop">
+              <div class="value-prop-icon">📊</div>
+              <div class="value-prop-title">Progress Reports</div>
+              <div class="value-prop-desc">See growth over time</div>
+            </div>
+          </div>
+
+          <!-- Social Proof -->
+          <div class="social-proof">
+            <div class="social-proof-avatars">
+              <div class="social-proof-avatar">J</div>
+              <div class="social-proof-avatar">M</div>
+              <div class="social-proof-avatar">S</div>
+              <div class="social-proof-avatar">+</div>
+            </div>
+            <span>Students are finding scholarships matched to them</span>
+          </div>
+
+          <!-- Dual CTAs -->
+          <div class="cta-buttons">
+            <button class="btn-cta-student" id="result-student-signup-btn">
+              <span>🎓</span>
+              <span>I'm a Student - Sign Up Free</span>
+            </button>
+            <button class="btn-cta-parent" id="result-parent-signup-btn">
+              <span>👨‍👩‍👧</span>
+              <span>I'm a Parent - Track My Child</span>
+            </button>
+          </div>
+
+          <!-- Free Badge -->
+          <div class="free-badge">
+            <span>✓</span>
+            <span>100% Free • No Credit Card</span>
+          </div>
+
+          <!-- Benefits List -->
+          <div class="benefits-list">
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>Search thousands of scholarships</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>AI chatbot answers your questions</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>Parents get weekly progress reports</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>Upload resume, we extract your profile</span>
+            </div>
+          </div>
         </div>
 
         <!-- Privacy Note -->
-        <div class="share-privacy-note">
+        <div class="share-privacy-note" style="padding: 16px 20px; text-align: center;">
           <span class="privacy-icon">🔒</span>
           <span>Only your Vylium Type and traits are shared. No personal info.</span>
-        </div>
-
-        <!-- Disclaimer -->
-        <div class="result-disclaimer">
-          This result is designed for self-reflection and exploration. It is not a clinical or psychological diagnosis.
         </div>
       </div>
     `;
@@ -564,6 +638,24 @@ const ViralShare = (function() {
         if (success && onShare) {
           onShare(share);
         }
+      });
+    }
+
+    // Student signup handler (from result page)
+    const studentBtn = container.querySelector('#result-student-signup-btn');
+    if (studentBtn) {
+      studentBtn.addEventListener('click', () => {
+        trackEvent('student_signup_clicked', { source: 'share_result' });
+        window.location.href = '/index.html?signup=student';
+      });
+    }
+
+    // Parent signup handler (from result page)
+    const parentBtn = container.querySelector('#result-parent-signup-btn');
+    if (parentBtn) {
+      parentBtn.addEventListener('click', () => {
+        trackEvent('parent_signup_clicked', { source: 'share_result' });
+        window.location.href = '/parents.html?signup=true';
       });
     }
   }
@@ -648,16 +740,83 @@ const ViralShare = (function() {
           </button>
         </div>
 
-        <!-- Continue to App -->
-        <div class="continue-section">
-          <h3>Turn Your Result Into a Future Plan</h3>
-          <p>Build a free profile to see scholarships, colleges, and careers matched to you.</p>
-          <button class="btn-continue" id="build-profile-btn">
-            Build My Profile
-          </button>
-          <button class="btn-skip" id="skip-profile-btn">
-            Not now
-          </button>
+        <!-- VIRAL CONVERSION SECTION -->
+        <div class="conversion-section">
+          <h2 class="conversion-headline">Your Vylium Type is just the start</h2>
+          <p class="conversion-subline">Turn this into a roadmap for scholarships, colleges & careers</p>
+
+          <!-- Value Props -->
+          <div class="value-props">
+            <div class="value-prop">
+              <div class="value-prop-icon">💰</div>
+              <div class="value-prop-title">AI Scholarship Match</div>
+              <div class="value-prop-desc">Find scholarships that fit YOUR profile</div>
+            </div>
+            <div class="value-prop">
+              <div class="value-prop-icon">📝</div>
+              <div class="value-prop-title">Essay Builder</div>
+              <div class="value-prop-desc">AI-powered help for winning essays</div>
+            </div>
+            <div class="value-prop">
+              <div class="value-prop-icon">🎯</div>
+              <div class="value-prop-title">Goal Tracker</div>
+              <div class="value-prop-desc">Never miss a deadline</div>
+            </div>
+            <div class="value-prop">
+              <div class="value-prop-icon">📊</div>
+              <div class="value-prop-title">Progress Reports</div>
+              <div class="value-prop-desc">See growth over time</div>
+            </div>
+          </div>
+
+          <!-- Social Proof -->
+          <div class="social-proof">
+            <div class="social-proof-avatars">
+              <div class="social-proof-avatar">J</div>
+              <div class="social-proof-avatar">M</div>
+              <div class="social-proof-avatar">S</div>
+              <div class="social-proof-avatar">+</div>
+            </div>
+            <span>Students are finding scholarships matched to them</span>
+          </div>
+
+          <!-- Dual CTAs -->
+          <div class="cta-buttons">
+            <button class="btn-cta-student" id="student-signup-btn">
+              <span>🎓</span>
+              <span>I'm a Student - Sign Up Free</span>
+            </button>
+            <button class="btn-cta-parent" id="parent-signup-btn">
+              <span>👨‍👩‍👧</span>
+              <span>I'm a Parent - Track My Child</span>
+            </button>
+          </div>
+
+          <!-- Free Badge -->
+          <div class="free-badge">
+            <span>✓</span>
+            <span>100% Free • No Credit Card</span>
+          </div>
+
+          <!-- Benefits List -->
+          <div class="benefits-list">
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>Search thousands of scholarships</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>AI chatbot answers your questions</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>Parents get weekly progress reports</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-check">✓</span>
+              <span>Upload resume, we extract your profile</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -676,23 +835,23 @@ const ViralShare = (function() {
       });
     }
 
-    // Build profile handler
-    const buildBtn = container.querySelector('#build-profile-btn');
-    if (buildBtn) {
-      buildBtn.addEventListener('click', () => {
-        trackEvent('account_cta_viewed');
-        // Navigate to main app / signup
-        window.location.href = '/index.html?signup=true';
+    // Student signup handler
+    const studentBtn = container.querySelector('#student-signup-btn');
+    if (studentBtn) {
+      studentBtn.addEventListener('click', () => {
+        trackEvent('student_signup_clicked', { source: 'share_comparison' });
+        // Navigate to main app with signup flag
+        window.location.href = '/index.html?signup=student';
       });
     }
 
-    // Skip handler
-    const skipBtn = container.querySelector('#skip-profile-btn');
-    if (skipBtn) {
-      skipBtn.addEventListener('click', () => {
-        trackEvent('account_cta_skipped');
-        // Just close or navigate home
-        window.location.href = '/index.html';
+    // Parent signup handler
+    const parentBtn = container.querySelector('#parent-signup-btn');
+    if (parentBtn) {
+      parentBtn.addEventListener('click', () => {
+        trackEvent('parent_signup_clicked', { source: 'share_comparison' });
+        // Navigate to parent portal
+        window.location.href = '/parents.html?signup=true';
       });
     }
   }
