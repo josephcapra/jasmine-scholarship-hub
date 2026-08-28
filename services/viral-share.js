@@ -543,86 +543,86 @@ const ViralShare = (function() {
         </div>
 
         <!-- VIRAL CONVERSION SECTION -->
-        <div class="conversion-section">
-          <h2 class="conversion-headline">Now turn this into action</h2>
-          <p class="conversion-subline">Your Vylium Type unlocks scholarships & opportunities matched to YOU</p>
+        <div style="background:linear-gradient(180deg, var(--bg) 0%, rgba(124,58,237,0.08) 100%);padding:40px 20px 60px;text-align:center;">
+          <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:8px;color:var(--text);">Now turn this into action</h2>
+          <p style="color:var(--muted);font-size:1rem;margin-bottom:32px;">Your Vylium Type unlocks scholarships & opportunities matched to YOU</p>
 
           <!-- Value Props -->
-          <div class="value-props">
-            <div class="value-prop">
-              <div class="value-prop-icon">💰</div>
-              <div class="value-prop-title">AI Scholarship Match</div>
-              <div class="value-prop-desc">Find scholarships that fit YOUR profile</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:400px;margin:0 auto 32px;">
+            <div style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">💰</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">AI Scholarship Match</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">Find scholarships that fit YOUR profile</div>
             </div>
-            <div class="value-prop">
-              <div class="value-prop-icon">📝</div>
-              <div class="value-prop-title">Essay Builder</div>
-              <div class="value-prop-desc">AI-powered help for winning essays</div>
+            <div style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">📝</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">Essay Builder</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">AI-powered help for winning essays</div>
             </div>
-            <div class="value-prop">
-              <div class="value-prop-icon">🎯</div>
-              <div class="value-prop-title">Goal Tracker</div>
-              <div class="value-prop-desc">Never miss a deadline</div>
+            <div style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">🎯</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">Goal Tracker</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">Never miss a deadline</div>
             </div>
-            <div class="value-prop">
-              <div class="value-prop-icon">📊</div>
-              <div class="value-prop-title">Progress Reports</div>
-              <div class="value-prop-desc">See growth over time</div>
+            <div style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">📊</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">Progress Reports</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">See growth over time</div>
             </div>
           </div>
 
           <!-- Social Proof -->
-          <div class="social-proof">
-            <div class="social-proof-avatars">
-              <div class="social-proof-avatar">J</div>
-              <div class="social-proof-avatar">M</div>
-              <div class="social-proof-avatar">S</div>
-              <div class="social-proof-avatar">+</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:0.85rem;margin-bottom:24px;">
+            <div style="display:flex;">
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;border:2px solid var(--card);">J</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;margin-left:-8px;border:2px solid var(--card);">M</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;margin-left:-8px;border:2px solid var(--card);">S</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;margin-left:-8px;border:2px solid var(--card);">+</div>
             </div>
             <span>Students are finding scholarships matched to them</span>
           </div>
 
           <!-- Dual CTAs -->
-          <div class="cta-buttons">
-            <button class="btn-cta-student" id="result-student-signup-btn">
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto 24px;">
+            <button id="result-student-signup-btn" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:white;font-size:1.1rem;font-weight:800;padding:18px 24px;border:none;border-radius:50px;cursor:pointer;width:100%;">
               <span>🎓</span>
               <span>I'm a Student - Sign Up Free</span>
             </button>
-            <button class="btn-cta-parent" id="result-parent-signup-btn">
+            <button id="result-parent-signup-btn" style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);color:#7c3aed;font-size:1rem;font-weight:700;padding:16px 24px;border:2px solid #7c3aed;border-radius:50px;cursor:pointer;width:100%;">
               <span>👨‍👩‍👧</span>
               <span>I'm a Parent - Track My Child</span>
             </button>
           </div>
 
           <!-- Free Badge -->
-          <div class="free-badge">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#065f46;padding:8px 16px;border-radius:20px;font-size:0.85rem;font-weight:700;">
             <span>✓</span>
             <span>100% Free • No Credit Card</span>
           </div>
 
           <!-- Benefits List -->
-          <div class="benefits-list">
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+          <div style="max-width:300px;margin:24px auto 0;text-align:left;">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>Search thousands of scholarships</span>
             </div>
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>AI chatbot answers your questions</span>
             </div>
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>Parents get weekly progress reports</span>
             </div>
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>Upload resume, we extract your profile</span>
             </div>
           </div>
         </div>
 
         <!-- Privacy Note -->
-        <div class="share-privacy-note" style="padding: 16px 20px; text-align: center;">
+        <div style="padding: 16px 20px; text-align: center; color: var(--muted); font-size: 0.85rem;">
           <span class="privacy-icon">🔒</span>
           <span>Only your Vylium Type and traits are shared. No personal info.</span>
         </div>
@@ -746,74 +746,74 @@ const ViralShare = (function() {
           <p class="conversion-subline">Turn this into a roadmap for scholarships, colleges & careers</p>
 
           <!-- Value Props -->
-          <div class="value-props">
-            <div class="value-prop">
-              <div class="value-prop-icon">💰</div>
-              <div class="value-prop-title">AI Scholarship Match</div>
-              <div class="value-prop-desc">Find scholarships that fit YOUR profile</div>
+          <div class="value-props" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:400px;margin:0 auto 32px;">
+            <div class="value-prop" style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">💰</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">AI Scholarship Match</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">Find scholarships that fit YOUR profile</div>
             </div>
-            <div class="value-prop">
-              <div class="value-prop-icon">📝</div>
-              <div class="value-prop-title">Essay Builder</div>
-              <div class="value-prop-desc">AI-powered help for winning essays</div>
+            <div class="value-prop" style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">📝</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">Essay Builder</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">AI-powered help for winning essays</div>
             </div>
-            <div class="value-prop">
-              <div class="value-prop-icon">🎯</div>
-              <div class="value-prop-title">Goal Tracker</div>
-              <div class="value-prop-desc">Never miss a deadline</div>
+            <div class="value-prop" style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">🎯</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">Goal Tracker</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">Never miss a deadline</div>
             </div>
-            <div class="value-prop">
-              <div class="value-prop-icon">📊</div>
-              <div class="value-prop-title">Progress Reports</div>
-              <div class="value-prop-desc">See growth over time</div>
+            <div class="value-prop" style="background:var(--card);border:2px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;">
+              <div style="font-size:2rem;margin-bottom:8px;">📊</div>
+              <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:4px;">Progress Reports</div>
+              <div style="font-size:0.75rem;color:var(--muted);line-height:1.3;">See growth over time</div>
             </div>
           </div>
 
           <!-- Social Proof -->
-          <div class="social-proof">
-            <div class="social-proof-avatars">
-              <div class="social-proof-avatar">J</div>
-              <div class="social-proof-avatar">M</div>
-              <div class="social-proof-avatar">S</div>
-              <div class="social-proof-avatar">+</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:0.85rem;margin-bottom:24px;">
+            <div style="display:flex;">
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;border:2px solid var(--card);">J</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;margin-left:-8px;border:2px solid var(--card);">M</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;margin-left:-8px;border:2px solid var(--card);">S</div>
+              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700;margin-left:-8px;border:2px solid var(--card);">+</div>
             </div>
             <span>Students are finding scholarships matched to them</span>
           </div>
 
           <!-- Dual CTAs -->
-          <div class="cta-buttons">
-            <button class="btn-cta-student" id="student-signup-btn">
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:320px;margin:0 auto 24px;">
+            <button class="btn-cta-student" id="student-signup-btn" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:white;font-size:1.1rem;font-weight:800;padding:18px 24px;border:none;border-radius:50px;cursor:pointer;width:100%;">
               <span>🎓</span>
               <span>I'm a Student - Sign Up Free</span>
             </button>
-            <button class="btn-cta-parent" id="parent-signup-btn">
+            <button class="btn-cta-parent" id="parent-signup-btn" style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);color:#7c3aed;font-size:1rem;font-weight:700;padding:16px 24px;border:2px solid #7c3aed;border-radius:50px;cursor:pointer;width:100%;">
               <span>👨‍👩‍👧</span>
               <span>I'm a Parent - Track My Child</span>
             </button>
           </div>
 
           <!-- Free Badge -->
-          <div class="free-badge">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#065f46;padding:8px 16px;border-radius:20px;font-size:0.85rem;font-weight:700;">
             <span>✓</span>
             <span>100% Free • No Credit Card</span>
           </div>
 
           <!-- Benefits List -->
-          <div class="benefits-list">
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+          <div style="max-width:300px;margin:24px auto 0;text-align:left;">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>Search thousands of scholarships</span>
             </div>
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>AI chatbot answers your questions</span>
             </div>
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>Parents get weekly progress reports</span>
             </div>
-            <div class="benefit-item">
-              <span class="benefit-check">✓</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--text);">
+              <span style="color:#10b981;font-weight:700;">✓</span>
               <span>Upload resume, we extract your profile</span>
             </div>
           </div>
