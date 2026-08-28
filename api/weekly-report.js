@@ -5,7 +5,7 @@
 export default async function handler(req, res) {
   const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
   const PARENT_EMAIL = 'joe@josephcapra.com';
-  const FROM_EMAIL = 'joe@josephcapra.com';
+  const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'notifications@jasminescholarship.app';
 
   if (!SENDGRID_API_KEY) {
     return res.status(500).json({ error: 'Email service not configured' });
