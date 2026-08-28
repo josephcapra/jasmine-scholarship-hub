@@ -574,7 +574,7 @@ const ParentAuth = (function() {
     }
 
     googleInitializing = true;
-    const clientId = '383923649216-diemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
+    const clientId = '383923649216-dlemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
 
     try {
       const loaded = await waitForGoogle();
@@ -657,7 +657,7 @@ const ParentAuth = (function() {
 
   function redirectToGoogleOAuth() {
     // Fallback OAuth redirect flow when GSI script is blocked
-    const clientId = '383923649216-diemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
+    const clientId = '383923649216-dlemrggcq4c0ln9m6mfs3g4gft3d5lhu.apps.googleusercontent.com';
     const redirectUri = window.location.origin + '/parents.html';
     const scope = 'email profile';
     const state = btoa(JSON.stringify({ returnUrl: window.location.href }));
