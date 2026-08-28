@@ -60,25 +60,70 @@ WRITING GUIDANCE:
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
 
-    // Validate input
+    const { action, essayType, content, message, context } = body;
+
+    // Handle chatbot messages (from chat widget)
+    if (message) {
+      const contextInfo = [];
+      if (context?.firstName) contextInfo.push(`Student's name: ${context.firstName} ${context.lastName || ''}`);
+      if (context?.school) contextInfo.push(`School: ${context.school}`);
+      if (context?.gpa) contextInfo.push(`GPA: ${context.gpa}`);
+      if (context?.graduationYear) contextInfo.push(`Graduation year: ${context.graduationYear}`);
+      if (context?.vyliumType) contextInfo.push(`Vylium personality type: ${context.vyliumType}`);
+
+      const chatSystemPrompt = `You are a helpful scholarship assistant for Vylium, a scholarship discovery platform. You help students and parents with:
+- Finding scholarships that match their profile
+- Essay writing tips and feedback
+- Understanding their Vylium personality type and how it helps with scholarships
+- Deadline tracking and organization
+- College planning advice
+
+Be encouraging, supportive, and concise. Keep responses under 150 words unless more detail is needed.
+
+${contextInfo.length > 0 ? `\nStudent context:\n${contextInfo.join('\n')}` : ''}`;
+
+      const chatResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 500,
+          system: chatSystemPrompt,
+          messages: [{ role: 'user', content: message }],
+        }),
+      });
+
+      if (chatResponse.ok) {
+        const data = await chatResponse.json();
+        return res.status(200).json({ response: data.content[0].text });
+      } else {
+        return res.status(200).json({ response: "I'm here to help with your scholarship journey! Try asking about scholarships, essays, or your profile." });
+      }
+    }
+
+    // Validate input for essay actions
     const validation = validateRequest(aiAssistSchema, body);
     if (!validation.valid) {
       return res.status(400).json({ error: 'Validation failed', details: validation.errors });
     }
 
-    const { action, essayType, content } = validation.data;
+    const validatedData = validation.data;
     let userPrompt = '';
 
-    if (action === 'tips') {
-      userPrompt = `Jasmine is starting a ${essayType} scholarship essay. Give her 3-4 specific, actionable tips for THIS essay type. Which of her unique experiences should she highlight? Keep it brief and encouraging!`;
-    } else if (action === 'improve') {
-      userPrompt = `Help improve this ${essayType} essay draft while keeping Jasmine's voice:\n\n${content}\n\nGive 3-4 specific suggestions to make it stronger. Be encouraging!`;
-    } else if (action === 'expand') {
-      userPrompt = `Jasmine wrote these notes for her ${essayType} essay:\n\n${content}\n\nHelp expand into flowing paragraphs. Mark [ADD DETAIL] where she should add specifics. Keep her authentic voice!`;
-    } else if (action === 'check') {
-      userPrompt = `Review this essay for issues:\n\n${content}\n\nCheck grammar, flow, authenticity (not AI-sounding), and if it answers the prompt well. Brief feedback!`;
+    if (validatedData.action === 'tips') {
+      userPrompt = `Jasmine is starting a ${validatedData.essayType} scholarship essay. Give her 3-4 specific, actionable tips for THIS essay type. Which of her unique experiences should she highlight? Keep it brief and encouraging!`;
+    } else if (validatedData.action === 'improve') {
+      userPrompt = `Help improve this ${validatedData.essayType} essay draft while keeping Jasmine's voice:\n\n${validatedData.content}\n\nGive 3-4 specific suggestions to make it stronger. Be encouraging!`;
+    } else if (validatedData.action === 'expand') {
+      userPrompt = `Jasmine wrote these notes for her ${validatedData.essayType} essay:\n\n${validatedData.content}\n\nHelp expand into flowing paragraphs. Mark [ADD DETAIL] where she should add specifics. Keep her authentic voice!`;
+    } else if (validatedData.action === 'check') {
+      userPrompt = `Review this essay for issues:\n\n${validatedData.content}\n\nCheck grammar, flow, authenticity (not AI-sounding), and if it answers the prompt well. Brief feedback!`;
     } else {
-      userPrompt = content || 'How can I help with your scholarship essay?';
+      userPrompt = validatedData.content || 'How can I help with your scholarship essay?';
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {

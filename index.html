@@ -12622,47 +12622,193 @@
     window.showLoginForm = showLoginForm;
     window.updatePassword = updatePassword;
     window.skipPasswordUpdate = skipPasswordUpdate;
-    window.showFeedbackModal = showFeedbackModal;
-    window.closeFeedbackModal = closeFeedbackModal;
-    window.submitFeedback = submitFeedback;
+    // Chat Widget System
+    window.showFeedbackModal = showChatWidget;
+    window.closeFeedbackModal = closeChatWidget;
+    window.submitFeedback = submitContactForm;
 
-    // Feedback Modal Function
-    function showFeedbackModal() {
-      const modal = document.createElement('div');
-      modal.id = 'feedback-modal';
-      modal.innerHTML = `
-        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99998; display: flex; align-items: center; justify-content: center; padding: 20px;">
-          <div style="background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <h2 style="margin: 0; font-size: 1.25rem;">💬 Send Feedback</h2>
-              <button onclick="window.closeFeedbackModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+    let chatWidgetOpen = false;
+    let chatMessages = [];
+
+    function showChatWidget() {
+      if (document.getElementById('chat-widget')) {
+        closeChatWidget();
+        return;
+      }
+      chatWidgetOpen = true;
+      const widget = document.createElement('div');
+      widget.id = 'chat-widget';
+      widget.innerHTML = `
+        <div style="position: fixed; bottom: 140px; right: 16px; width: 350px; max-width: calc(100vw - 32px); background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 99999; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 1.1rem;">💬 How can we help?</span>
+            <button onclick="window.closeChatWidget()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; line-height: 1;">×</button>
+          </div>
+          <div id="chat-menu" style="padding: 16px;">
+            <button onclick="window.startAIChat()" style="width: 100%; padding: 16px; margin-bottom: 12px; background: linear-gradient(135deg, #ede9fe, #fae8ff); border: 2px solid #c4b5fd; border-radius: 12px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.5rem;">🤖</span>
+              <div>
+                <div style="font-weight: 700; color: #000000;">AI Assistant</div>
+                <div style="font-size: 0.85rem; color: #000000;">Ask about scholarships, essays, your profile</div>
+              </div>
+            </button>
+            <button onclick="window.showContactForm()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border: 2px solid #93c5fd; border-radius: 12px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.5rem;">📧</span>
+              <div>
+                <div style="font-weight: 700; color: #000000;">Contact Developer</div>
+                <div style="font-size: 0.85rem; color: #000000;">Report bugs, request features, ask questions</div>
+              </div>
+            </button>
+          </div>
+          <div id="chat-ai" style="display: none;">
+            <div id="chat-messages" style="height: 250px; overflow-y: auto; padding: 16px; background: #f9fafb;"></div>
+            <div style="padding: 12px; border-top: 1px solid #e5e7eb; display: flex; gap: 8px;">
+              <input type="text" id="chat-input" placeholder="Ask me anything..." style="flex: 1; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; color: #000000;" onkeypress="if(event.key==='Enter')window.sendChatMessage()">
+              <button onclick="window.sendChatMessage()" style="padding: 12px 16px; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700;">Send</button>
             </div>
-            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 16px;">Found a bug? Have a feature request? Let us know!</p>
-            <select id="feedback-type" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; font-size: 1rem;">
+            <button onclick="window.showContactFromChat()" style="width: 100%; padding: 10px; background: #fef3c7; border: none; border-top: 1px solid #e5e7eb; cursor: pointer; color: #000000; font-size: 0.85rem;">🙋 Didn't answer your question? Contact the developer</button>
+            <button onclick="window.backToMenu()" style="width: 100%; padding: 10px; background: #f3f4f6; border: none; border-top: 1px solid #e5e7eb; cursor: pointer; color: #000000; font-size: 0.9rem;">← Back to menu</button>
+          </div>
+          <div id="chat-contact" style="display: none; padding: 16px;">
+            <p style="margin: 0 0 12px; font-size: 0.9rem; color: #000000;">We'll respond as soon as possible!</p>
+            <input type="text" id="contact-name" placeholder="Your Name" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; color: #000000;">
+            <input type="email" id="contact-email" placeholder="Your Email" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; color: #000000;">
+            <input type="tel" id="contact-phone" placeholder="Phone (optional)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; color: #000000;">
+            <select id="feedback-type" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; font-size: 1rem; color: #000000;">
               <option value="bug">🐛 Bug Report</option>
               <option value="feature">💡 Feature Request</option>
               <option value="question">❓ Question</option>
               <option value="other">📝 Other</option>
             </select>
-            <textarea id="feedback-message" placeholder="Describe your feedback..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 120px; font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
-            <button onclick="window.submitFeedback()" style="width: 100%; margin-top: 16px; padding: 14px; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem;">
-              Send Feedback
+            <textarea id="feedback-message" placeholder="Describe your question or issue..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 80px; font-size: 1rem; font-family: inherit; resize: vertical; color: #000000;"></textarea>
+            <button onclick="window.submitContactForm()" style="width: 100%; margin-top: 12px; padding: 14px; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem;">
+              Send Message
             </button>
+            <button onclick="window.backToMenu()" style="width: 100%; margin-top: 8px; padding: 10px; background: #f3f4f6; border: none; border-radius: 8px; cursor: pointer; color: #000000; font-size: 0.9rem;">← Back to menu</button>
           </div>
         </div>
       `;
-      document.body.appendChild(modal);
+      document.body.appendChild(widget);
     }
 
-    function closeFeedbackModal() {
-      const modal = document.getElementById('feedback-modal');
-      if (modal) modal.remove();
+    function closeChatWidget() {
+      chatWidgetOpen = false;
+      const widget = document.getElementById('chat-widget');
+      if (widget) widget.remove();
     }
 
-    async function submitFeedback() {
+    window.startAIChat = function() {
+      document.getElementById('chat-menu').style.display = 'none';
+      document.getElementById('chat-ai').style.display = 'block';
+      chatMessages = [];
+      renderChatMessages();
+      addBotMessage("Hi! I'm your scholarship assistant. I can help you with:\\n\\n• Finding scholarships that match your profile\\n• Essay writing tips\\n• Understanding your Vylium personality type\\n• Tracking deadlines\\n\\nWhat would you like to know?");
+    };
+
+    window.showContactForm = function() {
+      document.getElementById('chat-menu').style.display = 'none';
+      document.getElementById('chat-contact').style.display = 'block';
+      // Pre-fill from profile if available
+      const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+      if (profile.firstName) document.getElementById('contact-name').value = `${profile.firstName} ${profile.lastName || ''}`.trim();
+      if (profile.email) document.getElementById('contact-email').value = profile.email;
+    };
+
+    window.showContactFromChat = function() {
+      document.getElementById('chat-ai').style.display = 'none';
+      document.getElementById('chat-contact').style.display = 'block';
+      // Pre-fill from profile if available
+      const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+      if (profile.firstName) document.getElementById('contact-name').value = `${profile.firstName} ${profile.lastName || ''}`.trim();
+      if (profile.email) document.getElementById('contact-email').value = profile.email;
+    };
+
+    window.backToMenu = function() {
+      document.getElementById('chat-menu').style.display = 'block';
+      document.getElementById('chat-ai').style.display = 'none';
+      document.getElementById('chat-contact').style.display = 'none';
+    };
+
+    function addBotMessage(text) {
+      chatMessages.push({ role: 'bot', text });
+      renderChatMessages();
+    }
+
+    function addUserMessage(text) {
+      chatMessages.push({ role: 'user', text });
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      const container = document.getElementById('chat-messages');
+      if (!container) return;
+      container.innerHTML = chatMessages.map(m => `
+        <div style="margin-bottom: 12px; display: flex; justify-content: ${m.role === 'user' ? 'flex-end' : 'flex-start'};">
+          <div style="max-width: 80%; padding: 10px 14px; border-radius: 12px; ${m.role === 'user' ? 'background: linear-gradient(135deg, #7c3aed, #ec4899); color: white;' : 'background: white; border: 1px solid #e5e7eb; color: #1f2937;'} font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap;">
+            ${m.text.replace(/\\n/g, '<br>')}
+          </div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    window.sendChatMessage = async function() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      addUserMessage(text);
+
+      // Get context from localStorage
+      const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+      const vault = JSON.parse(localStorage.getItem('jasmine_knowledge_vault') || '{}');
+      const context = { ...profile, ...vault };
+
+      addBotMessage('Thinking...');
+
+      try {
+        const response = await fetch('/api/ai-assist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            context: {
+              firstName: context.firstName,
+              lastName: context.lastName,
+              school: context.school,
+              gpa: context.gpa,
+              graduationYear: context.graduationYear,
+              interests: context.interests,
+              achievements: context.achievements,
+              vyliumType: context.vyliumType
+            }
+          })
+        });
+
+        chatMessages.pop(); // Remove "Thinking..."
+
+        if (response.ok) {
+          const data = await response.json();
+          addBotMessage(data.response || data.message || "I'm here to help! Could you rephrase that?");
+        } else {
+          addBotMessage("I'm having trouble connecting right now. Try asking about scholarships, essays, or your profile!");
+        }
+      } catch (e) {
+        chatMessages.pop();
+        addBotMessage("Sorry, I couldn't process that. Try asking about scholarships or essay tips!");
+      }
+    };
+
+    async function submitContactForm() {
+      const name = document.getElementById('contact-name').value.trim();
+      const email = document.getElementById('contact-email').value.trim();
+      const phone = document.getElementById('contact-phone').value.trim();
       const type = document.getElementById('feedback-type').value;
       const message = document.getElementById('feedback-message').value.trim();
-      if (!message) { showToast('Please enter your feedback'); return; }
+
+      if (!name || !email) { showToast('Please enter your name and email'); return; }
+      if (!message) { showToast('Please enter your message'); return; }
 
       try {
         await fetch('/api/send-email', {
@@ -12670,16 +12816,18 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             to: 'joe@josephcapra.com',
-            subject: `[Jasmine App] ${type.toUpperCase()}: Feedback from User`,
-            text: `Feedback Type: ${type}\n\nMessage:\n${message}\n\n---\nSent from Jasmine's Scholarship Hub`
+            subject: `[Jasmine App] ${type.toUpperCase()}: Message from ${name}`,
+            text: `From: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nType: ${type}\n\nMessage:\n${message}\n\n---\nSent from Jasmine's Scholarship Hub`
           })
         });
-        showToast('Feedback sent! Thank you! 💜');
-        closeFeedbackModal();
+        showToast('Message sent! Thank you! 💜');
+        closeChatWidget();
       } catch (e) {
         showToast('Could not send. Please try again.');
       }
     }
+
+    window.closeChatWidget = closeChatWidget;
 
     // TESTING MODE: Auto-load app without login
     // Show onboarding for first-time users, or show main app if already completed
