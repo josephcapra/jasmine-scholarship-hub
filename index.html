@@ -1356,8 +1356,6 @@
     #main-app { display: none; }
     #main-app.visible { display: block !important; }
     #login-screen.hidden { display: none !important; }
-    /* TESTING MODE: Force hide login */
-    #login-screen { display: none !important; }
 
     /* Mode toggle */
     .mode-toggle {
@@ -3929,8 +3927,8 @@
     </div>
   </div>
 
-  <!-- Main App (hidden until authenticated) -->
-  <div id="main-app" class="visible">
+  <!-- Main App (hidden until onboarding complete) -->
+  <div id="main-app">
     <div class="header">
       <div class="header-row">
         <div class="profile-photo-btn" id="profile-photo-btn" onclick="openProfilePhoto()">
@@ -12684,18 +12682,17 @@
     }
 
     // TESTING MODE: Auto-load app without login
-    // Show onboarding for first-time users
+    // Show onboarding for first-time users, or show main app if already completed
     if (typeof Onboarding !== 'undefined' && Onboarding.shouldShow()) {
       Onboarding.show();
+    } else {
+      // Onboarding complete - show main app
+      document.getElementById('main-app').classList.add('visible');
     }
     initApp();
     loadRewards();
     loadGoalData();
     loadHomeSection();
-
-    // NOTE: Login is temporarily disabled for testing
-    // To restore: remove style="display: none !important;" from login-screen
-    // and remove class="visible" from main-app
   </script>
 
   <!-- Footer -->

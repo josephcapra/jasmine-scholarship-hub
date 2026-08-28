@@ -769,11 +769,11 @@ const Onboarding = (function() {
       }
       .ob-consent-section { text-align: left; }
       .ob-consent-box {
-        background: #ede9fe; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+        background: #f5f3ff; border-radius: 12px; padding: 16px; margin-bottom: 20px;
       }
-      .ob-consent-header { font-weight: 700; margin-bottom: 12px; color: #5b21b6; }
-      .ob-consent-list { margin: 0; padding-left: 0; list-style: none; }
-      .ob-consent-list li { margin-bottom: 8px; font-size: 0.95rem; }
+      .ob-consent-header { font-weight: 700; margin-bottom: 12px; color: #000000; }
+      .ob-consent-list { margin: 0; padding-left: 0; list-style: none; color: #000000; }
+      .ob-consent-list li { margin-bottom: 8px; font-size: 0.95rem; color: #000000; }
       .ob-consent-checks { display: flex; flex-direction: column; gap: 12px; }
       .ob-checkbox-label {
         display: flex; align-items: flex-start; gap: 12px; cursor: pointer;
@@ -786,11 +786,11 @@ const Onboarding = (function() {
         font-size: 14px; font-weight: bold; color: white; background: white;
       }
       .ob-checkbox.checked { background: #7c3aed; border-color: #7c3aed; }
-      .ob-checkbox-label span { font-size: 0.95rem; line-height: 1.4; }
+      .ob-checkbox-label span { font-size: 0.95rem; line-height: 1.4; color: #000000; }
       .ob-checkbox-label a { color: #7c3aed; text-decoration: underline; }
       .ob-consent-minor-note {
         margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 8px;
-        font-size: 0.85rem; color: #92400e;
+        font-size: 0.85rem; color: #000000;
       }
       .ob-role-section { padding: 10px 0; }
       .ob-role-options { display: flex; flex-direction: column; gap: 16px; }
