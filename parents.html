@@ -21,30 +21,36 @@
       --jazz-gold: #f59e0b;
       --jazz-teal: #14b8a6;
       --jazz-green: #10b981;
-      --bg: #faf5ff;
+      --bg: #ffffff;
       --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
+      --text: #000000;
+      --text-secondary: #374151;
+      --muted: #4b5563;
       --border: #e5e7eb;
-      --shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --gradient-gold: linear-gradient(135deg, #fbbf24, #f59e0b);
+      --gradient-green: linear-gradient(135deg, #34d399, #10b981);
+      --gradient-purple: linear-gradient(135deg, #a78bfa, #7c3aed);
     }
     /* Dark mode support */
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg: #1a1025;
-        --card: #2d2235;
-        --text: #f3e8ff;
-        --muted: #a78bfa;
-        --border: #4c1d95;
+        --bg: #111827;
+        --card: #1f2937;
+        --text: #f9fafb;
+        --text-secondary: #d1d5db;
+        --muted: #9ca3af;
+        --border: #374151;
         --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       }
     }
     :root[data-theme="dark"] {
-      --bg: #1a1025;
-      --card: #2d2235;
-      --text: #f3e8ff;
-      --muted: #a78bfa;
-      --border: #4c1d95;
+      --bg: #111827;
+      --card: #1f2937;
+      --text: #f9fafb;
+      --text-secondary: #d1d5db;
+      --muted: #9ca3af;
+      --border: #374151;
       --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
     /* Touch-friendly buttons */
@@ -62,15 +68,16 @@
       padding: 20px;
     }
     .header {
-      background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink));
-      color: white;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border: 2px solid #bae6fd;
+      color: var(--text);
       padding: 30px 20px;
       border-radius: 20px;
       text-align: center;
       margin-bottom: 16px;
     }
-    .header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
-    .header p { opacity: 0.9; font-size: 0.95rem; }
+    .header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; color: #0c4a6e; }
+    .header p { color: #0369a1; font-size: 0.95rem; }
 
     .stats-grid {
       display: grid;
@@ -355,30 +362,111 @@
 
   <!-- Not Logged In State -->
   <div id="not-logged-in" style="display: none;">
-    <div class="connect-prompt">
-      <div class="emoji">👨‍👩‍👧</div>
-      <h2>Welcome, Parent!</h2>
-      <p>Track your child's scholarship journey and send encouragement along the way.</p>
-      <button class="btn btn-primary" onclick="startAuth()">Get Started</button>
+    <!-- Hero Section -->
+    <div style="text-align: center; padding: 40px 20px; margin-bottom: 24px;">
+      <div style="font-size: 3.5rem; margin-bottom: 16px;">🎓</div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 12px; line-height: 1.2;">
+        Help Your Child<br>Win Scholarships
+      </h1>
+      <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 320px; margin: 0 auto 24px;">
+        Track progress, send encouragement, and stay involved in their journey to college.
+      </p>
+      <button class="btn btn-primary" onclick="startAuth()" style="max-width: 300px; font-size: 1.1rem; padding: 18px;">
+        Get Started Free
+      </button>
     </div>
 
-    <div class="card">
-      <div class="card-title">🛡️ Why Parents Love Us</div>
-      <div class="progress-item">
-        <span class="name">🔒 Bank-level encryption</span>
+    <!-- Shocking Statistics -->
+    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px; padding: 24px; margin-bottom: 24px; border: 2px solid #fbbf24;">
+      <h2 style="font-size: 1.3rem; font-weight: 800; color: #78350f; margin-bottom: 20px; text-align: center;">
+        The Scholarship Crisis
+      </h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #dc2626;">$100M+</div>
+          <div style="font-size: 0.85rem; color: #78350f; font-weight: 600;">Goes Unclaimed<br>Every Year</div>
+        </div>
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #dc2626;">40%</div>
+          <div style="font-size: 0.85rem; color: #78350f; font-weight: 600;">Of Students<br>Never Apply</div>
+        </div>
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #059669;">$35K</div>
+          <div style="font-size: 0.85rem; color: #78350f; font-weight: 600;">Avg. Student<br>Could Win</div>
+        </div>
+        <div style="text-align: center; padding: 16px; background: white; border-radius: 12px;">
+          <div style="font-size: 2rem; font-weight: 800; color: #059669;">1.7M</div>
+          <div style="font-size: 0.85rem; color: #78350f; font-weight: 600;">Scholarships<br>Available</div>
+        </div>
       </div>
-      <div class="progress-item">
-        <span class="name">🚫 We never sell data</span>
+    </div>
+
+    <!-- What Parents Get -->
+    <div class="card" style="border: 2px solid var(--border);">
+      <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 20px; text-align: center;">
+        What You'll Get
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">📊</div>
+          <div>
+            <div style="font-weight: 700; color: var(--text); margin-bottom: 2px;">Real-Time Progress Dashboard</div>
+            <div style="font-size: 0.9rem; color: var(--muted);">See essays, deadlines, and submissions at a glance</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #fce7f3, #fbcfe8); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">💌</div>
+          <div>
+            <div style="font-weight: 700; color: var(--text); margin-bottom: 2px;">Send Encouragement</div>
+            <div style="font-size: 0.9rem; color: var(--muted);">A quick message can boost their motivation</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">📧</div>
+          <div>
+            <div style="font-weight: 700; color: var(--text); margin-bottom: 2px;">Weekly Progress Reports</div>
+            <div style="font-size: 0.9rem; color: var(--muted);">Stay informed without hovering</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">🎯</div>
+          <div>
+            <div style="font-weight: 700; color: var(--text); margin-bottom: 2px;">Deadline Alerts</div>
+            <div style="font-size: 0.9rem; color: var(--muted);">Never miss an important submission date</div>
+          </div>
+        </div>
       </div>
-      <div class="progress-item">
-        <span class="name">👀 See progress, not private essays</span>
+    </div>
+
+    <!-- Trust Signals -->
+    <div style="background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 20px;">
+      <h3 style="font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 16px; text-align: center;">
+        Your Privacy Matters
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+          <span style="color: #10b981;">✓</span> Bank-level encryption
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+          <span style="color: #10b981;">✓</span> We never sell data
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+          <span style="color: #10b981;">✓</span> Student controls sharing
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+          <span style="color: #10b981;">✓</span> Delete anytime
+        </div>
       </div>
-      <div class="progress-item">
-        <span class="name">📧 Weekly reports (optional)</span>
-      </div>
-      <div class="progress-item">
-        <span class="name">💜 Send encouragement directly</span>
-      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div style="text-align: center; padding: 30px 20px;">
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 16px;">
+        Join thousands of parents supporting their students
+      </p>
+      <button class="btn btn-primary" onclick="startAuth()" style="max-width: 300px;">
+        Create Free Account
+      </button>
     </div>
   </div>
 
