@@ -265,7 +265,23 @@ const Onboarding = (function() {
                 I'm a Parent →
               </button>
             </div>
-            <div style="text-align: center; margin-top: 12px;">
+
+            <div class="ob-divider" style="display: flex; align-items: center; margin: 20px 0; color: #9ca3af;">
+              <span style="flex: 1; height: 1px; background: #e5e7eb;"></span>
+              <span style="padding: 0 12px; font-size: 0.85rem;">or sign up with email</span>
+              <span style="flex: 1; height: 1px; background: #e5e7eb;"></span>
+            </div>
+
+            <div id="ob-email-signup" style="display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto;">
+              <input type="email" id="ob-signup-email" placeholder="Email address" style="padding: 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+              <input type="password" id="ob-signup-password" placeholder="Create password (6+ chars)" style="padding: 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+              <button type="button" class="ob-btn ob-btn-primary" onclick="Onboarding.signUpWithEmail()">
+                Sign Up with Email
+              </button>
+              <div id="ob-signup-error" style="color: #ef4444; font-size: 0.85rem; text-align: center; display: none;"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 16px;">
               <button type="button" class="ob-btn ob-btn-link" onclick="Onboarding.showLogin()">
                 Already have an account? Sign in
               </button>
@@ -607,6 +623,68 @@ const Onboarding = (function() {
     }
   }
 
+  async function signUpWithEmail() {
+    const email = document.getElementById('ob-signup-email')?.value?.trim();
+    const password = document.getElementById('ob-signup-password')?.value;
+    const errorEl = document.getElementById('ob-signup-error');
+
+    // Validation
+    if (!email || !password) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter email and password';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    if (password.length < 6) {
+      if (errorEl) {
+        errorEl.textContent = 'Password must be at least 6 characters';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter a valid email address';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    try {
+      if (errorEl) errorEl.style.display = 'none';
+
+      // Try Supabase Auth if available
+      if (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.signUp) {
+        const result = await SupabaseAuth.signUp(email, password);
+        if (result.error) {
+          if (errorEl) {
+            errorEl.textContent = result.error.message || 'Sign up failed';
+            errorEl.style.display = 'block';
+          }
+          return;
+        }
+      }
+
+      // Store email in formData and proceed with onboarding
+      formData.email = email;
+      formData.userRole = 'student';
+      localStorage.setItem('jasmine_student_email', email);
+
+      // Move to next step
+      next();
+    } catch (e) {
+      console.error('[Onboarding] Email signup error:', e);
+      if (errorEl) {
+        errorEl.textContent = e.message || 'Sign up failed. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    }
+  }
+
   function showLogin() {
     // Close onboarding and show login screen
     close();
@@ -617,8 +695,85 @@ const Onboarding = (function() {
       loginScreen.style.display = 'flex';
       if (mainApp) mainApp.classList.remove('visible');
     } else {
-      // Fallback: just close and let the app handle it
-      alert('Please log in with your existing account credentials.');
+      // Show inline login form
+      showInlineLogin();
+    }
+  }
+
+  function showInlineLogin() {
+    const overlay = document.createElement('div');
+    overlay.id = 'login-overlay';
+    overlay.innerHTML = \`
+      <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px;">
+        <div style="background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%;">
+          <h2 style="margin: 0 0 8px; color: #7c3aed; font-size: 1.5rem;">Welcome Back!</h2>
+          <p style="color: #6b7280; margin-bottom: 24px;">Sign in to continue your scholarship journey</p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <input type="email" id="login-email" placeholder="Email address" style="padding: 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+            <input type="password" id="login-password" placeholder="Password" style="padding: 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+            <button onclick="Onboarding.doLogin()" style="padding: 14px; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer;">
+              Sign In
+            </button>
+            <div id="login-error" style="color: #ef4444; font-size: 0.85rem; text-align: center; display: none;"></div>
+          </div>
+
+          <div style="display: flex; align-items: center; margin: 20px 0; color: #9ca3af;">
+            <span style="flex: 1; height: 1px; background: #e5e7eb;"></span>
+            <span style="padding: 0 12px; font-size: 0.85rem;">or</span>
+            <span style="flex: 1; height: 1px; background: #e5e7eb;"></span>
+          </div>
+
+          <button onclick="window.signInWithGoogle && signInWithGoogle()" style="width: 100%; padding: 14px; background: white; border: 2px solid #e5e7eb; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; color: #000;">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continue with Google
+          </button>
+
+          <button onclick="document.getElementById('login-overlay').remove()" style="width: 100%; margin-top: 16px; padding: 10px; background: #f3f4f6; border: none; border-radius: 8px; cursor: pointer; color: #6b7280;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    \`;
+    document.body.appendChild(overlay);
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email')?.value?.trim();
+    const password = document.getElementById('login-password')?.value;
+    const errorEl = document.getElementById('login-error');
+
+    if (!email || !password) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter email and password';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    try {
+      if (typeof SupabaseAuth !== 'undefined' && SupabaseAuth.signIn) {
+        const result = await SupabaseAuth.signIn(email, password);
+        if (result.error) {
+          if (errorEl) {
+            errorEl.textContent = result.error.message || 'Login failed';
+            errorEl.style.display = 'block';
+          }
+          return;
+        }
+      }
+
+      // Store email and reload
+      localStorage.setItem('jasmine_student_email', email);
+      localStorage.setItem('jasmine_onboarding_complete', 'true');
+
+      document.getElementById('login-overlay')?.remove();
+      window.location.reload();
+    } catch (e) {
+      if (errorEl) {
+        errorEl.textContent = e.message || 'Login failed';
+        errorEl.style.display = 'block';
+      }
     }
   }
 
@@ -917,6 +1072,8 @@ const Onboarding = (function() {
     toggleConsent,
     selectRole,
     showLogin,
+    signUpWithEmail,
+    doLogin,
     skip,
     skipResume,
     handleResumeUpload,
