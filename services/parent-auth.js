@@ -683,15 +683,21 @@ const ParentAuth = (function() {
     const accessToken = params.get('access_token');
 
     if (accessToken) {
-      // Fetch user info from Google
-      fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      })
-      .then(r => r.json())
-      .then(user => {
-        // Clear the hash
-        history.replaceState(null, '', window.location.pathname + window.location.search);
+      // Clear the hash first to prevent loops
+      history.replaceState(null, '', window.location.pathname + window.location.search);
 
+      // Fetch user info from Google with CORS mode
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+        mode: 'cors'
+      })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(user => {
+        console.log('Google user info:', user);
         // Prefill form and proceed
         setTimeout(() => {
           startAuth();
@@ -704,7 +710,14 @@ const ParentAuth = (function() {
           }, 500);
         }, 100);
       })
-      .catch(e => console.error('OAuth callback error:', e));
+      .catch(e => {
+        console.error('OAuth callback error:', e);
+        // Fallback: still proceed with sign-in flow, user can enter details manually
+        showToast('Google sign-in partial - please enter your details', 'warning');
+        setTimeout(() => {
+          startAuth();
+        }, 500);
+      });
 
       return true;
     }
