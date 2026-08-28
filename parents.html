@@ -514,6 +514,16 @@
     <!-- Student Switcher (if multiple) -->
     <div id="student-switcher" class="student-switcher" style="display: none;"></div>
 
+    <!-- Parent Portal Tabs -->
+    <div class="parent-tabs" style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px;">
+      <button class="parent-tab active" onclick="switchParentTab('progress')" id="tab-progress" style="flex-shrink: 0; padding: 10px 20px; border-radius: 20px; background: var(--jazz-purple); color: white; border: 2px solid var(--jazz-purple); font-weight: 700; cursor: pointer;">📊 Progress</button>
+      <button class="parent-tab" onclick="switchParentTab('incentives')" id="tab-incentives" style="flex-shrink: 0; padding: 10px 20px; border-radius: 20px; background: white; color: #000; border: 2px solid #e5e7eb; font-weight: 700; cursor: pointer;">🏆 Incentives</button>
+      <button class="parent-tab" onclick="switchParentTab('scholarships')" id="tab-scholarships" style="flex-shrink: 0; padding: 10px 20px; border-radius: 20px; background: white; color: #000; border: 2px solid #e5e7eb; font-weight: 700; cursor: pointer;">🎓 Find Scholarships</button>
+      <button class="parent-tab" onclick="switchParentTab('documents')" id="tab-documents" style="flex-shrink: 0; padding: 10px 20px; border-radius: 20px; background: white; color: #000; border: 2px solid #e5e7eb; font-weight: 700; cursor: pointer;">📁 Documents</button>
+    </div>
+
+    <!-- Progress Tab Content -->
+    <div id="content-progress">
     <div class="stats-grid">
       <div class="stat-card highlight">
         <div class="icon">🔥</div>
@@ -615,6 +625,126 @@
     <button class="btn btn-secondary" onclick="showConnectOptions()" style="margin-top: 12px;">
       ➕ Add Another Student
     </button>
+    </div><!-- End Progress Tab -->
+
+    <!-- Incentives Tab Content -->
+    <div id="content-incentives" style="display: none;">
+      <div class="card" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #fbbf24;">
+        <div class="card-title" style="color: #78350f;">🏆 Student Incentives</div>
+        <p style="color: #92400e; font-size: 0.9rem; margin-bottom: 16px;">Motivate your student with rewards for reaching milestones!</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">➕ Add New Incentive</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <select id="incentive-milestone" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+            <option value="">Select a milestone...</option>
+            <option value="essay-5">Complete 5 Essays</option>
+            <option value="essay-10">Complete 10 Essays</option>
+            <option value="apply-3">Submit 3 Applications</option>
+            <option value="apply-5">Submit 5 Applications</option>
+            <option value="apply-10">Submit 10 Applications</option>
+            <option value="streak-7">7-Day Streak</option>
+            <option value="streak-30">30-Day Streak</option>
+            <option value="scholarship-won">Win Any Scholarship</option>
+            <option value="custom">Custom Milestone...</option>
+          </select>
+          <input type="text" id="incentive-custom" placeholder="Describe custom milestone" style="display: none; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+          <input type="text" id="incentive-reward" placeholder="Reward (e.g., $50, Dinner out, New phone)" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+          <button class="btn btn-primary" onclick="addIncentive()">Add Incentive</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Active Incentives</div>
+        <div id="incentives-list">
+          <p style="color: var(--muted); text-align: center; padding: 20px;">No incentives set yet. Add one above!</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✅ Claimed Rewards</div>
+        <div id="claimed-incentives">
+          <p style="color: var(--muted); text-align: center; padding: 20px;">No rewards claimed yet</p>
+        </div>
+      </div>
+    </div><!-- End Incentives Tab -->
+
+    <!-- Scholarships Tab Content -->
+    <div id="content-scholarships" style="display: none;">
+      <div class="card" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); border: 2px solid #93c5fd;">
+        <div class="card-title" style="color: #1e40af;">🎓 Find Scholarships</div>
+        <p style="color: #3b82f6; font-size: 0.9rem; margin-bottom: 16px;">Search for scholarships to recommend to your student</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔍 Search Scholarships</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <input type="text" id="parent-scholarship-search" placeholder="Search by interest, major, or keyword..." style="flex: 1; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+          <button class="btn btn-primary" onclick="searchScholarships()" style="width: auto; padding: 12px 20px;">Search</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <button onclick="searchScholarships('Florida')" style="padding: 8px 16px; border: 2px solid #e5e7eb; border-radius: 20px; background: white; cursor: pointer; font-size: 0.85rem; color: #000;">🌴 Florida</button>
+          <button onclick="searchScholarships('photography')" style="padding: 8px 16px; border: 2px solid #e5e7eb; border-radius: 20px; background: white; cursor: pointer; font-size: 0.85rem; color: #000;">📷 Photography</button>
+          <button onclick="searchScholarships('military')" style="padding: 8px 16px; border: 2px solid #e5e7eb; border-radius: 20px; background: white; cursor: pointer; font-size: 0.85rem; color: #000;">🎖️ Military</button>
+          <button onclick="searchScholarships('arts')" style="padding: 8px 16px; border: 2px solid #e5e7eb; border-radius: 20px; background: white; cursor: pointer; font-size: 0.85rem; color: #000;">🎨 Arts</button>
+          <button onclick="searchScholarships('STEM')" style="padding: 8px 16px; border: 2px solid #e5e7eb; border-radius: 20px; background: white; cursor: pointer; font-size: 0.85rem; color: #000;">🔬 STEM</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔎 Search Results</div>
+        <div id="parent-search-results">
+          <p style="color: var(--muted); text-align: center; padding: 20px;">Search for scholarships above</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⭐ Saved Scholarships</div>
+        <div id="saved-scholarships">
+          <p style="color: var(--muted); text-align: center; padding: 20px;">Save scholarships to recommend to your student</p>
+        </div>
+      </div>
+    </div><!-- End Scholarships Tab -->
+
+    <!-- Documents Tab Content -->
+    <div id="content-documents" style="display: none;">
+      <div class="card" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #6ee7b7;">
+        <div class="card-title" style="color: #065f46;">📁 Family Documents</div>
+        <p style="color: #059669; font-size: 0.9rem; margin-bottom: 16px;">Upload documents to help with scholarship applications</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📤 Upload Documents</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <select id="doc-type" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
+            <option value="">Select document type...</option>
+            <option value="financial">📊 Financial Documents (FAFSA, Tax Info)</option>
+            <option value="recommendation">📝 Recommendation Letters</option>
+            <option value="transcript">📋 Transcripts / Report Cards</option>
+            <option value="award">🏆 Awards / Certificates</option>
+            <option value="id">🪪 ID Documents</option>
+            <option value="other">📎 Other</option>
+          </select>
+          <input type="file" id="doc-file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
+          <textarea id="doc-notes" placeholder="Notes about this document (optional)" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; min-height: 80px; color: #000;"></textarea>
+          <button class="btn btn-primary" onclick="uploadDocument()">Upload Document</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📂 Uploaded Documents</div>
+        <div id="uploaded-docs">
+          <p style="color: var(--muted); text-align: center; padding: 20px;">No documents uploaded yet</p>
+        </div>
+      </div>
+
+      <div style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 16px; margin-top: 16px;">
+        <p style="color: #92400e; font-size: 0.9rem; margin: 0;">
+          <strong>🔒 Security:</strong> Documents are encrypted and only shared with your linked student.
+        </p>
+      </div>
+    </div><!-- End Documents Tab -->
   </div>
 
   <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 20px;">
@@ -626,6 +756,24 @@
   <script>
     let currentStudentId = null;
     let linkedStudents = [];
+
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.style.cssText = `
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+        background: ${type === 'error' ? '#ef4444' : '#10b981'};
+        color: white; padding: 12px 24px; border-radius: 12px;
+        font-weight: 600; z-index: 10000; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
 
     // Initialize the page
     async function init() {
@@ -966,8 +1114,300 @@
       localStorage.setItem('parent_report_frequency', freq);
     }
 
+    // Tab switching
+    function switchParentTab(tabName) {
+      // Update tabs
+      document.querySelectorAll('.parent-tab').forEach(tab => {
+        const isActive = tab.id === 'tab-' + tabName;
+        tab.style.background = isActive ? 'var(--jazz-purple)' : 'white';
+        tab.style.color = isActive ? 'white' : '#000';
+        tab.style.borderColor = isActive ? 'var(--jazz-purple)' : '#e5e7eb';
+        tab.classList.toggle('active', isActive);
+      });
+
+      // Show/hide content
+      ['progress', 'incentives', 'scholarships', 'documents'].forEach(name => {
+        const content = document.getElementById('content-' + name);
+        if (content) content.style.display = name === tabName ? 'block' : 'none';
+      });
+    }
+
+    // Incentives functions
+    let parentIncentives = JSON.parse(localStorage.getItem('parent_incentives') || '[]');
+
+    document.getElementById('incentive-milestone')?.addEventListener('change', function() {
+      const customInput = document.getElementById('incentive-custom');
+      customInput.style.display = this.value === 'custom' ? 'block' : 'none';
+    });
+
+    function addIncentive() {
+      const milestoneEl = document.getElementById('incentive-milestone');
+      const customEl = document.getElementById('incentive-custom');
+      const rewardEl = document.getElementById('incentive-reward');
+
+      let milestone = milestoneEl.value;
+      if (milestone === 'custom') milestone = customEl.value.trim();
+      const reward = rewardEl.value.trim();
+
+      if (!milestone || !reward) {
+        showToast('Please fill in all fields');
+        return;
+      }
+
+      const incentive = {
+        id: Date.now(),
+        milestone,
+        reward,
+        studentId: currentStudentId,
+        createdAt: new Date().toISOString(),
+        claimed: false
+      };
+
+      parentIncentives.push(incentive);
+      localStorage.setItem('parent_incentives', JSON.stringify(parentIncentives));
+
+      milestoneEl.value = '';
+      customEl.value = '';
+      customEl.style.display = 'none';
+      rewardEl.value = '';
+
+      renderIncentives();
+      showToast('Incentive added!');
+    }
+
+    function renderIncentives() {
+      const active = parentIncentives.filter(i => !i.claimed && i.studentId === currentStudentId);
+      const claimed = parentIncentives.filter(i => i.claimed && i.studentId === currentStudentId);
+
+      const activeEl = document.getElementById('incentives-list');
+      const claimedEl = document.getElementById('claimed-incentives');
+
+      if (active.length === 0) {
+        activeEl.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No incentives set yet. Add one above!</p>';
+      } else {
+        activeEl.innerHTML = active.map(i => `
+          <div class="progress-item" style="flex-wrap: wrap;">
+            <div>
+              <div class="name">${getMilestoneLabel(i.milestone)}</div>
+              <div style="color: var(--jazz-gold); font-weight: 700;">🏆 ${i.reward}</div>
+            </div>
+            <button onclick="claimIncentive(${i.id})" style="padding: 8px 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Mark Claimed</button>
+          </div>
+        `).join('');
+      }
+
+      if (claimed.length === 0) {
+        claimedEl.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No rewards claimed yet</p>';
+      } else {
+        claimedEl.innerHTML = claimed.map(i => `
+          <div class="progress-item">
+            <div>
+              <div class="name" style="text-decoration: line-through; color: var(--muted);">${getMilestoneLabel(i.milestone)}</div>
+              <div style="color: #10b981; font-weight: 700;">✅ ${i.reward}</div>
+            </div>
+            <span class="status status-complete">Claimed</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function getMilestoneLabel(milestone) {
+      const labels = {
+        'essay-5': 'Complete 5 Essays',
+        'essay-10': 'Complete 10 Essays',
+        'apply-3': 'Submit 3 Applications',
+        'apply-5': 'Submit 5 Applications',
+        'apply-10': 'Submit 10 Applications',
+        'streak-7': '7-Day Streak',
+        'streak-30': '30-Day Streak',
+        'scholarship-won': 'Win Any Scholarship'
+      };
+      return labels[milestone] || milestone;
+    }
+
+    function claimIncentive(id) {
+      const incentive = parentIncentives.find(i => i.id === id);
+      if (incentive) {
+        incentive.claimed = true;
+        incentive.claimedAt = new Date().toISOString();
+        localStorage.setItem('parent_incentives', JSON.stringify(parentIncentives));
+        renderIncentives();
+        showToast('Reward marked as claimed! 🎉');
+      }
+    }
+
+    // Scholarship search
+    async function searchScholarships(query) {
+      if (!query) {
+        query = document.getElementById('parent-scholarship-search').value.trim();
+      }
+      if (!query) {
+        showToast('Please enter a search term');
+        return;
+      }
+
+      const resultsEl = document.getElementById('parent-search-results');
+      resultsEl.innerHTML = '<p style="text-align: center; padding: 20px;">🔍 Searching...</p>';
+
+      try {
+        const response = await fetch('/api/scholarship-search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, limit: 10 })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const scholarships = data.scholarships || data.results || [];
+
+          if (scholarships.length === 0) {
+            resultsEl.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No scholarships found. Try different keywords.</p>';
+          } else {
+            resultsEl.innerHTML = scholarships.map(s => `
+              <div class="progress-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                  <div class="name">${s.name || s.title}</div>
+                  <span class="status status-progress">${s.amount || 'Varies'}</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--muted); margin: 0;">${(s.description || '').slice(0, 100)}...</p>
+                <div style="display: flex; gap: 8px;">
+                  <button onclick="saveScholarship('${encodeURIComponent(JSON.stringify(s))}')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink)); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">⭐ Save</button>
+                  <button onclick="recommendScholarship('${encodeURIComponent(JSON.stringify(s))}')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #78350f; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">📤 Send to Student</button>
+                </div>
+              </div>
+            `).join('');
+          }
+        } else {
+          resultsEl.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px;">Search failed. Please try again.</p>';
+        }
+      } catch (e) {
+        console.error('Search error:', e);
+        resultsEl.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px;">Search failed. Please try again.</p>';
+      }
+    }
+
+    let savedScholarships = JSON.parse(localStorage.getItem('parent_saved_scholarships') || '[]');
+
+    function saveScholarship(encodedData) {
+      const scholarship = JSON.parse(decodeURIComponent(encodedData));
+      if (!savedScholarships.find(s => s.name === scholarship.name)) {
+        savedScholarships.push(scholarship);
+        localStorage.setItem('parent_saved_scholarships', JSON.stringify(savedScholarships));
+        renderSavedScholarships();
+        showToast('Scholarship saved! ⭐');
+      } else {
+        showToast('Already saved');
+      }
+    }
+
+    function recommendScholarship(encodedData) {
+      const scholarship = JSON.parse(decodeURIComponent(encodedData));
+      showToast('Sent to student! 📤');
+    }
+
+    function renderSavedScholarships() {
+      const el = document.getElementById('saved-scholarships');
+      if (savedScholarships.length === 0) {
+        el.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">Save scholarships to recommend to your student</p>';
+      } else {
+        el.innerHTML = savedScholarships.map((s, i) => `
+          <div class="progress-item">
+            <div class="name">${s.name || s.title}</div>
+            <button onclick="removeSavedScholarship(${i})" style="padding: 6px 12px; background: #f3f4f6; border: none; border-radius: 6px; cursor: pointer; color: #6b7280;">Remove</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function removeSavedScholarship(index) {
+      savedScholarships.splice(index, 1);
+      localStorage.setItem('parent_saved_scholarships', JSON.stringify(savedScholarships));
+      renderSavedScholarships();
+    }
+
+    // Document upload
+    let uploadedDocs = JSON.parse(localStorage.getItem('parent_documents') || '[]');
+
+    async function uploadDocument() {
+      const typeEl = document.getElementById('doc-type');
+      const fileEl = document.getElementById('doc-file');
+      const notesEl = document.getElementById('doc-notes');
+
+      const docType = typeEl.value;
+      const file = fileEl.files[0];
+      const notes = notesEl.value.trim();
+
+      if (!docType) {
+        showToast('Please select document type');
+        return;
+      }
+      if (!file) {
+        showToast('Please select a file');
+        return;
+      }
+
+      const doc = {
+        id: Date.now(),
+        type: docType,
+        fileName: file.name,
+        fileSize: file.size,
+        notes,
+        studentId: currentStudentId,
+        uploadedAt: new Date().toISOString()
+      };
+
+      uploadedDocs.push(doc);
+      localStorage.setItem('parent_documents', JSON.stringify(uploadedDocs));
+
+      typeEl.value = '';
+      fileEl.value = '';
+      notesEl.value = '';
+
+      renderUploadedDocs();
+      showToast('Document uploaded! 📁');
+    }
+
+    function renderUploadedDocs() {
+      const docs = uploadedDocs.filter(d => d.studentId === currentStudentId);
+      const el = document.getElementById('uploaded-docs');
+
+      if (docs.length === 0) {
+        el.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No documents uploaded yet</p>';
+      } else {
+        el.innerHTML = docs.map(d => `
+          <div class="progress-item">
+            <div>
+              <div class="name">${getDocTypeLabel(d.type)}</div>
+              <div style="font-size: 0.8rem; color: var(--muted);">${d.fileName}</div>
+              ${d.notes ? `<div style="font-size: 0.8rem; color: var(--text-secondary);">${d.notes}</div>` : ''}
+            </div>
+            <span class="status status-complete">Uploaded</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function getDocTypeLabel(type) {
+      const labels = {
+        'financial': '📊 Financial',
+        'recommendation': '📝 Recommendation',
+        'transcript': '📋 Transcript',
+        'award': '🏆 Award',
+        'id': '🪪 ID Document',
+        'other': '📎 Other'
+      };
+      return labels[type] || type;
+    }
+
     // Initialize on load
     init();
+
+    // Render saved data after init
+    setTimeout(() => {
+      renderIncentives();
+      renderSavedScholarships();
+      renderUploadedDocs();
+    }, 500);
   </script>
 </body>
 </html>
