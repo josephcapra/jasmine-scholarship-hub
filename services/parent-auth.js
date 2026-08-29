@@ -618,8 +618,57 @@ const ParentAuth = (function() {
   }
 
   async function signInWithGoogle() {
-    // Direct redirect to Google OAuth - faster and more reliable than GSI popup
-    redirectToGoogleOAuth();
+    // Use Firebase Auth for Google Sign-In (cleaner URLs)
+    if (window.firebaseAuth && window.googleProvider && window.firebaseSignInWithPopup) {
+      try {
+        const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.googleProvider);
+        const user = result.user;
+        console.log('Parent Google sign-in successful:', user.email, user.displayName);
+
+        // Pre-fill the form fields with Google account data
+        const nameInput = document.getElementById('pam-name');
+        const emailInput = document.getElementById('pam-email');
+
+        if (nameInput && user.displayName) {
+          nameInput.value = user.displayName;
+        }
+        if (emailInput && user.email) {
+          emailInput.value = user.email;
+        }
+
+        // Save parent info
+        const parentId = 'p_' + Date.now();
+        const parentData = {
+          id: parentId,
+          name: user.displayName || '',
+          email: user.email || '',
+          photoURL: user.photoURL || '',
+          provider: 'google',
+          createdAt: new Date().toISOString()
+        };
+        localStorage.setItem('jasmine_parent_profile', JSON.stringify(parentData));
+        localStorage.setItem('jasmine_session_active', 'true');
+
+        // Show step 2 (connection options)
+        document.getElementById('pam-step-1').style.display = 'none';
+        document.getElementById('pam-step-2').style.display = 'block';
+
+        if (typeof showToast === 'function') {
+          showToast('Welcome, ' + (user.displayName || user.email) + '!');
+        }
+      } catch (error) {
+        console.error('Google sign-in error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
+          if (typeof showToast === 'function') showToast('Sign-in cancelled');
+        } else {
+          if (typeof showToast === 'function') showToast('Sign-in failed. Please try again.');
+        }
+      }
+    } else {
+      // Fallback to redirect OAuth if Firebase not ready
+      console.log('Firebase not ready, using redirect OAuth');
+      redirectToGoogleOAuth();
+    }
   }
 
   function showGoogleButton() {

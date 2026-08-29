@@ -31,6 +31,13 @@
     const firebaseAuth = getAuth(firebaseApp);
     const googleProvider = new GoogleAuthProvider();
 
+    // Request profile and email scopes from Google
+    googleProvider.addScope('profile');
+    googleProvider.addScope('email');
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
+
     // Expose to global scope for use in onclick handlers
     window.firebaseAuth = firebaseAuth;
     window.googleProvider = googleProvider;
@@ -40,25 +47,32 @@
     // Listen for Firebase auth state changes
     onAuthStateChanged(firebaseAuth, (user) => {
       if (user) {
-        console.log('Firebase user signed in:', user.email);
+        console.log('Firebase user signed in:', user.email, user.displayName);
         window.firebaseUser = user;
-        // Store user profile data from Google
-        if (user.displayName || user.email) {
-          const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
-          if (!profile.firstName && user.displayName) {
-            const names = user.displayName.split(' ');
-            profile.firstName = names[0] || '';
-            profile.lastName = names.slice(1).join(' ') || '';
-          }
-          if (!profile.email && user.email) {
-            profile.email = user.email;
-          }
-          if (!profile.photoURL && user.photoURL) {
-            profile.photoURL = user.photoURL;
-          }
-          localStorage.setItem('jasmine_student_profile', JSON.stringify(profile));
+
+        // Store user profile data from Google - always update to ensure fresh data
+        const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+
+        if (user.displayName) {
+          const names = user.displayName.split(' ');
+          profile.firstName = names[0] || profile.firstName || '';
+          profile.lastName = names.slice(1).join(' ') || profile.lastName || '';
         }
+        if (user.email) {
+          profile.email = user.email;
+        }
+        if (user.photoURL) {
+          profile.photoURL = user.photoURL;
+        }
+
+        localStorage.setItem('jasmine_student_profile', JSON.stringify(profile));
         localStorage.setItem('jasmine_session_active', 'true');
+
+        // Dispatch event so other components know profile updated
+        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: profile }));
+
+        console.log('Profile saved:', profile);
+
         if (typeof showApp === 'function') showApp();
       }
     });
