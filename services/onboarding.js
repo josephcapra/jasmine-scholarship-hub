@@ -718,7 +718,7 @@ const Onboarding = (function() {
   function showInlineLogin() {
     const overlay = document.createElement('div');
     overlay.id = 'login-overlay';
-    overlay.innerHTML = \`
+    overlay.innerHTML = `
       <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px;">
         <div style="background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%;">
           <h2 style="margin: 0 0 8px; color: #7c3aed; font-size: 1.5rem;">Welcome Back!</h2>
@@ -749,7 +749,7 @@ const Onboarding = (function() {
           </button>
         </div>
       </div>
-    \`;
+    `;
     document.body.appendChild(overlay);
   }
 
