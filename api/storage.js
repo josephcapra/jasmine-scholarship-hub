@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPA_URL = 'https://xjorndkpofhyhihgaesu.supabase.co';
+const SUPA_URL = 'https://ntmsclblmncklbxlttlw.supabase.co';
 const SUPA_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const BUCKET_NAME = 'jasmine-docs';
 const MAX_SIZE_MB = 10; // Max 10MB per file
