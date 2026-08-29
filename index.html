@@ -68,6 +68,12 @@
         localStorage.setItem('jasmine_student_profile', JSON.stringify(profile));
         localStorage.setItem('jasmine_session_active', 'true');
 
+        // Auto-enable developer mode for admin email
+        if (user.email && user.email.toLowerCase() === 'joe@josephcapra.com') {
+          localStorage.setItem('jasmine_dev_mode', 'true');
+          console.log('Developer mode enabled for admin');
+        }
+
         // Dispatch event so other components know profile updated
         window.dispatchEvent(new CustomEvent('profileUpdated', { detail: profile }));
 
@@ -12282,6 +12288,13 @@
       if (password === DEFAULT_PASSWORD || password === 'paradiserealtyfla') {
         currentUserEmail = email;
         localStorage.setItem('jasmine_session_active', 'true');
+
+        // Auto-enable developer mode for admin email
+        if (email.toLowerCase() === 'joe@josephcapra.com') {
+          localStorage.setItem('jasmine_dev_mode', 'true');
+          console.log('Developer mode enabled for admin');
+        }
+
         showApp();
         trackLogin(email);
         notifyParentOfLogin(email);
@@ -12327,6 +12340,12 @@
         // Store session and user info
         localStorage.setItem('jasmine_session_active', 'true');
         currentUserEmail = user.email.toLowerCase();
+
+        // Auto-enable developer mode for admin email
+        if (currentUserEmail === 'joe@josephcapra.com') {
+          localStorage.setItem('jasmine_dev_mode', 'true');
+          console.log('Developer mode enabled for admin');
+        }
 
         // Pre-populate profile from Google account
         const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
