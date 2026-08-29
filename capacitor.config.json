@@ -1,0 +1,16 @@
+{
+  "appId": "com.vylium.app",
+  "appName": "Vylium",
+  "webDir": "www",
+  "server": {
+    "url": "https://www.jasminescholarshiphub.com",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#7c3aed"
+  },
+  "android": {
+    "backgroundColor": "#7c3aed"
+  }
+}

@@ -6,9 +6,21 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "test:watch": "node --test --watch tests/*.test.js",
-    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js"
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
+    "cap:sync": "npx cap sync",
+    "cap:ios": "npx cap open ios",
+    "cap:android": "npx cap open android",
+    "build:mobile": "npx cap sync && echo 'Ready! Run npm run cap:ios or npm run cap:android'"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/camera": "^8.2.3",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/push-notifications": "^8.1.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "mammoth": "^1.6.0",
     "pdf-parse": "^1.1.1",
     "zod": "^4.4.3"
