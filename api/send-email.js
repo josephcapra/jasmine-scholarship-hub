@@ -61,7 +61,7 @@ export default async function handler(req, res) {
           </div>
           <div style="background: #d1fae5; padding: 20px; border-radius: 16px; margin-top: 20px; color: #065f46;">
             <p style="font-weight: bold; margin: 0 0 8px;">📎 Resume Link:</p>
-            <p style="margin: 0;"><a href="https://paradiserealtyfla.app/jasmine/resumes/">View & Download Your Resumes</a></p>
+            <p style="margin: 0;"><a href="https://www.jasminescholarshiphub.com/resumes/">View & Download Your Resumes</a></p>
           </div>
           <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); padding: 20px; border-radius: 16px; margin-top: 20px; color: #78350f;">
             <p style="font-weight: bold; margin: 0 0 8px;">💜 From Mom & Daddy Dog:</p>

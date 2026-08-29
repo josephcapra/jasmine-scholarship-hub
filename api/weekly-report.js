@@ -76,14 +76,14 @@ export default async function handler(req, res) {
         </div>
 
         <div style="text-align: center;">
-          <a href="https://paradiserealtyfla.app/jasmine/parents.html" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700;">
+          <a href="https://www.jasminescholarshiphub.com/parents.html" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700;">
             View Full Dashboard
           </a>
         </div>
 
         <p style="text-align: center; color: #6b7280; font-size: 0.75rem; margin-top: 24px;">
           Sent from Jasmine's Scholarship Hub 🌟<br>
-          <a href="https://paradiserealtyfla.app/jasmine/unsubscribe" style="color: #6b7280;">Unsubscribe</a>
+          <a href="https://www.jasminescholarshiphub.com/unsubscribe" style="color: #6b7280;">Unsubscribe</a>
         </p>
       </div>
     `;

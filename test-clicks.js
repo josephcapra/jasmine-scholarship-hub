@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const BASE_URL = 'https://paradiserealtyfla.app/jasmine/';
+const BASE_URL = 'https://www.jasminescholarshiphub.com/';
 const SCREENSHOT_DIR = '/tmp/jasmine-clicks';
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
