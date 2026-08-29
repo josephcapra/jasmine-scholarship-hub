@@ -3873,7 +3873,7 @@
   </div>
 
   <!-- Login Screen -->
-  <div id="login-screen" style="display: none !important;">
+  <div id="login-screen">
     <div class="login-box">
       <div class="logo">🌟</div>
       <h1>Jasmine's Scholarship Hub</h1>
@@ -8945,6 +8945,11 @@
           await SupabaseAuth.signOut();
         }
 
+        // Sign out of Supabase client if available
+        if (typeof supabaseClient !== 'undefined' && supabaseClient?.auth?.signOut) {
+          await supabaseClient.auth.signOut();
+        }
+
         // Clear session-related localStorage items
         const sessionKeys = [
           'jasmine_auth_token',
@@ -8953,14 +8958,18 @@
           'jasmine_student_id',
           'jasmine_parent_id',
           'jasmine_passkey_credential',
-          'jasmine_passkey_user'
+          'jasmine_passkey_user',
+          'jasmine_session_active'
         ];
         sessionKeys.forEach(key => localStorage.removeItem(key));
 
+        // Clear current user
+        currentUserEmail = null;
+
         showToast('Logged out successfully');
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 500);
+
+        // Show login screen instead of redirecting
+        showLogin();
       } catch (error) {
         console.error('Logout error:', error);
         showToast('Logout failed. Please try again.');
@@ -12093,13 +12102,25 @@
     }
 
     async function checkAuth() {
-      if (!supabaseClient) { showApp(); return; }
+      // Check for active session in localStorage (for password-based login)
+      const sessionActive = localStorage.getItem('jasmine_session_active');
+
+      if (!supabaseClient) {
+        // No Supabase - check localStorage session
+        if (sessionActive) {
+          showApp();
+        } else {
+          showLogin();
+        }
+        return;
+      }
 
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         const email = session.user.email.toLowerCase();
         if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
           currentUserEmail = email;
+          localStorage.setItem('jasmine_session_active', 'true');
           showApp();
           trackLogin(email);
           notifyParentOfLogin(email);
@@ -12107,7 +12128,14 @@
         } else {
           alert('This account is not authorized. Please use jasminecapra848@gmail.com');
           await supabaseClient.auth.signOut();
+          showLogin();
         }
+      } else if (sessionActive) {
+        // Had a password-based login
+        showApp();
+      } else {
+        // No session - show login
+        showLogin();
       }
 
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -12115,6 +12143,7 @@
           const email = session.user.email.toLowerCase();
           if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
             currentUserEmail = email;
+            localStorage.setItem('jasmine_session_active', 'true');
             showApp();
             trackLogin(email);
             notifyParentOfLogin(email);
@@ -12122,7 +12151,10 @@
           } else {
             alert('This account is not authorized. Please use jasminecapra848@gmail.com');
             await supabaseClient.auth.signOut();
+            showLogin();
           }
+        } else if (event === 'SIGNED_OUT') {
+          showLogin();
         }
       });
     }
@@ -12146,6 +12178,7 @@
       // Simple password check for immediate access
       if (password === DEFAULT_PASSWORD || password === 'paradiserealtyfla') {
         currentUserEmail = email;
+        localStorage.setItem('jasmine_session_active', 'true');
         showApp();
         trackLogin(email);
         notifyParentOfLogin(email);
@@ -12293,6 +12326,15 @@
       loadRewards();
       loadGoalData();
     }
+
+    function showLogin() {
+      document.getElementById('main-app').classList.remove('visible');
+      document.getElementById('login-screen').classList.remove('hidden');
+      // Clear password field for security
+      const passwordField = document.getElementById('login-password');
+      if (passwordField) passwordField.value = '';
+    }
+    window.showLogin = showLogin;
 
     function loadRewards() {
       const rewardSettings = JSON.parse(localStorage.getItem('jasmine_reward_settings') || '{"enabled":false,"balance":0,"history":[]}');
@@ -12837,16 +12879,8 @@
 
     // TESTING MODE: Auto-load app without login
     // Show onboarding for first-time users, or show main app if already completed
-    if (typeof Onboarding !== 'undefined' && Onboarding.shouldShow()) {
-      Onboarding.show();
-    } else {
-      // Onboarding complete - show main app
-      document.getElementById('main-app').classList.add('visible');
-    }
-    initApp();
-    loadRewards();
-    loadGoalData();
-    loadHomeSection();
+    // Check authentication on page load
+    checkAuth();
   </script>
 
   <!-- Footer -->
