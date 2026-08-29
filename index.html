@@ -3881,7 +3881,7 @@
 
       <!-- Email/Password Login -->
       <div id="login-form">
-        <input type="email" id="login-email" class="login-input" placeholder="Email" value="jasminecapra848@gmail.com">
+        <input type="email" id="login-email" class="login-input" placeholder="Email" value="">
         <input type="password" id="login-password" class="login-input" placeholder="Password">
         <button class="google-btn" style="background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; margin-bottom: 12px;" onclick="signInWithEmail()">
           🔐 Sign In
@@ -3910,7 +3910,7 @@
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
         Continue with Google
       </button>
-      <div class="hint">Use your jasminecapra848@gmail.com account</div>
+      <div class="hint">Sign in to access your scholarships</div>
     </div>
   </div>
 
@@ -3992,7 +3992,7 @@
 
     <!-- Parent Incentives -->
     <div id="incentives-banner" style="display: none; margin: 0 16px 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 16px; padding: 14px; color: #78350f;">
-      <div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px;">🎁 Incentives from Mom & Daddy Dog</div>
+      <div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px;">🎁 Rewards & Incentives</div>
       <div id="active-incentives-list"></div>
     </div>
 
@@ -4414,7 +4414,7 @@
           <div class="card-header">
             <div>
               <div class="card-title">Career Goals: Business + Photography</div>
-              <div class="card-subtitle">Entrepreneurship, jazz.ysphotos</div>
+              <div class="card-subtitle">Entrepreneurship & Business</div>
             </div>
             <span class="badge badge-gold">Merit</span>
           </div>
@@ -4438,7 +4438,7 @@
           <div class="card-header">
             <div>
               <div class="card-title">How Art & Photography Shaped Me</div>
-              <div class="card-subtitle">"Warm Embrace", Carnegie Hall</div>
+              <div class="card-subtitle">Photography & Arts</div>
             </div>
             <span class="badge badge-pink">Arts</span>
           </div>
@@ -7094,7 +7094,10 @@
       const content = document.getElementById('transcript')?.textContent || '';
       if (!content.trim()) { showToast('Write something first! 📝'); return; }
       const template = essayTemplates[currentEssay];
-      const header = `SUEANNA "JASMINE" DORIS-CAPRA\nStuart, Florida | jasminecapra848@gmail.com\n\n${template.title.toUpperCase()}\n\n`;
+      const userName = localStorage.getItem('scholarship_user_name') || 'YOUR NAME';
+      const userEmail = localStorage.getItem('scholarship_user_email') || currentUserEmail || 'your@email.com';
+      const userLocation = localStorage.getItem('scholarship_user_location') || 'Your City, State';
+      const header = `${userName.toUpperCase()}\n${userLocation} | ${userEmail}\n\n${template.title.toUpperCase()}\n\n`;
       downloadText(header + content, `Jasmine_Essay_${currentEssay}`, format);
     }
 
@@ -7104,7 +7107,10 @@
       if (!content.trim()) { showToast('Write something first! 📝'); return; }
       const template = essayTemplates[currentInterviewType] || { title: 'Essay' };
       const title = template.title || currentInterviewType || 'Essay';
-      const header = `SUEANNA "JASMINE" DORIS-CAPRA\nStuart, Florida | jasminecapra848@gmail.com\n\n${title.toUpperCase()}\n\n`;
+      const userName = localStorage.getItem('scholarship_user_name') || 'YOUR NAME';
+      const userEmail = localStorage.getItem('scholarship_user_email') || currentUserEmail || 'your@email.com';
+      const userLocation = localStorage.getItem('scholarship_user_location') || 'Your City, State';
+      const header = `${userName.toUpperCase()}\n${userLocation} | ${userEmail}\n\n${title.toUpperCase()}\n\n`;
       downloadText(header + content, `Jasmine_Essay_${currentInterviewType || 'draft'}`, format);
     }
 
@@ -7677,7 +7683,7 @@
 
       // Show encouraging message
       if (newStatus === 'applied') {
-        showToast('🎉 Amazing! Application submitted! Mom & Daddy Dog are SO proud!');
+        showToast('🎉 Amazing! Application submitted! Great work!');
         checkApplicationBadges();
       } else if (newStatus === 'in_progress') {
         showToast('💪 Great start! You got this!');
@@ -9643,7 +9649,7 @@
       localStorage.setItem('jasmine_goal_tasks', JSON.stringify(tasks));
 
       if (checkbox.classList.contains('checked')) {
-        showToast('Task completed! 🎉 Mom & Daddy Dog are proud!');
+        showToast('Task completed! 🎉 Great job!');
         trackAction(`Completed task: ${text.textContent}`);
       }
     }
@@ -9784,7 +9790,7 @@
       { icon: '📸', title: 'Add Your Photo', text: 'Upload a profile photo that represents you. This makes your app feel more personal!', hasPhotoUpload: true },
       { icon: '🎤', title: 'Voice & Interview Mode', text: 'Speak your answers naturally - the app will transcribe for you. Or use Interview Mode to answer guided questions!' },
       { icon: '📂', title: 'Upload Documents', text: 'Keep your awards, transcripts, and photos organized. Up to 1GB of storage!' },
-      { icon: '💜', title: 'You\'ve Got This!', text: 'Mom and Daddy Dog are SO proud of you. Every scholarship you apply for is an investment in YOUR future!' }
+      { icon: '💜', title: 'You\'ve Got This!', text: 'Every scholarship you apply for is an investment in YOUR future! Keep going!' }
     ];
     let tutorialStep = 0;
     let tutorialPhoto = null;
@@ -12085,9 +12091,9 @@
   <script>
     const SUPA_URL = 'https://xjorndkpofhyhihgaesu.supabase.co';
     const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhqb3JuZGtwb2ZoeWhpaGdhZXN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzYyNDUsImV4cCI6MjEwMjY1MjI0NX0.FeFjvR_R-ysFVsYAuKM97RYYpWJeDIJKWHHk5-3PwKY';
-    const ALLOWED_EMAILS = ['jasminecapra848@gmail.com', 'joe@josephcapra.com'];
-    const PARENT_EMAIL = 'joe@josephcapra.com';
-    const DEFAULT_PASSWORD = 'paradiserealtyfla';
+    const ALLOWED_EMAILS = null; // Allow any registered user
+    const PARENT_EMAIL = null; // No parent email restriction
+    const DEFAULT_PASSWORD = null; // No default password
 
     // Detect parent preview mode - skip login tracking
     const urlParams = new URLSearchParams(window.location.search);
@@ -12118,18 +12124,12 @@
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         const email = session.user.email.toLowerCase();
-        if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
-          currentUserEmail = email;
-          localStorage.setItem('jasmine_session_active', 'true');
-          showApp();
-          trackLogin(email);
-          notifyParentOfLogin(email);
-          checkPasswordUpdate();
-        } else {
-          alert('This account is not authorized. Please use jasminecapra848@gmail.com');
-          await supabaseClient.auth.signOut();
-          showLogin();
-        }
+        // Allow any authenticated user (no email restriction)
+        currentUserEmail = email;
+        localStorage.setItem('jasmine_session_active', 'true');
+        showApp();
+        trackLogin(email);
+        checkPasswordUpdate();
       } else if (sessionActive) {
         // Had a password-based login
         showApp();
@@ -12141,18 +12141,12 @@
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session) {
           const email = session.user.email.toLowerCase();
-          if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
-            currentUserEmail = email;
-            localStorage.setItem('jasmine_session_active', 'true');
-            showApp();
-            trackLogin(email);
-            notifyParentOfLogin(email);
-            checkPasswordUpdate();
-          } else {
-            alert('This account is not authorized. Please use jasminecapra848@gmail.com');
-            await supabaseClient.auth.signOut();
-            showLogin();
-          }
+          // Allow any authenticated user (no email restriction)
+          currentUserEmail = email;
+          localStorage.setItem('jasmine_session_active', 'true');
+          showApp();
+          trackLogin(email);
+          checkPasswordUpdate();
         } else if (event === 'SIGNED_OUT') {
           showLogin();
         }
@@ -12186,9 +12180,9 @@
         return;
       }
 
-      // Try Supabase auth if available
+      // Try Supabase auth
       if (!supabaseClient) {
-        showToast('Please use the default password');
+        showToast('Authentication service unavailable');
         return;
       }
 
@@ -12196,29 +12190,15 @@
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
         if (error) {
-          // If Supabase fails, try simple password
-          if (password === DEFAULT_PASSWORD) {
-            currentUserEmail = email;
-            showApp();
-            trackLogin(email);
-            notifyParentOfLogin(email);
-            return;
-          }
           showToast('Login failed: ' + error.message);
           return;
         }
 
         // Success - auth listener will handle the rest
+        console.log('Sign-in successful');
       } catch (e) {
-        // Fallback to simple password
-        if (password === DEFAULT_PASSWORD) {
-          currentUserEmail = email;
-          showApp();
-          trackLogin(email);
-          notifyParentOfLogin(email);
-        } else {
-          showToast('Login error. Try the default password.');
-        }
+        console.error('Login error:', e);
+        showToast('Login error. Please try again.');
       }
     }
 
@@ -12524,7 +12504,7 @@
           ${historyHtml}
         </div>
         <p style="text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 16px;">
-          Mom & Daddy Dog add rewards when you complete scholarship tasks! Max $30/week
+          Complete scholarship tasks to earn rewards! Max $30/week
         </p>
       `;
 

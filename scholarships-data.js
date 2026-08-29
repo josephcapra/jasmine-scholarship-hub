@@ -982,8 +982,8 @@ const APPLICATION_PHASES = {
     title: 'Phase D: Complete Application',
     checklist: [
       'Complete personal information',
-      'Use legal name: Sueanna Doris-Capra',
-      'Use email: jasminecapra848@gmail.com',
+      'Use your legal name',
+      'Use your registered email',
       'Upload correct scholarship resume',
       'Upload transcript',
       'Upload requested documentation',

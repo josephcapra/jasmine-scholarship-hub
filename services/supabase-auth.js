@@ -99,7 +99,7 @@ const SupabaseAuth = (function() {
   }
 
   async function signInWithOAuth(provider) {
-    const redirectUrl = `${window.location.origin}/parents.html`;
+    const redirectUrl = window.location.href;
     const authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectUrl)}`;
     window.location.href = authUrl;
   }

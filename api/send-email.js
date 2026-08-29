@@ -64,8 +64,8 @@ export default async function handler(req, res) {
             <p style="margin: 0;"><a href="https://www.jasminescholarshiphub.com/resumes/">View & Download Your Resumes</a></p>
           </div>
           <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); padding: 20px; border-radius: 16px; margin-top: 20px; color: #78350f;">
-            <p style="font-weight: bold; margin: 0 0 8px;">💜 From Mom & Daddy Dog:</p>
-            <p style="margin: 0;">This resume shows how hard you've worked. From jazz.ysphotos to Carnegie Hall - you've earned every accomplishment. Go get those scholarships!</p>
+            <p style="font-weight: bold; margin: 0 0 8px;">💜 Great work!</p>
+            <p style="margin: 0;">This resume shows how hard you've worked. You've earned every accomplishment. Go get those scholarships!</p>
           </div>
         </div>`;
     } else if (type === 'progress') {
@@ -79,8 +79,8 @@ export default async function handler(req, res) {
             ${content}
           </div>
           <div style="background: linear-gradient(135deg, #f59e0b, #fbbf24); padding: 20px; border-radius: 16px; margin-top: 20px; color: #78350f;">
-            <p style="font-weight: bold; margin: 0 0 8px;">💜 From Mom & Daddy Dog:</p>
-            <p style="margin: 0;">Another week of amazing progress! We see how hard you're working and we couldn't be more proud!</p>
+            <p style="font-weight: bold; margin: 0 0 8px;">💜 Keep it up!</p>
+            <p style="margin: 0;">Another week of amazing progress! Your hard work is paying off!</p>
           </div>
         </div>`;
     } else if (body.to && body.subject && body.text) {

@@ -557,14 +557,14 @@
       const encouragements = JSON.parse(localStorage.getItem('parent_encouragements') || '[]');
       encouragements.unshift({
         message,
-        from: 'Mom & Daddy Dog',
+        from: 'Your Supporters',
         date: new Date().toISOString()
       });
 
       localStorage.setItem('parent_encouragements', JSON.stringify(encouragements));
       document.getElementById('encouragement-message').value = '';
 
-      alert('Message sent! Jasmine will see it next time she opens the app 💜');
+      alert('Message sent! They will see it next time they open the app 💜');
       logActivity('Sent encouragement message');
     }
 
