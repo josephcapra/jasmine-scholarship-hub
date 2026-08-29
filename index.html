@@ -9141,14 +9141,20 @@
     window.confirmDeleteAccount = confirmDeleteAccount;
 
     // ===========================================
-    // RESUMES
+    // RESUMES - Generated dynamically from user profile
     // ===========================================
-    const resumeUrls = {
-      general: '/jasmine/resumes/Sueanna_Jasmine_Doris-Capra_General_Scholarship_Resume.pdf',
-      photography: '/jasmine/resumes/Sueanna_Jasmine_Doris-Capra_Photography_Arts_Scholarship_Resume.pdf',
-      military: '/jasmine/resumes/Sueanna_Jasmine_Doris-Capra_Military_Service_Scholarship_Resume.pdf',
-      master: '/jasmine/resumes/Sueanna_Jasmine_Doris-Capra_Master_Achievement_Resume.pdf'
-    };
+    function getResumeUrls() {
+      const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+      const name = profile.name || 'Student';
+      const safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
+      return {
+        general: `/jasmine/resumes/${safeName}_General_Scholarship_Resume.pdf`,
+        photography: `/jasmine/resumes/${safeName}_Photography_Arts_Scholarship_Resume.pdf`,
+        military: `/jasmine/resumes/${safeName}_Military_Service_Scholarship_Resume.pdf`,
+        master: `/jasmine/resumes/${safeName}_Master_Achievement_Resume.pdf`
+      };
+    }
+    const resumeUrls = getResumeUrls();
 
     function viewResume(type) {
       window.open(resumeUrls[type], '_blank');
@@ -12249,7 +12255,7 @@
 
     function checkPasswordUpdate() {
       // Prompt to update password if using default
-      if (currentUserEmail === 'jasminecapra848@gmail.com') {
+      if (currentUserEmail) {
         const hasUpdatedPassword = localStorage.getItem('jasmine_password_updated');
         if (!hasUpdatedPassword) {
           setTimeout(() => {
@@ -12513,9 +12519,9 @@
       document.getElementById('scholarship-detail-modal').classList.add('active');
     }
 
-    // Track Jasmine's logins for badges and rewards
+    // Track user logins for badges and rewards
     function trackLogin(email) {
-      if (email !== 'jasminecapra848@gmail.com') return;
+      if (!email) return;
 
       const loginData = JSON.parse(localStorage.getItem('jasmine_logins') || '{"logins":[],"streak":0,"lastLogin":null}');
       const today = new Date().toDateString();

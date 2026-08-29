@@ -296,7 +296,7 @@ const SCHOLARSHIPS = [
     transcript: false,
     notes: 'ONE OF YOUR TOP 5 APPLICATIONS. Theme: "What a Veteran Taught Me About America." Local Post → District → State → National. 35% Originality, 35% Delivery, 30% Content.',
     action: 'Tell ONE real story. Specific memory → lesson → how it changed you → what it taught about America. Record 3-5 min audio.',
-    competitive_advantage: 'You are the daughter of TWO combat veterans. You do not have to imagine what veterans teach - you have lived it.',
+    competitive_advantage: 'If you have a personal connection to military veterans, share your authentic experience.',
     important_warning: 'AI assistance prohibited. Your essay and recording must be your own work.',
     url: 'https://www.vfw.org/VOD',
     status: 'not_started',
@@ -307,14 +307,14 @@ const SCHOLARSHIPS = [
       'This is an AUDIO essay - you will record yourself reading it',
       'Judging: 35% Originality, 35% Delivery, 30% Content',
       'Do NOT write "Veterans sacrifice for our freedom" - everyone says that',
-      'Tell ONE real story from your own life with Mom or Dad',
+      'Tell ONE real story from your own life with a veteran you know',
       'Structure: specific memory → lesson → how it changed you → what it taught about America',
       'You have an enormous advantage: you lived it, you do not have to imagine it',
       'Practice reading aloud - delivery matters as much as content'
     ],
-    essayStructure: '1. Open with a specific scene/memory with your veteran parent\n2. What happened in that moment\n3. What it made you realize about their service\n4. The lesson you carry forward\n5. What this taught you about America specifically',
+    essayStructure: '1. Open with a specific scene/memory with a veteran you know\n2. What happened in that moment\n3. What it made you realize about their service\n4. The lesson you carry forward\n5. What this taught you about America specifically',
     interviewQuestions: [
-      'Think of ONE specific memory with Mom or Dad that shows what their military service meant. Describe the scene - where were you, what were you doing, what did you see or hear?',
+      'Think of ONE specific memory with a veteran that shows what their military service meant. Describe the scene - where were you, what were you doing, what did you see or hear?',
       'In that moment, what did you realize about their service that you had not understood before?',
       'What lesson from that experience do you carry with you now? How does it affect how you act or think?',
       'When you think about what a veteran taught you, what does that say about America specifically - not just about sacrifice in general?',
@@ -527,7 +527,7 @@ const SCHOLARSHIPS = [
     recommendation: true,
     transcript: true,
     notes: 'VERY HIGH if eligible. 3 awards of $5,000. Values community involvement, entrepreneurship, leadership, future impact. DEADLINE IS VERY CLOSE.',
-    action: 'Discuss jazz.ysphotos: How you started, working with clients, pricing, how professional differs from recreational. Do NOT rush if prerequisites not ready.',
+    action: 'Discuss your photography business: How you started, working with clients, pricing, how professional differs from recreational. Do NOT rush if prerequisites not ready.',
     competitive_advantage: 'You did not join a photography club - you CREATED a business.',
     url: '',
     status: 'not_started'
@@ -832,7 +832,7 @@ const SCHOLARSHIPS = [
     recommendation: false,
     transcript: false,
     notes: 'Focus on passion and storytelling, not test scores. Video or written response.',
-    action: 'Tell YOUR story: discovered photography → national award → jazz.ysphotos → professional work.',
+    action: 'Tell YOUR story: discovered photography → national award → your photography business → professional work.',
     competitive_advantage: 'Most students tell what they WANT to do. You show what you ALREADY did.',
     url: 'https://tacobellfoundation.org/live-mas-scholarship/',
     status: 'not_started',
@@ -842,16 +842,16 @@ const SCHOLARSHIPS = [
     essayTips: [
       'Focus on PASSION and STORYTELLING, not grades or test scores',
       'Video applications often stand out more - consider recording yourself',
-      'Your story arc: discovered photography → developed skill → national award → started jazz.ysphotos → professional work',
+      'Your story arc: discovered photography → developed skill → recognition → started business → professional work',
       'Most students tell what they WANT to do. You show what you ALREADY DID.',
       'Show the progression from hobby to business to career path',
       'Include real-estate photography as proof you turned passion into income'
     ],
-    essayStructure: '1. The moment photography became more than a hobby\n2. What you learned building jazz.ysphotos\n3. The validation of national recognition (Scholastic Gold Medal)\n4. How your passion already earns income (portraits, real estate)\n5. Where this passion is taking you next',
+    essayStructure: '1. The moment photography became more than a hobby\n2. What you learned building your photography practice\n3. The validation of recognition or achievements\n4. How your passion connects to your goals\n5. Where this passion is taking you next',
     interviewQuestions: [
       'When did photography stop being just a hobby and become something more? What happened in that moment?',
-      'What was it like starting jazz.ysphotos? What was the hardest part of turning your passion into a business?',
-      'What did it feel like when you won the Scholastic Gold Medal? What did that recognition mean to you?',
+      'What was it like starting your photography practice? What was the hardest part of turning your passion into something more?',
+      'Tell me about a time your work was recognized. What did that mean to you?',
       'Tell me about a real paying job you did - portraits, senior photos, or real estate. What did you learn from working with actual clients?',
       'Where is this passion taking you next? What do you want to build or create in the future?'
     ]
@@ -896,7 +896,7 @@ const APPLICATION_ASSETS = {
   D: {
     name: 'Photography-Business Story',
     supports: ['Live Mas', 'Entrepreneurship scholarships', 'NSHSS Entrepreneur'],
-    note: 'interest → skill → national recognition → jazz.ysphotos → paying clients → professional RE photography'
+    note: 'interest → skill → national recognition → your photography business → paying clients → professional RE photography'
   },
   E: {
     name: 'Academic Packet',
@@ -948,19 +948,19 @@ const APPLICATION_PHASES = {
     title: 'Phase B: Identify Competitive Advantage',
     prompt: 'Why might they choose me instead of another qualified student?',
     options: [
-      'National Gold Medal photographer',
-      'American Visions Award recipient',
-      'Carnegie Hall National Medalist',
-      'Professional photographer at 16',
-      'Founder of jazz.ysphotos',
-      'Real estate photographer',
-      'AICE Diploma candidate',
-      '4.0167 cumulative weighted GPA',
+      'National award winner',
+      'Regional recognition',
+      'Unique skill or talent',
+      'Professional experience',
+      'Founder of a business',
+      'Exceptional academics',
+      'Leadership positions',
       'Long-term community service',
       'Works while attending school',
-      'Service to children/families',
-      'Daughter of two combat veterans',
-      'Entrepreneurial experience'
+      'Service to others',
+      'Military family connection',
+      'Entrepreneurial experience',
+      'First-generation college student'
     ]
   },
   plan: {

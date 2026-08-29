@@ -11,9 +11,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-  const JASMINE_EMAIL = 'jasminecapra848@gmail.com';
   const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'notifications@jasminescholarship.app';
-  const FEEDBACK_TO_EMAIL = 'joe@josephcapra.com';
+  const FEEDBACK_TO_EMAIL = process.env.FEEDBACK_EMAIL || 'feedback@jasminescholarship.app';
 
   if (!SENDGRID_API_KEY) {
     return res.status(500).json({ error: 'Email service not configured' });
@@ -125,6 +124,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid email type' });
     }
 
+    // Get recipient email from request body (user must provide their email)
+    const userEmail = body.userEmail;
+    if (!userEmail) {
+      return res.status(400).json({ error: 'User email required' });
+    }
+
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
@@ -132,8 +137,8 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        personalizations: [{ to: [{ email: JASMINE_EMAIL }] }],
-        from: { email: FROM_EMAIL, name: 'Jasmine\'s Scholarship Hub' },
+        personalizations: [{ to: [{ email: userEmail }] }],
+        from: { email: FROM_EMAIL, name: 'Scholarship Hub' },
         subject,
         content: [{ type: 'text/html', value: htmlContent }],
       }),
