@@ -619,9 +619,9 @@ const ParentAuth = (function() {
 
   async function signInWithGoogle() {
     // Use Firebase Auth for Google Sign-In (cleaner URLs)
-    if (window.firebaseAuth && window.googleProvider && window.firebaseSignInWithPopup) {
+    if (window.firebaseReady && window.firebaseAuth && window.googleProvider) {
       try {
-        const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.googleProvider);
+        const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
         const user = result.user;
         console.log('Parent Google sign-in successful:', user.email, user.displayName);
 

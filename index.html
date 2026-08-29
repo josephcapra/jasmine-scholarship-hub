@@ -12,11 +12,11 @@
   <meta name="theme-color" content="#7c3aed">
   <!-- Supabase JS Client (for email/password auth) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Firebase SDK (for Google Sign-In) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
+  <!-- Firebase SDK (for Google Sign-In) - using compat for global scope -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    // Initialize Firebase immediately
     const firebaseConfig = {
       apiKey: "AIzaSyBqjjRm_dyVtCIIOxab40Epc6lDISJ26gc",
       authDomain: "jasmine-scholarship-hub.firebaseapp.com",
@@ -27,9 +27,9 @@
       measurementId: "G-78H9EPW3ZQ"
     };
 
-    const firebaseApp = initializeApp(firebaseConfig);
-    const firebaseAuth = getAuth(firebaseApp);
-    const googleProvider = new GoogleAuthProvider();
+    firebase.initializeApp(firebaseConfig);
+    const firebaseAuth = firebase.auth();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
 
     // Request profile and email scopes from Google
     googleProvider.addScope('profile');
@@ -38,19 +38,20 @@
       prompt: 'select_account'
     });
 
-    // Expose to global scope for use in onclick handlers
+    // Expose to global scope
     window.firebaseAuth = firebaseAuth;
     window.googleProvider = googleProvider;
-    window.firebaseSignInWithPopup = signInWithPopup;
-    window.firebaseSignOut = signOut;
+    window.firebaseReady = true;
+
+    console.log('Firebase initialized successfully');
 
     // Listen for Firebase auth state changes
-    onAuthStateChanged(firebaseAuth, (user) => {
+    firebaseAuth.onAuthStateChanged((user) => {
       if (user) {
         console.log('Firebase user signed in:', user.email, user.displayName);
         window.firebaseUser = user;
 
-        // Store user profile data from Google - always update to ensure fresh data
+        // Store user profile data from Google
         const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
 
         if (user.displayName) {
@@ -12326,14 +12327,14 @@
 
     async function signInWithGoogle() {
       // Use Firebase Auth for Google Sign-In (cleaner URLs)
-      if (!window.firebaseAuth || !window.googleProvider) {
+      if (!window.firebaseReady || !window.firebaseAuth || !window.googleProvider) {
         console.error('Firebase Auth not initialized');
         alert('Google Sign-In is loading, please try again in a moment.');
         return;
       }
 
       try {
-        const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.googleProvider);
+        const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
         const user = result.user;
         console.log('Google sign-in successful:', user.email);
 
