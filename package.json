@@ -13,6 +13,7 @@
     "build:mobile": "npx cap sync && echo 'Ready! Run npm run cap:ios or npm run cap:android'"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^8.4.0",
     "@capacitor/android": "^8.5.0",
     "@capacitor/camera": "^8.2.3",
     "@capacitor/cli": "^8.5.0",
@@ -21,6 +22,7 @@
     "@capacitor/push-notifications": "^8.1.2",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
+    "firebase": "^12.18.0",
     "mammoth": "^1.6.0",
     "pdf-parse": "^1.1.1",
     "zod": "^4.4.3"

@@ -12338,26 +12338,70 @@
     }
 
     async function signInWithGoogle() {
-      // Use Firebase Auth for Google Sign-In (cleaner URLs)
+      // Check if running in Capacitor native app
+      const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
+      if (isCapacitor) {
+        // Use native Capacitor Firebase Auth for iOS/Android
+        try {
+          console.log('Using native Google Sign-In...');
+
+          // Access Capacitor Firebase Auth plugin (registered on native side)
+          const FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+          if (!FirebaseAuthentication) {
+            throw new Error('FirebaseAuthentication plugin not available');
+          }
+
+          // Sign in with Google natively
+          const result = await FirebaseAuthentication.signInWithGoogle();
+          console.log('Native Google sign-in result:', result);
+
+          if (result && result.user) {
+            const user = result.user;
+            console.log('Native Google sign-in successful:', user.email);
+
+            // Store session and user info
+            localStorage.setItem('jasmine_session_active', 'true');
+            currentUserEmail = user.email.toLowerCase();
+
+            // Auto-enable developer mode for admin email
+            if (currentUserEmail === 'joe@josephcapra.com') {
+              localStorage.setItem('jasmine_dev_mode', 'true');
+              console.log('Developer mode enabled for admin');
+            }
+
+            // Pre-populate profile from Google account
+            const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+            if (user.displayName) {
+              const names = user.displayName.split(' ');
+              if (!profile.firstName) profile.firstName = names[0] || '';
+              if (!profile.lastName) profile.lastName = names.slice(1).join(' ') || '';
+            }
+            if (!profile.email && user.email) profile.email = user.email;
+            if (!profile.photoURL && user.photoURL) profile.photoURL = user.photoURL;
+            localStorage.setItem('jasmine_student_profile', JSON.stringify(profile));
+
+            showApp();
+            trackLogin(user.email);
+            showToast('Welcome, ' + (user.displayName || user.email) + '!');
+          }
+        } catch (error) {
+          console.error('Native Google sign-in error:', error);
+          showToast('Sign-in failed: ' + (error.message || 'Please try again'));
+        }
+        return;
+      }
+
+      // Web fallback: Use Firebase Auth for Google Sign-In
       if (!window.firebaseReady || !window.firebaseAuth || !window.googleProvider) {
         console.error('Firebase Auth not initialized');
         alert('Google Sign-In is loading, please try again in a moment.');
         return;
       }
 
-      // Use redirect on mobile/Capacitor (popups don't work in WebViews)
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.Capacitor;
-
       try {
-        let result;
-        if (isMobile) {
-          // On mobile, use redirect flow
-          await window.firebaseAuth.signInWithRedirect(window.googleProvider);
-          return; // The page will redirect, auth state listener handles the rest
-        } else {
-          // On desktop, use popup
-          result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
-        }
+        // On web, use popup
+        const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
         const user = result.user;
         console.log('Google sign-in successful:', user.email);
 

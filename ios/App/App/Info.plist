@@ -66,5 +66,18 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.vylium.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.213973806574-oig08iqa1cagdsc4t7tcdu91e5eujf7q</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
