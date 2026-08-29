@@ -114,7 +114,7 @@ const ParentAuth = (function() {
           <div id="pam-step-1">
             <div class="pam-field">
               <label>Your Name</label>
-              <input type="text" id="pam-name" placeholder="Mom, Dad, Guardian...">
+              <input type="text" id="pam-name" placeholder="Parent or Guardian name">
             </div>
             <div class="pam-field">
               <label>Your Email</label>

@@ -4401,8 +4401,8 @@
         <div class="card essay-template" data-essay="veteran">
           <div class="card-header">
             <div>
-              <div class="card-title">Mom's Journey & What It Taught Me</div>
-              <div class="card-subtitle">Veteran influence, citizenship, service</div>
+              <div class="card-title">Veteran's Journey & What It Taught Me</div>
+              <div class="card-subtitle">Military influence, service, patriotism</div>
             </div>
             <span class="badge badge-purple">VFW</span>
           </div>
@@ -4481,7 +4481,7 @@
         <div class="card">
           <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">What type of essay?</label>
           <select id="interview-essay-type" class="goal-input" style="margin-bottom: 0;">
-            <option value="veteran">Mom's Journey (Military/Veteran)</option>
+            <option value="veteran">Veteran's Journey (Military/Veteran)</option>
             <option value="career">Career Goals & Business</option>
             <option value="community">Community Service</option>
             <option value="arts">Art & Photography</option>
@@ -5123,7 +5123,7 @@
         </div>
 
         <div class="interview-header-info">
-          <span class="essay-type" id="interview-essay-title">Mom's Journey</span>
+          <span class="essay-type" id="interview-essay-title">Veteran's Journey</span>
           <span class="step-count" id="interview-step-count">0 / 5 answered</span>
         </div>
         <div class="interview-progress-bar">
@@ -5825,10 +5825,10 @@
     }
 
     const essayTemplates = {
-      veteran: { title: "Mom's Journey & What It Taught Me", prompts: ["What is one real memory of Mom that makes these facts feel personal?", "When did you first understand that becoming a citizen while deployed in Iraq was unusual?", "The biggest lesson I learned from Mom is...", "Which ONE part of your own life best proves this lesson?"] },
+      veteran: { title: "Veteran's Journey & What It Taught Me", prompts: ["What is one real memory with a veteran that feels personal to you?", "When did you first understand what their service meant?", "The biggest lesson I learned from them is...", "Which ONE part of your own life best proves this lesson?"] },
       career: { title: "Career Goals: Business + Photography", prompts: ["What do you enjoy most: creating the image, working with people, or running the business?", "What was the first moment photography started to feel like more than a hobby?", "Which business responsibility has taught you the most?", "What do you currently want to study in college?"] },
       community: { title: "Community Service + Leadership", prompts: ["Which service role matters most to you and why?", "Describe one person, moment, or responsibility you remember from that role.", "What does leadership mean to you now?", "How do you plan to continue serving in college?"] },
-      arts: { title: "How Art & Photography Shaped Me", prompts: ["What was happening when you created 'Warm Embrace'?", "What did you want the photograph to capture about your mother?", "What do you notice through a camera that you used to miss?", "What did you feel when you learned the image received national recognition?"] },
+      arts: { title: "How Art & Photography Shaped Me", prompts: ["Describe your most meaningful artwork - what was happening when you created it?", "What did you want the image to capture or express?", "What do you notice through a camera that you used to miss?", "What did you feel when your work received recognition?"] },
       challenge: { title: "A Challenge I Overcame", prompts: ["Name the challenge in one sentence.", "Describe the specific situation, not the lesson yet.", "What did you initially do that did NOT work?", "What did you change? What do you do differently now?"] },
       financial: { title: "Financial Value & Responsibility", prompts: ["What college costs are you most concerned about?", "What do you want to avoid financially?", "What do you personally plan to contribute toward college?", "What specific expense would this scholarship help cover?"] }
     };
@@ -6062,7 +6062,7 @@
       currentQuestionIndex = 0;
 
       const essayTitles = {
-        veteran: "Mom's Journey (Military/Veteran)",
+        veteran: "Veteran's Journey (Military/Veteran)",
         career: "Career Goals: Business + Photography",
         community: "Community Service + Leadership",
         arts: "How Art & Photography Shaped Me"
@@ -7000,11 +7000,11 @@
 
       // Check for personal connection based on essay type
       if (currentInterviewType === 'veteran') {
-        if (!lowerText.includes('mom') && !lowerText.includes('mother') && !lowerText.includes('army')) {
-          issues.push({ message: 'Include more about your mom\'s military service' });
+        if (!lowerText.includes('veteran') && !lowerText.includes('military') && !lowerText.includes('service') && !lowerText.includes('army')) {
+          issues.push({ message: 'Include more about military service' });
         }
         if (!lowerText.includes('taught') && !lowerText.includes('learned') && !lowerText.includes('lesson')) {
-          issues.push({ message: 'Explain what you learned from her journey' });
+          issues.push({ message: 'Explain what you learned from their journey' });
         }
       }
 

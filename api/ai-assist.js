@@ -22,47 +22,42 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'AI service not configured' });
   }
 
-  const JASMINE_CONTEXT = `You are helping Jasmine, a 16-year-old junior at Martin County High School in Stuart, Florida, write scholarship essays.
-
-ACHIEVEMENTS:
-- 2026 Scholastic Art & Writing Awards National Gold Medal for "Warm Embrace"
-- American Visions Award (highest national honor for teen artists)
-- Honored at Carnegie Hall as National Medalist (335,000+ submissions)
-- 1st Place Photography at Marvin S. Cone High School Juried Art Show
-- 4.0167 weighted GPA, Cambridge AICE Diploma candidate
-- Adobe Photoshop Certified
-
-ENTREPRENEURSHIP:
-- Founder of jazz.ysphotos photography business
-- Real estate photographer for Paradise Realty FLA
-- Student photographer for Martin County High School
-- Bakery team member at Boys & Girls Clubs Fork in the Road (2+ years)
-
-FAMILY:
-- Daughter of TWO U.S. military combat veterans
-- Mom immigrated from Guyana, deployed to Iraq, became U.S. citizen in Baghdad 2005
-- Mom was born July 4, 1983
-
-LEADERSHIP & SERVICE:
-- Assistant Director, Event Planning for SERA
-- M.I.S.S. Inc. Butterfly Gardens volunteer
-- Ascent Church nursery volunteer, VBS Crew Leader
-- Former AFJROTC cadet
-
-"Warm Embrace" was inspired by her mother and themes of warmth/authenticity.
+  // Build student context from profile passed in request, or use generic guidance
+  function buildStudentContext(profile) {
+    if (!profile || !profile.name) {
+      return `You are helping a high school student write scholarship essays.
 
 WRITING GUIDANCE:
-- Keep Jasmine's authentic teenage voice
+- Keep the student's authentic voice
 - Avoid clichés - be specific
 - Show, don't tell
 - Don't manufacture hardship
 - Connect achievements to values learned`;
+    }
+
+    return `You are helping ${profile.name}, a high school student, write scholarship essays.
+
+STUDENT INFO:
+${profile.school ? `- School: ${profile.school}` : ''}
+${profile.gpa ? `- GPA: ${profile.gpa}` : ''}
+${profile.achievements ? `- Achievements: ${profile.achievements}` : ''}
+${profile.activities ? `- Activities: ${profile.activities}` : ''}
+${profile.interests ? `- Interests: ${profile.interests}` : ''}
+
+WRITING GUIDANCE:
+- Keep the student's authentic voice
+- Avoid clichés - be specific
+- Show, don't tell
+- Don't manufacture hardship
+- Connect achievements to values learned`;
+  }
 
   try {
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
 
-    const { action, essayType, content, message, context } = body;
+    const { action, essayType, content, message, context, profile } = body;
+    const studentContext = buildStudentContext(profile);
 
     // Handle chatbot messages (from chat widget)
     if (message) {
@@ -165,7 +160,7 @@ ${contextInfo.length > 0 ? `\nStudent context:\n${contextInfo.join('\n')}` : ''}
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1024,
-        system: JASMINE_CONTEXT,
+        system: studentContext,
         messages: [{ role: 'user', content: userPrompt }],
       }),
     });

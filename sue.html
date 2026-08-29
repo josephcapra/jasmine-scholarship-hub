@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jasmine's Progress - Mom's View</title>
+  <title>Student Progress - Parent View</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👩‍👧</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -125,21 +125,21 @@
   <!-- Login -->
   <div id="login">
     <div class="card login-card">
-      <div class="logo">👩‍👧</div>
-      <h1 style="color: var(--purple); margin-bottom: 8px;">Mom's Dashboard</h1>
-      <p style="color: var(--muted); margin-bottom: 24px;">Track Jasmine's scholarship progress</p>
+      <div class="logo">👨‍👩‍👧</div>
+      <h1 style="color: var(--purple); margin-bottom: 8px;">Parent Dashboard</h1>
+      <p style="color: var(--muted); margin-bottom: 24px;">Track student scholarship progress</p>
       <input type="email" id="login-email" placeholder="Your email">
       <input type="password" id="login-password" placeholder="Password">
       <button class="btn btn-primary" onclick="login()">Sign In</button>
-      <p style="margin-top: 16px; font-size: 0.8rem; color: var(--muted);">Only Mom can access</p>
+      <p style="margin-top: 16px; font-size: 0.8rem; color: var(--muted);">Parent/Guardian access only</p>
     </div>
   </div>
 
   <!-- Main App -->
   <div id="app" class="container">
     <div class="header">
-      <h1>👩‍👧 Jasmine's Progress</h1>
-      <div class="sub">Mom's Dashboard - Real-time tracking</div>
+      <h1>👨‍👩‍👧 Student Progress</h1>
+      <div class="sub">Parent Dashboard - Real-time tracking</div>
     </div>
 
     <!-- Preview Student View Button -->
@@ -230,7 +230,7 @@
       <div class="card-title">📝 Essay Progress</div>
       <div id="essay-progress">
         <div class="progress-item">
-          <span>Mom's Journey</span>
+          <span>Veteran's Journey</span>
           <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
           <span class="badge badge-purple">0%</span>
         </div>
@@ -386,7 +386,7 @@
         }
 
         const names = {
-          veteran: "Mom's Journey",
+          veteran: "Veteran's Journey",
           career: "Career Goals",
           community: "Community Service",
           arts: "Arts & Photography",
