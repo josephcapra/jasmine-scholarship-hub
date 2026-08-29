@@ -45,6 +45,18 @@
 
     console.log('Firebase initialized successfully');
 
+    // Handle redirect result (for mobile sign-in)
+    firebaseAuth.getRedirectResult().then((result) => {
+      if (result && result.user) {
+        console.log('Redirect sign-in successful:', result.user.email);
+        // Auth state listener will handle the rest
+      }
+    }).catch((error) => {
+      if (error.code !== 'auth/null-error') {
+        console.error('Redirect sign-in error:', error);
+      }
+    });
+
     // Listen for Firebase auth state changes
     firebaseAuth.onAuthStateChanged((user) => {
       if (user) {
@@ -12333,8 +12345,19 @@
         return;
       }
 
+      // Use redirect on mobile/Capacitor (popups don't work in WebViews)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.Capacitor;
+
       try {
-        const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
+        let result;
+        if (isMobile) {
+          // On mobile, use redirect flow
+          await window.firebaseAuth.signInWithRedirect(window.googleProvider);
+          return; // The page will redirect, auth state listener handles the rest
+        } else {
+          // On desktop, use popup
+          result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
+        }
         const user = result.user;
         console.log('Google sign-in successful:', user.email);
 

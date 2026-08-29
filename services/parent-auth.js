@@ -621,6 +621,14 @@ const ParentAuth = (function() {
     // Use Firebase Auth for Google Sign-In (cleaner URLs)
     if (window.firebaseReady && window.firebaseAuth && window.googleProvider) {
       try {
+        // Use redirect on mobile/Capacitor (popups don't work in WebViews)
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.Capacitor;
+
+        if (isMobile) {
+          await window.firebaseAuth.signInWithRedirect(window.googleProvider);
+          return; // Page redirects, auth state listener handles the rest
+        }
+
         const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
         const user = result.user;
         console.log('Parent Google sign-in successful:', user.email, user.displayName);
