@@ -19,3 +19,7 @@ android/local.properties
 *.ipa
 *.apk
 *.aab
+
+# Signing
+android/app/keystore.properties
+android/app/*.keystore
