@@ -1,9 +1,9 @@
 // Vercel Serverless Function: AI Essay Feedback and Scoring
 // POST /api/essay-feedback { essay, prompt, wordLimit }
+// Hybrid coaching system combining Khan Academy, CollegeVine, IvyStrides, and Common App rubrics
 
 export default async function handler(req, res) {
-  const ALLOWED_ORIGIN = process.env.NODE_ENV === 'production' ? 'https://jasmine-scholarship-hub.vercel.app' : '*';
-  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -26,45 +26,91 @@ export default async function handler(req, res) {
     }
 
     const wordCount = essay.trim().split(/\s+/).length;
+    const sentences = essay.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const firstSentence = sentences[0]?.trim() || '';
 
-    const systemPrompt = `You are an expert scholarship essay reviewer. Analyze the essay and provide constructive, encouraging feedback.
+    const systemPrompt = `You are an expert scholarship essay coach combining methodologies from Khan Academy Writing Coach, CollegeVine, IvyStrides, and Common App reviewers. Your feedback is encouraging but actionable.
 
-Score the essay on a scale of 1-100 across these dimensions:
-- Clarity (clear message, easy to follow)
-- Authenticity (genuine voice, personal stories)
-- Impact (memorable, emotionally engaging)
-- Relevance (addresses the prompt/scholarship goals)
-- Grammar (spelling, punctuation, sentence structure)
+SCORING RUBRIC (1-100 each):
+1. CLARITY - Clear thesis, logical flow, reader never confused about the point
+2. AUTHENTICITY - Genuine voice, specific personal details, not generic or cliché
+3. IMPACT - Memorable, emotionally engaging, creates connection with reader
+4. RELEVANCE - Directly addresses the prompt and scholarship's values/mission
+5. CRAFT - Grammar, spelling, sentence variety, word choice
+
+ANALYSIS FRAMEWORK:
+- HOOK: Is the opening sentence compelling? Does it create curiosity or emotion?
+- SHOW vs TELL: Find sentences that "tell" (generic claims) vs "show" (specific evidence)
+- SENSORY DETAILS: Are there specific moments with vivid details (sights, sounds, feelings)?
+- STORY ARC: Is there a clear beginning (challenge/moment), middle (action/growth), end (lesson/future)?
+- THEME: What single takeaway does the reader learn about the writer?
 
 Return ONLY valid JSON with this structure:
 {
   "overallScore": 75,
+  "tier": "Good",
   "scores": {
-    "clarity": 80,
-    "authenticity": 85,
-    "impact": 70,
-    "relevance": 75,
-    "grammar": 90
+    "clarity": { "score": 80, "emoji": "✨", "label": "Clear & Focused" },
+    "authenticity": { "score": 85, "emoji": "💜", "label": "Your Voice Shines" },
+    "impact": { "score": 70, "emoji": "🎯", "label": "Memorable Moments" },
+    "relevance": { "score": 75, "emoji": "🎓", "label": "Prompt Fit" },
+    "craft": { "score": 90, "emoji": "✍️", "label": "Writing Quality" }
   },
-  "strengths": ["strength 1", "strength 2"],
-  "improvements": ["specific improvement suggestion 1", "specific improvement suggestion 2"],
-  "hookSuggestion": "A stronger opening line suggestion if needed",
-  "closingSuggestion": "A stronger closing suggestion if needed",
-  "wordCountFeedback": "Comment on word count if too short/long",
-  "oneThingToFix": "The single most impactful change to make"
-}`;
+  "hookAnalysis": {
+    "strength": "weak|okay|strong|excellent",
+    "currentHook": "The first sentence quoted",
+    "feedback": "Why it works or doesn't",
+    "suggestion": "A stronger alternative opening if needed"
+  },
+  "showVsTell": {
+    "tellExamples": ["I am hardworking", "I learned a lot"],
+    "showExamples": ["When I stayed until midnight debugging..."],
+    "tip": "How to convert one tell into a show"
+  },
+  "sensoryCheck": {
+    "hasDetails": true,
+    "strongMoment": "Quote a vivid moment from the essay if exists",
+    "suggestion": "Add a specific detail about what you saw/heard/felt when..."
+  },
+  "storyStructure": {
+    "hasBeginning": true,
+    "hasMiddle": true,
+    "hasEnd": true,
+    "missingElement": "What's missing or weak in the narrative arc"
+  },
+  "theme": "The single takeaway/lesson the reader learns about this person",
+  "strengths": ["Specific strength 1 with quote", "Specific strength 2 with quote"],
+  "oneThingToFix": {
+    "issue": "The single most impactful change",
+    "why": "Why this matters for scholarship readers",
+    "how": "Specific action to fix it",
+    "example": "Show what the improved version could look like"
+  },
+  "encouragement": "A warm, personalized closing message acknowledging their unique story",
+  "nextSteps": ["Action 1", "Action 2", "Action 3"]
+}
 
-    const userPrompt = `Review this scholarship essay:
+TIER DEFINITIONS:
+- "Needs Work" (0-59): Missing key elements, generic, or unclear
+- "Good Start" (60-74): Solid foundation, needs polish and specificity
+- "Strong" (75-84): Compelling with minor improvements possible
+- "Excellent" (85-94): Ready to submit, very competitive
+- "Outstanding" (95-100): Exceptional, memorable, scholarship-winning`;
 
-${scholarshipName ? `Scholarship: ${scholarshipName}` : ''}
-${prompt ? `Prompt: ${prompt}` : ''}
-Word Limit: ${wordLimit || 'Not specified'}
-Word Count: ${wordCount}
+    const userPrompt = `Analyze this scholarship essay with your full coaching framework:
 
-Essay:
+${scholarshipName ? `SCHOLARSHIP: ${scholarshipName}` : ''}
+${prompt ? `PROMPT: ${prompt}` : ''}
+WORD LIMIT: ${wordLimit || 'Not specified'}
+WORD COUNT: ${wordCount}
+FIRST SENTENCE: "${firstSentence}"
+
+ESSAY:
+---
 ${essay}
+---
 
-Provide encouraging but honest feedback. Focus on what makes this essay stand out and one key area to improve.`;
+Remember: Be encouraging but specific. Quote directly from their essay when giving feedback. Focus on helping them tell THEIR unique story more effectively.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -78,7 +124,7 @@ Provide encouraging but honest feedback. Focus on what makes this essay stand ou
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 800,
+        max_tokens: 1500,
         temperature: 0.7,
         store: false
       })
@@ -108,6 +154,7 @@ Provide encouraging but honest feedback. Focus on what makes this essay stand ou
       success: true,
       feedback,
       wordCount,
+      goalWords: wordLimit || 500,
       analyzedAt: new Date().toISOString()
     });
 

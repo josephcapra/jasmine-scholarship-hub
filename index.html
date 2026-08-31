@@ -5317,14 +5317,51 @@
             <button class="btn btn-primary" style="flex: 1; min-width: 100px;" onclick="saveFinalDraft()">💾 Save Draft</button>
           </div>
 
-          <!-- AI Feedback Display -->
-          <div id="ai-feedback-panel" style="display: none; margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; border: 2px solid #86efac;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div style="font-weight: 800; color: #166534; font-size: 1.1rem;">🎯 Essay Score</div>
-              <div id="ai-overall-score" style="font-size: 2rem; font-weight: 800; color: #059669;">--</div>
+          <!-- AI Feedback Display - Hybrid Coaching System -->
+          <div id="ai-feedback-panel" style="display: none; margin-top: 16px;">
+            <!-- Score Header with Tier Badge -->
+            <div style="background: linear-gradient(135deg, #7c3aed, #ec4899); padding: 20px; border-radius: 16px 16px 0 0; color: white; text-align: center;">
+              <div id="ai-tier-badge" style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">STRONG</div>
+              <div id="ai-overall-score" style="font-size: 3rem; font-weight: 800;">75</div>
+              <div style="font-size: 0.9rem; opacity: 0.9;">out of 100</div>
             </div>
-            <div id="ai-score-bars" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;"></div>
-            <div id="ai-feedback-text" style="font-size: 0.9rem; color: #166534;"></div>
+
+            <!-- Score Breakdown -->
+            <div style="background: white; padding: 16px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+              <div style="font-weight: 700; margin-bottom: 12px; color: #374151;">📊 Score Breakdown</div>
+              <div id="ai-score-bars" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+
+            <!-- One Thing to Fix - Prominent -->
+            <div id="ai-one-thing" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px; border-left: 4px solid #f59e0b;">
+              <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">🎯 Your #1 Priority</div>
+              <div id="ai-one-thing-content" style="color: #78350f; font-size: 0.95rem;"></div>
+            </div>
+
+            <!-- Hook Analysis -->
+            <div id="ai-hook-section" style="background: #f0f9ff; padding: 16px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+              <div style="font-weight: 700; color: #0369a1; margin-bottom: 8px;">✨ Hook Strength</div>
+              <div id="ai-hook-content" style="font-size: 0.9rem; color: #0c4a6e;"></div>
+            </div>
+
+            <!-- Show vs Tell -->
+            <div id="ai-show-tell" style="background: white; padding: 16px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+              <div style="font-weight: 700; color: #374151; margin-bottom: 8px;">📝 Show vs. Tell</div>
+              <div id="ai-show-tell-content" style="font-size: 0.9rem;"></div>
+            </div>
+
+            <!-- Strengths -->
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 16px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+              <div style="font-weight: 700; color: #166534; margin-bottom: 8px;">💜 What's Working</div>
+              <div id="ai-strengths" style="font-size: 0.9rem; color: #14532d;"></div>
+            </div>
+
+            <!-- Next Steps -->
+            <div style="background: #faf5ff; padding: 16px; border-radius: 0 0 16px 16px; border: 1px solid #e5e7eb; border-top: none;">
+              <div style="font-weight: 700; color: #7c3aed; margin-bottom: 8px;">🚀 Next Steps</div>
+              <div id="ai-next-steps" style="font-size: 0.9rem; color: #581c87;"></div>
+              <div id="ai-encouragement" style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; font-style: italic; color: #6b7280; font-size: 0.85rem;"></div>
+            </div>
           </div>
         </div>
 
@@ -6544,34 +6581,121 @@
         const panel = document.getElementById('ai-feedback-panel');
         panel.style.display = 'block';
 
-        // Show overall score with color
-        const scoreEl = document.getElementById('ai-overall-score');
-        const score = feedback.overallScore || 75;
-        scoreEl.textContent = score + '/100';
-        scoreEl.style.color = score >= 80 ? '#059669' : score >= 60 ? '#d97706' : '#dc2626';
+        // Scroll panel into view
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Show score bars
+        // Overall score
+        const score = feedback.overallScore || 75;
+        document.getElementById('ai-overall-score').textContent = score;
+
+        // Tier badge
+        const tier = feedback.tier || (score >= 95 ? 'Outstanding' : score >= 85 ? 'Excellent' : score >= 75 ? 'Strong' : score >= 60 ? 'Good Start' : 'Needs Work');
+        const tierBadge = document.getElementById('ai-tier-badge');
+        tierBadge.textContent = tier.toUpperCase();
+        tierBadge.style.background = score >= 85 ? 'rgba(16,185,129,0.3)' : score >= 75 ? 'rgba(255,255,255,0.2)' : 'rgba(251,191,36,0.3)';
+
+        // Score breakdown with emojis and visual bars
         const barsEl = document.getElementById('ai-score-bars');
         const scores = feedback.scores || {};
-        barsEl.innerHTML = Object.entries(scores).map(([key, val]) => `
-          <div style="background: white; padding: 8px; border-radius: 8px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-              <span style="font-size: 0.75rem; text-transform: capitalize;">${key}</span>
-              <span style="font-weight: 700; font-size: 0.8rem;">${val}%</span>
+        barsEl.innerHTML = Object.entries(scores).map(([key, valObj]) => {
+          const val = typeof valObj === 'object' ? valObj.score : valObj;
+          const emoji = typeof valObj === 'object' ? valObj.emoji : '✨';
+          const label = typeof valObj === 'object' ? valObj.label : key;
+          const barColor = val >= 80 ? '#10b981' : val >= 60 ? '#f59e0b' : '#ef4444';
+          return `
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.2rem; width: 28px;">${emoji}</span>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 0.85rem; color: #374151;">${label}</span>
+                  <span style="font-weight: 700; font-size: 0.85rem; color: ${barColor};">${val}%</span>
+                </div>
+                <div style="height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                  <div style="width: ${val}%; height: 100%; background: ${barColor}; border-radius: 4px; transition: width 0.5s ease;"></div>
+                </div>
+              </div>
             </div>
-            <div style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
-              <div style="width: ${val}%; height: 100%; background: ${val >= 80 ? '#10b981' : val >= 60 ? '#f59e0b' : '#ef4444'}; border-radius: 3px;"></div>
+          `;
+        }).join('');
+
+        // One Thing to Fix - prominent
+        const oneThingEl = document.getElementById('ai-one-thing-content');
+        const oneThing = feedback.oneThingToFix || {};
+        if (typeof oneThing === 'object' && oneThing.issue) {
+          oneThingEl.innerHTML = `
+            <div style="font-weight: 600; margin-bottom: 6px;">${oneThing.issue}</div>
+            <div style="margin-bottom: 6px; opacity: 0.9;"><strong>Why it matters:</strong> ${oneThing.why || ''}</div>
+            <div style="margin-bottom: 6px;"><strong>How to fix:</strong> ${oneThing.how || ''}</div>
+            ${oneThing.example ? `<div style="background: white; padding: 8px; border-radius: 6px; font-style: italic; margin-top: 8px;">"${oneThing.example}"</div>` : ''}
+          `;
+        } else {
+          oneThingEl.innerHTML = `<div>${oneThing || 'Your essay is looking great! Keep refining the details.'}</div>`;
+        }
+
+        // Hook Analysis
+        const hookEl = document.getElementById('ai-hook-content');
+        const hook = feedback.hookAnalysis || {};
+        if (hook.strength) {
+          const hookEmoji = hook.strength === 'excellent' ? '🌟' : hook.strength === 'strong' ? '✨' : hook.strength === 'okay' ? '👍' : '💡';
+          hookEl.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 1.5rem;">${hookEmoji}</span>
+              <span style="font-weight: 600; text-transform: capitalize;">${hook.strength}</span>
             </div>
+            ${hook.currentHook ? `<div style="background: white; padding: 8px; border-radius: 6px; margin-bottom: 8px; font-style: italic;">"${hook.currentHook}"</div>` : ''}
+            <div style="margin-bottom: 6px;">${hook.feedback || ''}</div>
+            ${hook.suggestion ? `<div style="background: #dbeafe; padding: 8px; border-radius: 6px; margin-top: 8px;"><strong>Try:</strong> "${hook.suggestion}"</div>` : ''}
+          `;
+        } else {
+          document.getElementById('ai-hook-section').style.display = 'none';
+        }
+
+        // Show vs Tell
+        const showTellEl = document.getElementById('ai-show-tell-content');
+        const showTell = feedback.showVsTell || {};
+        if (showTell.tellExamples || showTell.showExamples) {
+          showTellEl.innerHTML = `
+            ${showTell.tellExamples?.length ? `
+              <div style="margin-bottom: 10px;">
+                <div style="color: #dc2626; font-weight: 600; margin-bottom: 4px;">❌ "Telling" (generic):</div>
+                ${showTell.tellExamples.map(t => `<div style="background: #fef2f2; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-style: italic;">"${t}"</div>`).join('')}
+              </div>
+            ` : ''}
+            ${showTell.showExamples?.length ? `
+              <div style="margin-bottom: 10px;">
+                <div style="color: #059669; font-weight: 600; margin-bottom: 4px;">✅ "Showing" (specific):</div>
+                ${showTell.showExamples.map(s => `<div style="background: #f0fdf4; padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; font-style: italic;">"${s}"</div>`).join('')}
+              </div>
+            ` : ''}
+            ${showTell.tip ? `<div style="background: #eff6ff; padding: 8px; border-radius: 6px;"><strong>💡 Tip:</strong> ${showTell.tip}</div>` : ''}
+          `;
+        } else {
+          document.getElementById('ai-show-tell').style.display = 'none';
+        }
+
+        // Strengths
+        const strengthsEl = document.getElementById('ai-strengths');
+        const strengths = feedback.strengths || [];
+        strengthsEl.innerHTML = strengths.map(s => `
+          <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+            <span style="color: #10b981;">✓</span>
+            <span>${s}</span>
+          </div>
+        `).join('') || '<div>Your unique voice comes through!</div>';
+
+        // Next Steps
+        const nextStepsEl = document.getElementById('ai-next-steps');
+        const nextSteps = feedback.nextSteps || ['Expand on your most specific moment', 'Read it aloud to check flow', 'Ask someone to read and give feedback'];
+        nextStepsEl.innerHTML = nextSteps.map((step, i) => `
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span style="background: #7c3aed; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;">${i + 1}</span>
+            <span>${step}</span>
           </div>
         `).join('');
 
-        // Show feedback text
-        const textEl = document.getElementById('ai-feedback-text');
-        textEl.innerHTML = `
-          <div style="margin-bottom: 8px;"><strong>✨ Strengths:</strong> ${(feedback.strengths || []).join(', ')}</div>
-          <div style="margin-bottom: 8px;"><strong>🎯 To Improve:</strong> ${feedback.oneThingToFix || (feedback.improvements || [])[0] || 'Great job!'}</div>
-          ${feedback.hookSuggestion ? `<div><strong>💡 Hook idea:</strong> ${feedback.hookSuggestion}</div>` : ''}
-        `;
+        // Encouragement
+        const encouragementEl = document.getElementById('ai-encouragement');
+        encouragementEl.textContent = feedback.encouragement || "Every scholarship essay you write makes you a stronger writer. Keep going! 💜";
 
         showToast('Essay analyzed! 🎯');
 
