@@ -10,6 +10,20 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%237c3aed' width='100' height='100' rx='20'/><text y='.9em' x='10' font-size='70'>🌟</text></svg>">
   <meta name="theme-color" content="#7c3aed">
+  <!-- Capacitor Core (for native iOS/Android bridge) -->
+  <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@8.5.0/dist/capacitor.js"></script>
+  <script>
+    // Wait for Capacitor to be ready (injected by native app)
+    window.isCapacitorNative = false;
+    if (window.Capacitor && window.Capacitor.isNativePlatform) {
+      try {
+        window.isCapacitorNative = window.Capacitor.isNativePlatform();
+        console.log('Capacitor native platform detected:', window.isCapacitorNative);
+      } catch (e) {
+        console.log('Capacitor detection error:', e);
+      }
+    }
+  </script>
   <!-- Supabase JS Client (for email/password auth) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Firebase SDK (for Google Sign-In) - using compat for global scope -->
@@ -3989,10 +4003,16 @@
         </button>
       </div>
 
-      <!-- Google Login -->
+      <!-- Social Login Buttons -->
       <button class="google-btn" onclick="signInWithGoogle()">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
         Continue with Google
+      </button>
+      <button class="google-btn" onclick="signInWithApple()" style="background: #000; color: #fff; margin-top: 8px;">
+        <svg style="width: 18px; height: 18px; margin-right: 8px;" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+        </svg>
+        Continue with Apple
       </button>
       <div class="hint">Sign in to access your scholarships</div>
     </div>
@@ -12435,6 +12455,99 @@
           showToast('Sign-in cancelled');
         } else if (error.code === 'auth/popup-blocked') {
           showToast('Please allow popups for this site');
+        } else {
+          showToast('Sign-in failed: ' + (error.message || 'Please try again'));
+        }
+      }
+    }
+
+    async function signInWithApple() {
+      // Check if running in Capacitor native app
+      const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
+      if (isCapacitor) {
+        // Use native Capacitor Firebase Auth for iOS
+        try {
+          console.log('Using native Apple Sign-In...');
+
+          const FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+          if (!FirebaseAuthentication) {
+            throw new Error('FirebaseAuthentication plugin not available');
+          }
+
+          // Sign in with Apple natively
+          const result = await FirebaseAuthentication.signInWithApple();
+          console.log('Native Apple sign-in result:', result);
+
+          if (result && result.user) {
+            const user = result.user;
+            console.log('Native Apple sign-in successful:', user.email);
+
+            localStorage.setItem('jasmine_session_active', 'true');
+            currentUserEmail = (user.email || '').toLowerCase();
+
+            if (currentUserEmail === 'joe@josephcapra.com') {
+              localStorage.setItem('jasmine_dev_mode', 'true');
+            }
+
+            const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+            if (user.displayName) {
+              const names = user.displayName.split(' ');
+              if (!profile.firstName) profile.firstName = names[0] || '';
+              if (!profile.lastName) profile.lastName = names.slice(1).join(' ') || '';
+            }
+            if (!profile.email && user.email) profile.email = user.email;
+            localStorage.setItem('jasmine_student_profile', JSON.stringify(profile));
+
+            showApp();
+            trackLogin(user.email || 'apple-user');
+            showToast('Welcome' + (user.displayName ? ', ' + user.displayName : '') + '!');
+          }
+        } catch (error) {
+          console.error('Native Apple sign-in error:', error);
+          showToast('Sign-in failed: ' + (error.message || 'Please try again'));
+        }
+        return;
+      }
+
+      // Web fallback: Use Firebase Auth with Apple provider
+      if (!window.firebaseAuth) {
+        alert('Sign-In is loading, please try again in a moment.');
+        return;
+      }
+
+      try {
+        const appleProvider = new firebase.auth.OAuthProvider('apple.com');
+        appleProvider.addScope('email');
+        appleProvider.addScope('name');
+
+        const result = await window.firebaseAuth.signInWithPopup(appleProvider);
+        const user = result.user;
+        console.log('Apple sign-in successful:', user.email);
+
+        localStorage.setItem('jasmine_session_active', 'true');
+        currentUserEmail = (user.email || '').toLowerCase();
+
+        if (currentUserEmail === 'joe@josephcapra.com') {
+          localStorage.setItem('jasmine_dev_mode', 'true');
+        }
+
+        const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+        if (user.displayName) {
+          const names = user.displayName.split(' ');
+          if (!profile.firstName) profile.firstName = names[0] || '';
+          if (!profile.lastName) profile.lastName = names.slice(1).join(' ') || '';
+        }
+        if (!profile.email && user.email) profile.email = user.email;
+        localStorage.setItem('jasmine_student_profile', JSON.stringify(profile));
+
+        showApp();
+        trackLogin(user.email || 'apple-user');
+        showToast('Welcome' + (user.displayName ? ', ' + user.displayName : '') + '!');
+      } catch (error) {
+        console.error('Apple sign-in error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
+          showToast('Sign-in cancelled');
         } else {
           showToast('Sign-in failed: ' + (error.message || 'Please try again'));
         }
