@@ -28,9 +28,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Firebase SDK (for Google Sign-In) - using compat for global scope -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script id="firebase-auth-script" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script>
-    // Initialize Firebase immediately
+    // Firebase initialization - wait for SDK to be available
+    window.firebaseReady = false;
+    window.firebaseInitRetries = 0;
+
     const firebaseConfig = {
       apiKey: "AIzaSyBqjjRm_dyVtCIIOxab40Epc6lDISJ26gc",
       authDomain: "jasmine-scholarship-hub.firebaseapp.com",
@@ -41,38 +44,103 @@
       measurementId: "G-78H9EPW3ZQ"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const firebaseAuth = firebase.auth();
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
+    function initializeFirebase() {
+      // Check if Firebase SDK is available
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        window.firebaseInitRetries++;
+        if (window.firebaseInitRetries < 50) {
+          // Retry in 100ms (up to 5 seconds total)
+          setTimeout(initializeFirebase, 100);
+          return;
+        }
+        console.error('Firebase SDK failed to load after retries');
+        return;
+      }
 
-    // Request profile and email scopes from Google
-    googleProvider.addScope('profile');
-    googleProvider.addScope('email');
-    googleProvider.setCustomParameters({
-      prompt: 'select_account'
+      try {
+        firebase.initializeApp(firebaseConfig);
+        const firebaseAuth = firebase.auth();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // Request profile and email scopes from Google
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
+        googleProvider.setCustomParameters({
+          prompt: 'select_account'
+        });
+
+        // Expose to global scope
+        window.firebaseAuth = firebaseAuth;
+        window.googleProvider = googleProvider;
+        window.firebaseReady = true;
+
+        console.log('Firebase initialized successfully');
+
+        // Enable sign-in buttons now that Firebase is ready
+        enableSignInButtons();
+
+        // Dispatch custom event for any listeners
+        window.dispatchEvent(new CustomEvent('firebaseReady'));
+      } catch (e) {
+        console.error('Firebase initialization error:', e);
+      }
+    }
+
+    function enableSignInButtons() {
+      // Remove loading state from Google and Apple buttons
+      const googleBtn = document.getElementById('google-signin-btn');
+      const googleText = document.getElementById('google-signin-text');
+      const appleBtn = document.getElementById('apple-signin-btn');
+      const appleText = document.getElementById('apple-signin-text');
+
+      if (googleBtn) {
+        googleBtn.disabled = false;
+        googleBtn.style.opacity = '1';
+        googleBtn.style.cursor = 'pointer';
+      }
+      if (googleText) {
+        googleText.textContent = 'Continue with Google';
+      }
+      if (appleBtn) {
+        appleBtn.disabled = false;
+        appleBtn.style.opacity = '1';
+        appleBtn.style.cursor = 'pointer';
+      }
+      if (appleText) {
+        appleText.textContent = 'Continue with Apple';
+      }
+      console.log('Sign-in buttons enabled');
+    }
+
+    // Start initialization when DOM is ready or immediately if already ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeFirebase);
+    } else {
+      initializeFirebase();
+    }
+
+    // Set up auth listeners after Firebase is ready
+    window.addEventListener('firebaseReady', function() {
+      // Handle redirect result (for mobile sign-in)
+      window.firebaseAuth.getRedirectResult().then((result) => {
+        if (result && result.user) {
+          console.log('Redirect sign-in successful:', result.user.email);
+          // Auth state listener will handle the rest
+        }
+      }).catch((error) => {
+        if (error.code !== 'auth/null-error') {
+          console.error('Redirect sign-in error:', error);
+        }
+      });
     });
 
-    // Expose to global scope
-    window.firebaseAuth = firebaseAuth;
-    window.googleProvider = googleProvider;
-    window.firebaseReady = true;
-
-    console.log('Firebase initialized successfully');
-
-    // Handle redirect result (for mobile sign-in)
-    firebaseAuth.getRedirectResult().then((result) => {
-      if (result && result.user) {
-        console.log('Redirect sign-in successful:', result.user.email);
-        // Auth state listener will handle the rest
+    // Listen for Firebase auth state changes - wait for Firebase to be ready
+    function setupAuthStateListener() {
+      if (!window.firebaseAuth) {
+        window.addEventListener('firebaseReady', setupAuthStateListener, { once: true });
+        return;
       }
-    }).catch((error) => {
-      if (error.code !== 'auth/null-error') {
-        console.error('Redirect sign-in error:', error);
-      }
-    });
-
-    // Listen for Firebase auth state changes
-    firebaseAuth.onAuthStateChanged((user) => {
+      window.firebaseAuth.onAuthStateChanged((user) => {
       if (user) {
         console.log('Firebase user signed in:', user.email, user.displayName);
         window.firebaseUser = user;
@@ -108,7 +176,10 @@
 
         if (typeof showApp === 'function') showApp();
       }
-    });
+      });
+    }
+    // Start auth state listener
+    setupAuthStateListener();
   </script>
   <script src="scholarships-data.js"></script>
   <script src="services/onboarding.js?v=2"></script>
@@ -155,13 +226,42 @@
       --border: #4c1d95;
       --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
+    /* Evolving gradient animation - like pool LED lights */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      25% { background-position: 50% 100%; }
+      50% { background-position: 100% 50%; }
+      75% { background-position: 50% 0%; }
+      100% { background-position: 0% 50%; }
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
+      background: linear-gradient(-45deg, 
+        #faf5ff, #f3e8ff, #ede9fe, #e9d5ff, 
+        #fce7f3, #fbcfe8, #f5d0fe, #faf5ff);
+      background-size: 400% 400%;
+      animation: gradientShift 30s ease infinite;
       color: var(--text);
       min-height: 100vh;
       padding-bottom: 80px;
+    }
+    /* Dark mode animated gradient */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) body {
+        background: linear-gradient(-45deg,
+          #1a1025, #2d1f3d, #1e1b4b, #312e81,
+          #4c1d95, #3b0764, #581c87, #1a1025);
+        background-size: 400% 400%;
+        animation: gradientShift 30s ease infinite;
+      }
+    }
+    :root[data-theme="dark"] body {
+      background: linear-gradient(-45deg,
+        #1a1025, #2d1f3d, #1e1b4b, #312e81,
+        #4c1d95, #3b0764, #581c87, #1a1025);
+      background-size: 400% 400%;
+      animation: gradientShift 30s ease infinite;
     }
 
     /* Header - Clean Modern Design */
@@ -4003,16 +4103,16 @@
         </button>
       </div>
 
-      <!-- Social Login Buttons -->
-      <button class="google-btn" onclick="signInWithGoogle()">
+      <!-- Social Login Buttons - start disabled until Firebase loads -->
+      <button id="google-signin-btn" class="google-btn" onclick="signInWithGoogle()" disabled style="opacity: 0.6; cursor: wait;">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-        Continue with Google
+        <span id="google-signin-text">Loading...</span>
       </button>
-      <button class="google-btn" onclick="signInWithApple()" style="background: #000; color: #fff; margin-top: 8px;">
+      <button id="apple-signin-btn" class="google-btn" onclick="signInWithApple()" style="background: #000; color: #fff; margin-top: 8px; opacity: 0.6; cursor: wait;" disabled>
         <svg style="width: 18px; height: 18px; margin-right: 8px;" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
         </svg>
-        Continue with Apple
+        <span id="apple-signin-text">Loading...</span>
       </button>
       <div class="hint">Sign in to access your scholarships</div>
     </div>
@@ -12538,9 +12638,46 @@
 
       // Web fallback: Use Firebase Auth for Google Sign-In
       if (!window.firebaseReady || !window.firebaseAuth || !window.googleProvider) {
-        console.error('Firebase Auth not initialized');
-        alert('Google Sign-In is loading, please try again in a moment.');
-        return;
+        console.log('Firebase Auth still initializing, waiting...');
+        // Show visual feedback instead of blocking alert
+        const btn = document.getElementById('google-signin-btn');
+        const text = document.getElementById('google-signin-text');
+        if (btn) btn.disabled = true;
+        if (text) text.textContent = 'Connecting...';
+
+        // Wait for Firebase to be ready, then retry
+        const waitForFirebase = () => {
+          return new Promise((resolve, reject) => {
+            if (window.firebaseReady) {
+              resolve();
+              return;
+            }
+            let attempts = 0;
+            const check = setInterval(() => {
+              attempts++;
+              if (window.firebaseReady) {
+                clearInterval(check);
+                resolve();
+              } else if (attempts > 30) {
+                clearInterval(check);
+                reject(new Error('Firebase initialization timeout'));
+              }
+            }, 200);
+          });
+        };
+
+        try {
+          await waitForFirebase();
+          // Re-enable button and retry
+          if (btn) btn.disabled = false;
+          if (text) text.textContent = 'Continue with Google';
+          return signInWithGoogle(); // Retry
+        } catch (e) {
+          if (btn) btn.disabled = false;
+          if (text) text.textContent = 'Continue with Google';
+          showToast('Connection issue. Please refresh and try again.');
+          return;
+        }
       }
 
       try {
@@ -12635,9 +12772,44 @@
       }
 
       // Web fallback: Use Firebase Auth with Apple provider
-      if (!window.firebaseAuth) {
-        alert('Sign-In is loading, please try again in a moment.');
-        return;
+      if (!window.firebaseReady || !window.firebaseAuth) {
+        console.log('Firebase Auth still initializing for Apple Sign-In, waiting...');
+        const btn = document.getElementById('apple-signin-btn');
+        const text = document.getElementById('apple-signin-text');
+        if (btn) btn.disabled = true;
+        if (text) text.textContent = 'Connecting...';
+
+        const waitForFirebase = () => {
+          return new Promise((resolve, reject) => {
+            if (window.firebaseReady) {
+              resolve();
+              return;
+            }
+            let attempts = 0;
+            const check = setInterval(() => {
+              attempts++;
+              if (window.firebaseReady) {
+                clearInterval(check);
+                resolve();
+              } else if (attempts > 30) {
+                clearInterval(check);
+                reject(new Error('Firebase initialization timeout'));
+              }
+            }, 200);
+          });
+        };
+
+        try {
+          await waitForFirebase();
+          if (btn) btn.disabled = false;
+          if (text) text.textContent = 'Continue with Apple';
+          return signInWithApple();
+        } catch (e) {
+          if (btn) btn.disabled = false;
+          if (text) text.textContent = 'Continue with Apple';
+          showToast('Connection issue. Please refresh and try again.');
+          return;
+        }
       }
 
       try {
