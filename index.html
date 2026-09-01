@@ -54,6 +54,8 @@
           return;
         }
         console.error('Firebase SDK failed to load after retries');
+        // Show error state on buttons instead of leaving them stuck
+        showSignInError();
         return;
       }
 
@@ -110,6 +112,32 @@
         appleText.textContent = 'Continue with Apple';
       }
       console.log('Sign-in buttons enabled');
+    }
+
+    function showSignInError() {
+      // Show error state when Firebase SDK fails to load
+      const googleBtn = document.getElementById('google-signin-btn');
+      const googleText = document.getElementById('google-signin-text');
+      const appleBtn = document.getElementById('apple-signin-btn');
+      const appleText = document.getElementById('apple-signin-text');
+
+      if (googleBtn) {
+        googleBtn.disabled = false;
+        googleBtn.style.opacity = '1';
+        googleBtn.style.cursor = 'pointer';
+      }
+      if (googleText) {
+        googleText.textContent = 'Continue with Google';
+      }
+      if (appleBtn) {
+        appleBtn.disabled = false;
+        appleBtn.style.opacity = '1';
+        appleBtn.style.cursor = 'pointer';
+      }
+      if (appleText) {
+        appleText.textContent = 'Continue with Apple';
+      }
+      console.log('Sign-in buttons enabled (Firebase may retry on click)');
     }
 
     // Start initialization when DOM is ready or immediately if already ready
