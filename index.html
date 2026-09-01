@@ -26,9 +26,9 @@
   </script>
   <!-- Supabase JS Client (for email/password auth) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Firebase SDK (for Google Sign-In) - using compat for global scope -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script id="firebase-auth-script" src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- Firebase SDK (for Google Sign-In) - self-hosted to avoid ad blocker issues -->
+  <script src="lib/firebase-app-compat.js"></script>
+  <script src="lib/firebase-auth-compat.js"></script>
   <script>
     // Firebase initialization - wait for SDK to be available
     window.firebaseReady = false;
