@@ -209,6 +209,10 @@ const WouldYouRather = (function() {
       const question = getNextQuestion();
       if (!question || questionsAnswered >= maxQuestions) {
         const stats = getStats();
+
+        // Check if Vylium assessment is complete
+        const vyliumComplete = typeof VyliumProfile !== 'undefined' && VyliumProfile.getProfile()?.isComplete;
+
         container.innerHTML = `
           <div class="wyr-game-over">
             <div class="wyr-game-icon">🏆</div>
@@ -223,7 +227,15 @@ const WouldYouRather = (function() {
                 ${stats.topDimensions.map(d => `<span class="wyr-trait">${d.name}</span>`).join('')}
               </div>
             ` : ''}
-            <button class="btn btn-primary" onclick="WouldYouRather.renderGameMode('${containerId}')">Play Again</button>
+            ${!vyliumComplete ? `
+              <div style="background: linear-gradient(135deg, #ede9fe, #fce7f3); padding: 16px; border-radius: 12px; margin: 16px 0; text-align: center;">
+                <div style="font-size: 1.5rem; margin-bottom: 8px;">✨</div>
+                <div style="font-weight: 700; color: #7c3aed; margin-bottom: 8px;">Discover Your Full Profile!</div>
+                <div style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">Take the complete Vylium assessment to unlock your personality type and career matches.</div>
+                <button class="btn btn-primary" onclick="if(typeof openVyliumAssessment === 'function') openVyliumAssessment();" style="background: linear-gradient(135deg, #7c3aed, #ec4899); border: none; color: white; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer;">Take Vylium Assessment</button>
+              </div>
+            ` : ''}
+            <button class="btn btn-primary" onclick="WouldYouRather.renderGameMode('${containerId}')" style="margin-top: 8px;">Play Again</button>
           </div>
         `;
         if (onComplete) onComplete(stats);

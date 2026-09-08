@@ -5893,6 +5893,9 @@
       initVyliumMini();
     }
 
+    // Expose Vylium assessment globally for Would You Rather integration
+    window.openVyliumAssessment = openVyliumAssessment;
+
     // Phase 3-5: Discover Section Functions
     function initDiscoverSection() {
       // XP Bar & Engagement
@@ -7936,11 +7939,17 @@
     function loadScholarships() {
       const list = document.getElementById('scholarship-list');
       if (!list) return; // Element doesn't exist in new UI
-      if (!window.JASMINE_SCHOLARSHIPS) { list.innerHTML = '<p>Loading scholarships...</p>'; return; }
 
-      // Combine built-in scholarships with parent-added custom ones
+      // Combine built-in scholarships with parent-added custom ones (from search results)
       const customScholarships = JSON.parse(localStorage.getItem('jasmine_custom_scholarships') || '[]');
-      const scholarships = [...window.JASMINE_SCHOLARSHIPS, ...customScholarships];
+      const builtInScholarships = window.JASMINE_SCHOLARSHIPS || [];
+      const scholarships = [...builtInScholarships, ...customScholarships];
+
+      // Show message only if no scholarships at all
+      if (scholarships.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">No scholarships yet. Use the search to find scholarships matched to your profile!</p>';
+        return;
+      }
 
       // Sort by deadline (soonest first)
       scholarships.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
@@ -8084,6 +8093,9 @@
         });
       });
     }
+
+    // Expose loadScholarships globally so ScholarshipSearch can refresh after adding results
+    window.loadScholarships = loadScholarships;
 
     // Update scholarship status and track action
     function updateScholarshipStatus(scholarshipId, newStatus) {
