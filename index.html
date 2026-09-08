@@ -4681,7 +4681,8 @@
 
       <div class="mode-toggle">
         <button class="active" onclick="setEssayMode('templates')">📋 Templates</button>
-        <button onclick="setEssayMode('interview')">🎤 Interview Mode</button>
+        <button onclick="setEssayMode('interview')">🎤 Interview</button>
+        <button onclick="setEssayMode('review')">🔍 Review Essay</button>
       </div>
 
       <div id="essay-templates-view">
@@ -4780,6 +4781,99 @@
         </div>
 
         <button class="btn btn-primary btn-block" onclick="startInterview()">🎙️ Start Interview</button>
+      </div>
+
+      <!-- Essay Review View -->
+      <div id="essay-review-view" style="display: none;">
+        <div class="card" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe); margin-bottom: 16px;">
+          <div style="font-weight: 700; color: #5b21b6; margin-bottom: 4px;">🔍 Essay Review & Feedback</div>
+          <div style="font-size: 0.85rem; color: #7c3aed;">Upload or paste your essay to get AI-powered feedback based on college admissions best practices.</div>
+        </div>
+
+        <div class="card" style="margin-bottom: 16px;">
+          <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Essay Type</label>
+          <select id="review-essay-type" class="goal-input" style="margin-bottom: 12px;">
+            <option value="college-personal">College Personal Statement</option>
+            <option value="scholarship">Scholarship Essay</option>
+            <option value="why-us">Why This School Essay</option>
+            <option value="activity">Extracurricular/Activity Essay</option>
+            <option value="challenge">Challenge/Growth Essay</option>
+            <option value="community">Community/Service Essay</option>
+          </select>
+
+          <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Word Limit (optional)</label>
+          <input type="number" id="review-word-limit" class="goal-input" placeholder="e.g., 650" style="margin-bottom: 12px;">
+        </div>
+
+        <div class="card" style="margin-bottom: 16px;">
+          <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Your Essay</label>
+
+          <!-- Upload option -->
+          <div style="border: 2px dashed #c4b5fd; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 12px; cursor: pointer; background: rgba(124,58,237,0.05);" onclick="document.getElementById('essay-file-upload').click()">
+            <div style="font-size: 2rem; margin-bottom: 8px;">📄</div>
+            <div style="font-weight: 600; color: #7c3aed;">Upload Essay File</div>
+            <div style="font-size: 0.8rem; color: #6b7280;">.txt, .doc, .docx, or .pdf</div>
+          </div>
+          <input type="file" id="essay-file-upload" accept=".txt,.doc,.docx,.pdf" style="display: none;" onchange="handleEssayUpload(event)">
+
+          <div style="text-align: center; color: #9ca3af; font-size: 0.85rem; margin: 12px 0;">— or paste below —</div>
+
+          <textarea id="review-essay-text" class="goal-input" rows="10" placeholder="Paste your essay here..." style="font-size: 0.95rem; line-height: 1.6;"></textarea>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem; color: #6b7280;">
+            <span id="review-word-count">0 words</span>
+            <span id="review-char-count">0 characters</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" onclick="analyzeUploadedEssay()" id="analyze-essay-btn">
+          🔍 Analyze My Essay
+        </button>
+
+        <!-- Feedback Results -->
+        <div id="essay-review-results" style="display: none; margin-top: 20px;">
+          <div class="card" style="background: linear-gradient(135deg, #065f46, #047857); color: white; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">Overall Score</div>
+                <div style="font-size: 2.5rem; font-weight: 800;" id="review-score">85</div>
+              </div>
+              <div style="text-align: right;">
+                <div id="review-tier-badge" style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">STRONG</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Strengths -->
+          <div class="card" style="margin-bottom: 12px; border-left: 4px solid #10b981;">
+            <div style="font-weight: 700; color: #065f46; margin-bottom: 8px;">✅ Strengths</div>
+            <ul id="review-strengths" style="margin: 0; padding-left: 20px; color: #374151; font-size: 0.9rem;"></ul>
+          </div>
+
+          <!-- Areas to Improve -->
+          <div class="card" style="margin-bottom: 12px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">💡 Areas to Improve</div>
+            <ul id="review-improvements" style="margin: 0; padding-left: 20px; color: #374151; font-size: 0.9rem;"></ul>
+          </div>
+
+          <!-- Missing Elements -->
+          <div class="card" style="margin-bottom: 12px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: 700; color: #991b1b; margin-bottom: 8px;">❌ Missing Elements</div>
+            <ul id="review-missing" style="margin: 0; padding-left: 20px; color: #374151; font-size: 0.9rem;"></ul>
+          </div>
+
+          <!-- Best Practices Tips -->
+          <div class="card" style="margin-bottom: 12px; border-left: 4px solid #7c3aed;">
+            <div style="font-weight: 700; color: #5b21b6; margin-bottom: 8px;">📚 Best Practice Tips</div>
+            <ul id="review-tips" style="margin: 0; padding-left: 20px; color: #374151; font-size: 0.9rem;"></ul>
+          </div>
+
+          <!-- Suggested Revisions -->
+          <div class="card" style="background: #faf5ff;">
+            <div style="font-weight: 700; color: #7c3aed; margin-bottom: 8px;">✏️ Suggested First Revision</div>
+            <div id="review-revision" style="font-size: 0.9rem; color: #374151; line-height: 1.6;"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -6243,6 +6337,231 @@
       event.target.classList.add('active');
       document.getElementById('essay-templates-view').style.display = mode === 'templates' ? 'block' : 'none';
       document.getElementById('essay-interview-view').style.display = mode === 'interview' ? 'block' : 'none';
+      document.getElementById('essay-review-view').style.display = mode === 'review' ? 'block' : 'none';
+    }
+
+    // Essay Review Functions
+    function handleEssayUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        document.getElementById('review-essay-text').value = text;
+        updateReviewWordCount();
+      };
+
+      if (file.name.endsWith('.txt')) {
+        reader.readAsText(file);
+      } else {
+        // For .doc, .docx, .pdf - show message to paste instead
+        alert('For best results, please copy the text from your document and paste it below. We recommend using .txt files for direct upload.');
+      }
+    }
+
+    function updateReviewWordCount() {
+      const text = document.getElementById('review-essay-text').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      const chars = text.length;
+      document.getElementById('review-word-count').textContent = `${words} words`;
+      document.getElementById('review-char-count').textContent = `${chars} characters`;
+    }
+
+    // Add event listener for word count
+    document.getElementById('review-essay-text')?.addEventListener('input', updateReviewWordCount);
+
+    async function analyzeUploadedEssay() {
+      const essay = document.getElementById('review-essay-text').value.trim();
+      const essayType = document.getElementById('review-essay-type').value;
+      const wordLimit = parseInt(document.getElementById('review-word-limit').value) || 650;
+
+      if (!essay || essay.length < 100) {
+        alert('Please enter at least 100 characters of your essay.');
+        return;
+      }
+
+      const btn = document.getElementById('analyze-essay-btn');
+      btn.disabled = true;
+      btn.innerHTML = '🔄 Analyzing...';
+
+      try {
+        const response = await fetch('/api/essay-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ essay, essayType, wordLimit })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          // Use local analysis if API fails
+          const localFeedback = analyzeEssayLocally(essay, essayType, wordLimit);
+          displayReviewResults(localFeedback);
+        } else {
+          displayReviewResults(data.feedback);
+        }
+
+      } catch (error) {
+        console.error('Essay review error:', error);
+        // Fallback to local analysis
+        const localFeedback = analyzeEssayLocally(essay, essayType, wordLimit);
+        displayReviewResults(localFeedback);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Analyze My Essay';
+      }
+    }
+
+    function analyzeEssayLocally(essay, essayType, wordLimit) {
+      const words = essay.split(/\s+/).length;
+      const sentences = essay.split(/[.!?]+/).filter(s => s.trim()).length;
+      const paragraphs = essay.split(/\n\n+/).filter(p => p.trim()).length;
+      const hasFirstPerson = /\b(I|me|my|myself)\b/i.test(essay);
+      const hasSpecificDetails = /\b(when|where|because|specifically|for example|one time)\b/i.test(essay);
+      const hasEmotions = /\b(felt|feeling|emotion|happy|sad|excited|nervous|proud|grateful|scared|anxious)\b/i.test(essay);
+      const hasReflection = /\b(learned|realized|understood|changed|grew|developed|now I|looking back)\b/i.test(essay);
+      const hasStrongOpening = essay.substring(0, 100).includes('"') || /^[A-Z][^.!?]*\b(moment|day|time|when)\b/i.test(essay);
+
+      let score = 60;
+      const strengths = [];
+      const improvements = [];
+      const missing = [];
+      const tips = [];
+
+      // Word count check
+      if (words >= wordLimit * 0.9 && words <= wordLimit * 1.05) {
+        score += 5;
+        strengths.push('Word count is within the ideal range');
+      } else if (words < wordLimit * 0.7) {
+        improvements.push(`Essay is ${wordLimit - words} words short of the limit - expand with more details`);
+      } else if (words > wordLimit * 1.1) {
+        improvements.push(`Essay is ${words - wordLimit} words over the limit - tighten your prose`);
+      }
+
+      // Structure check
+      if (paragraphs >= 3) {
+        score += 5;
+        strengths.push('Good paragraph structure');
+      } else {
+        improvements.push('Add more paragraph breaks to improve readability');
+      }
+
+      // First person narrative
+      if (hasFirstPerson) {
+        score += 5;
+        strengths.push('Uses personal voice and first-person narrative');
+      } else {
+        missing.push('Personal voice - use "I" and share your perspective');
+      }
+
+      // Specific details
+      if (hasSpecificDetails) {
+        score += 10;
+        strengths.push('Includes specific details and examples');
+      } else {
+        missing.push('Specific examples - add concrete moments, dates, or descriptions');
+      }
+
+      // Emotional content
+      if (hasEmotions) {
+        score += 10;
+        strengths.push('Shows emotional depth and vulnerability');
+      } else {
+        missing.push('Emotional connection - share how experiences made you feel');
+      }
+
+      // Reflection
+      if (hasReflection) {
+        score += 10;
+        strengths.push('Demonstrates reflection and personal growth');
+      } else {
+        missing.push('Reflection on growth - what did you learn or how did you change?');
+      }
+
+      // Strong opening
+      if (hasStrongOpening) {
+        score += 5;
+        strengths.push('Engaging opening that hooks the reader');
+      } else {
+        improvements.push('Start with a specific moment or scene to grab attention');
+      }
+
+      // Essay type specific tips
+      const typeTips = {
+        'college-personal': [
+          'Show your unique perspective - what makes YOU different?',
+          'Focus on ONE meaningful story rather than listing achievements',
+          'End with forward-looking insight about college and beyond'
+        ],
+        'scholarship': [
+          'Clearly connect your story to the scholarship\'s mission',
+          'Demonstrate financial responsibility and gratitude',
+          'Show how the scholarship will help you achieve specific goals'
+        ],
+        'why-us': [
+          'Mention specific programs, professors, or opportunities',
+          'Show you\'ve researched the school deeply',
+          'Explain what you\'ll contribute to campus life'
+        ],
+        'activity': [
+          'Focus on growth and impact, not just participation',
+          'Show leadership through specific examples',
+          'Connect the activity to your larger goals'
+        ],
+        'challenge': [
+          'Be honest but focus on resilience, not trauma',
+          'Show concrete actions you took to overcome',
+          'Emphasize what you learned and how you grew'
+        ],
+        'community': [
+          'Focus on genuine impact, not hours logged',
+          'Show reciprocal learning - what did you gain?',
+          'Connect service to your values and future plans'
+        ]
+      };
+
+      tips.push(...(typeTips[essayType] || typeTips['college-personal']));
+
+      // Generate revision suggestion
+      let revision = '';
+      if (!hasStrongOpening) {
+        revision = 'Consider starting with a vivid scene: "The moment I realized..." or begin mid-action with dialogue or description. ';
+      }
+      if (!hasSpecificDetails) {
+        revision += 'Add a specific example: instead of "I helped others," try "Every Tuesday at 6 AM, I sorted donated clothes at the shelter." ';
+      }
+      if (!hasReflection) {
+        revision += 'End paragraphs with reflection: "This taught me..." or "Now I understand..."';
+      }
+
+      return {
+        score: Math.min(100, score),
+        tier: score >= 90 ? 'Outstanding' : score >= 80 ? 'Strong' : score >= 70 ? 'Good' : score >= 60 ? 'Developing' : 'Needs Work',
+        strengths,
+        improvements,
+        missing,
+        tips,
+        revision: revision || 'Your essay has a solid foundation. Focus on making each sentence do specific work - cut vague phrases and add concrete details.'
+      };
+    }
+
+    function displayReviewResults(feedback) {
+      document.getElementById('essay-review-results').style.display = 'block';
+      document.getElementById('review-score').textContent = feedback.score;
+      document.getElementById('review-tier-badge').textContent = feedback.tier.toUpperCase();
+
+      const tierBadge = document.getElementById('review-tier-badge');
+      tierBadge.style.background = feedback.score >= 80 ? 'rgba(16,185,129,0.3)' : feedback.score >= 70 ? 'rgba(255,255,255,0.2)' : 'rgba(251,191,36,0.3)';
+
+      document.getElementById('review-strengths').innerHTML = (feedback.strengths || []).map(s => `<li>${s}</li>`).join('') || '<li>Keep working on your essay!</li>';
+      document.getElementById('review-improvements').innerHTML = (feedback.improvements || []).map(s => `<li>${s}</li>`).join('') || '<li>Your essay is looking great!</li>';
+      document.getElementById('review-missing').innerHTML = (feedback.missing || []).map(s => `<li>${s}</li>`).join('') || '<li>No major missing elements detected</li>';
+      document.getElementById('review-tips').innerHTML = (feedback.tips || []).map(s => `<li>${s}</li>`).join('');
+      document.getElementById('review-revision').textContent = feedback.revision || 'Continue refining your essay with the suggestions above.';
+
+      // Scroll to results
+      document.getElementById('essay-review-results').scrollIntoView({ behavior: 'smooth' });
     }
 
     // ===========================================
