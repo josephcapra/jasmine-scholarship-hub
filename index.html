@@ -1571,6 +1571,39 @@
       outline: none;
       border-color: var(--jazz-purple);
     }
+    /* Password input with toggle */
+    .password-input-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .password-input-wrapper .login-input,
+    .password-input-wrapper .goal-input {
+      margin-bottom: 0;
+      padding-right: 50px;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 1.2rem;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .password-toggle:hover {
+      opacity: 1;
+    }
+    .password-toggle.showing .eye-icon::after {
+      content: '🙈';
+    }
+    .password-toggle:not(.showing) .eye-icon::after {
+      content: '👁️';
+    }
 
     /* Rewards Banner */
     .rewards-banner {
@@ -4116,7 +4149,12 @@
       <!-- Email/Password Login -->
       <div id="login-form">
         <input type="email" id="login-email" class="login-input" placeholder="Email" value="" autocomplete="off">
-        <input type="password" id="login-password" class="login-input" placeholder="Password" autocomplete="new-password">
+        <div class="password-input-wrapper">
+          <input type="password" id="login-password" class="login-input" placeholder="Password" autocomplete="new-password">
+          <button type="button" class="password-toggle" onclick="togglePasswordVisibility('login-password', this)" aria-label="Show password">
+            <span class="eye-icon">👁️</span>
+          </button>
+        </div>
         <button class="google-btn" style="background: linear-gradient(135deg, #7c3aed, #ec4899); color: white; border: none; margin-bottom: 12px;" onclick="signInWithEmail()">
           🔐 Sign In
         </button>
@@ -4156,12 +4194,23 @@
 
   <!-- Password Update Modal -->
   <div class="modal-overlay" id="password-update-modal">
-    <div class="modal" style="text-align: center;">
+    <div class="modal" style="text-align: center; position: relative;">
+      <button class="modal-close" onclick="skipPasswordUpdate()" style="position: absolute; top: 12px; right: 12px;">×</button>
       <div style="font-size: 3rem; margin-bottom: 16px;">🔐</div>
       <h3 class="modal-title" style="margin-bottom: 8px;">Update Your Password</h3>
       <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 20px;">For security, please create a new password that only you know!</p>
-      <input type="password" id="new-password-1" class="goal-input" placeholder="New password (at least 8 characters)">
-      <input type="password" id="new-password-2" class="goal-input" placeholder="Confirm new password">
+      <div class="password-input-wrapper">
+        <input type="password" id="new-password-1" class="goal-input" placeholder="New password (at least 8 characters)">
+        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('new-password-1', this)" aria-label="Show password">
+          <span class="eye-icon">👁️</span>
+        </button>
+      </div>
+      <div class="password-input-wrapper">
+        <input type="password" id="new-password-2" class="goal-input" placeholder="Confirm new password">
+        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('new-password-2', this)" aria-label="Show password">
+          <span class="eye-icon">👁️</span>
+        </button>
+      </div>
       <button class="btn btn-primary btn-block" onclick="updatePassword()">🔒 Update Password</button>
       <button style="background: none; border: none; color: var(--muted); margin-top: 12px; cursor: pointer; font-size: 0.85rem;" onclick="skipPasswordUpdate()">Skip for now</button>
     </div>
@@ -12560,6 +12609,25 @@
         }
       });
     }
+
+    // Toggle password visibility
+    function togglePasswordVisibility(inputId, toggleBtn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        toggleBtn.classList.add('showing');
+        toggleBtn.querySelector('.eye-icon').textContent = '🙈';
+        toggleBtn.setAttribute('aria-label', 'Hide password');
+      } else {
+        input.type = 'password';
+        toggleBtn.classList.remove('showing');
+        toggleBtn.querySelector('.eye-icon').textContent = '👁️';
+        toggleBtn.setAttribute('aria-label', 'Show password');
+      }
+    }
+    window.togglePasswordVisibility = togglePasswordVisibility;
 
     async function signInWithEmail() {
       const email = document.getElementById('login-email').value.trim().toLowerCase();

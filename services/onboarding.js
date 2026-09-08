@@ -165,6 +165,7 @@ const Onboarding = (function() {
 
     container.innerHTML = `
       <div class="ob-card">
+        ${currentStep > 0 ? `<button class="ob-close-btn" onclick="Onboarding.skip()" aria-label="Close">×</button>` : ''}
         ${step.id !== 'welcome' ? `
         <div class="ob-progress"><div class="ob-progress-bar" style="width:${progress}%"></div></div>
         <div class="ob-step">Step ${currentStep} of ${STEPS.length - 1}</div>
@@ -454,6 +455,20 @@ const Onboarding = (function() {
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
+
+      // Save resume to documents immediately
+      const docs = JSON.parse(localStorage.getItem('jasmine_documents') || '[]');
+      docs.push({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        type: file.type,
+        category: 'resume',
+        dataUrl: fileData,
+        uploadedAt: new Date().toISOString()
+      });
+      localStorage.setItem('jasmine_documents', JSON.stringify(docs));
+      formData.resumeFileData = fileData;
+      formData.resumeFileName = file.name;
 
       const response = await fetch('/api/extract-profile', {
         method: 'POST',
@@ -923,7 +938,15 @@ const Onboarding = (function() {
         background: white; border-radius: 20px; padding: 24px;
         width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        position: relative;
       }
+      .ob-close-btn {
+        position: absolute; top: 12px; right: 16px;
+        background: none; border: none; font-size: 1.6rem;
+        color: #9ca3af; cursor: pointer; padding: 4px 8px;
+        line-height: 1; z-index: 10;
+      }
+      .ob-close-btn:hover { color: #6b7280; }
       .ob-progress { height: 6px; background: #e5e7eb; border-radius: 3px; margin-bottom: 8px; }
       .ob-progress-bar { height: 100%; background: linear-gradient(90deg, #7c3aed, #ec4899); border-radius: 3px; transition: width 0.3s; }
       .ob-step { text-align: center; font-size: 0.8rem; color: #9ca3af; margin-bottom: 16px; }
