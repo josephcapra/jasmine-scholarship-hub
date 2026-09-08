@@ -176,6 +176,173 @@ ${currentResume.html}
     URL.revokeObjectURL(url);
   }
 
+  function downloadAsWord() {
+    if (!currentResume) {
+      throw new Error('No resume to download. Generate one first.');
+    }
+
+    const profile = getProfile();
+    const fileName = `resume-${profile.firstName || 'student'}-${new Date().toISOString().split('T')[0]}.doc`;
+
+    // Word-compatible HTML with proper styling
+    const wordDoc = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="UTF-8">
+  <title>Resume - ${profile.firstName || 'Student'} ${profile.lastName || ''}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+      <w:DoNotOptimizeForBrowser/>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  <style>
+    @page { size: 8.5in 11in; margin: 0.5in; }
+    body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; line-height: 1.4; color: #333; }
+    h1 { font-size: 18pt; font-weight: bold; margin-bottom: 4pt; color: #1a1a1a; }
+    h2 { font-size: 13pt; font-weight: bold; margin-top: 12pt; margin-bottom: 6pt; border-bottom: 1pt solid #7c3aed; padding-bottom: 2pt; color: #7c3aed; }
+    h3 { font-size: 11pt; font-weight: bold; margin-top: 8pt; margin-bottom: 4pt; }
+    p { margin: 4pt 0; }
+    ul { margin: 4pt 0; padding-left: 20pt; }
+    li { margin: 2pt 0; }
+    .contact { font-size: 10pt; color: #666; }
+    .section { margin-bottom: 12pt; }
+    table { border-collapse: collapse; width: 100%; }
+    td { vertical-align: top; padding: 2pt; }
+  </style>
+</head>
+<body>
+${currentResume.html}
+</body>
+</html>`;
+
+    const blob = new Blob([wordDoc], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function generateResumeFromProfile() {
+    const profile = getProfile();
+
+    if (!hasMinimumProfile(profile)) {
+      throw new Error('Please complete your profile first.');
+    }
+
+    // Build resume HTML from profile data
+    const name = `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Student';
+    const email = profile.email || '';
+    const phone = profile.phone || '';
+    const school = profile.school || '';
+    const gradYear = profile.graduationYear || '';
+    const gpa = profile.gpa || '';
+
+    let html = `<h1 style="text-align: center; margin-bottom: 4px;">${name}</h1>`;
+
+    // Contact info
+    const contactParts = [email, phone].filter(Boolean);
+    if (contactParts.length > 0) {
+      html += `<p style="text-align: center; color: #666; margin-top: 0;">${contactParts.join(' | ')}</p>`;
+    }
+
+    // Education
+    if (school || gradYear || gpa) {
+      html += `<h2>Education</h2>`;
+      html += `<p><strong>${school || 'High School'}</strong>`;
+      if (gradYear) html += ` | Expected Graduation: ${gradYear}`;
+      if (gpa) html += ` | GPA: ${gpa}`;
+      html += `</p>`;
+    }
+
+    // Achievements
+    const achievements = profile.achievements || [];
+    if (achievements.length > 0) {
+      html += `<h2>Achievements & Awards</h2><ul>`;
+      achievements.forEach(a => {
+        const title = typeof a === 'string' ? a : (a.title || a.name || '');
+        const date = typeof a === 'object' && a.date ? ` (${a.date})` : '';
+        if (title) html += `<li>${title}${date}</li>`;
+      });
+      html += `</ul>`;
+    }
+
+    // Activities
+    const activities = profile.activities || [];
+    if (activities.length > 0) {
+      html += `<h2>Activities & Leadership</h2><ul>`;
+      activities.forEach(a => {
+        const title = typeof a === 'string' ? a : (a.title || a.name || '');
+        const role = typeof a === 'object' && a.role ? ` - ${a.role}` : '';
+        if (title) html += `<li>${title}${role}</li>`;
+      });
+      html += `</ul>`;
+    }
+
+    // Work Experience
+    const workExperience = profile.workExperience || [];
+    if (workExperience.length > 0) {
+      html += `<h2>Work Experience</h2>`;
+      workExperience.forEach(w => {
+        const title = typeof w === 'string' ? w : (w.title || w.position || '');
+        const company = typeof w === 'object' ? (w.company || w.employer || '') : '';
+        const dates = typeof w === 'object' ? (w.dates || '') : '';
+        html += `<p><strong>${title}</strong>`;
+        if (company) html += ` | ${company}`;
+        if (dates) html += ` | ${dates}`;
+        html += `</p>`;
+      });
+    }
+
+    // Community Service
+    const communityService = profile.communityService || [];
+    if (communityService.length > 0) {
+      html += `<h2>Community Service</h2><ul>`;
+      communityService.forEach(c => {
+        const title = typeof c === 'string' ? c : (c.title || c.organization || '');
+        const hours = typeof c === 'object' && c.hours ? ` (${c.hours} hours)` : '';
+        if (title) html += `<li>${title}${hours}</li>`;
+      });
+      html += `</ul>`;
+    }
+
+    // Skills
+    const skills = profile.skills || [];
+    if (skills.length > 0) {
+      html += `<h2>Skills</h2>`;
+      const skillNames = skills.map(s => typeof s === 'string' ? s : (s.name || s.skill || '')).filter(Boolean);
+      html += `<p>${skillNames.join(' • ')}</p>`;
+    }
+
+    // Interests
+    const interests = profile.interests || [];
+    if (interests.length > 0) {
+      html += `<h2>Interests</h2>`;
+      const interestLabels = {
+        arts: 'Visual Arts', music: 'Music', writing: 'Creative Writing',
+        stem: 'STEM', business: 'Business', sports: 'Athletics',
+        service: 'Community Service', leadership: 'Leadership'
+      };
+      const interestNames = interests.map(i => interestLabels[i] || i).filter(Boolean);
+      html += `<p>${interestNames.join(' • ')}</p>`;
+    }
+
+    currentResume = {
+      html,
+      format: 'profile',
+      generatedAt: new Date().toISOString()
+    };
+
+    return currentResume;
+  }
+
   function copyToClipboard() {
     if (!currentResume) {
       throw new Error('No resume to copy. Generate one first.');
@@ -454,9 +621,9 @@ ${currentResume.html}
                 </div>
               </div>
               <div class="rb-actions" id="rb-actions" style="display: none;">
-                <button class="rb-action-btn" id="rb-download-pdf">Print / Save PDF</button>
-                <button class="rb-action-btn" id="rb-download-html">Download HTML</button>
-                <button class="rb-action-btn" id="rb-copy">Copy Text</button>
+                <button class="rb-action-btn" id="rb-download-word">📄 Download Word</button>
+                <button class="rb-action-btn" id="rb-download-pdf">🖨️ Print / PDF</button>
+                <button class="rb-action-btn" id="rb-copy">📋 Copy</button>
               </div>
             </div>
           `}
@@ -514,9 +681,9 @@ ${currentResume.html}
       }
     });
 
-    modal.querySelector('#rb-download-html')?.addEventListener('click', () => {
+    modal.querySelector('#rb-download-word')?.addEventListener('click', () => {
       try {
-        downloadAsHTML();
+        downloadAsWord();
       } catch (e) {
         alert(e.message);
       }
@@ -540,8 +707,10 @@ ${currentResume.html}
     getProfile,
     hasMinimumProfile,
     generateResume,
+    generateResumeFromProfile,
     downloadAsPDF,
     downloadAsHTML,
+    downloadAsWord,
     copyToClipboard,
     getHistory,
     showModal,
