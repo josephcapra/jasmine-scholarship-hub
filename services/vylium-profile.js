@@ -920,7 +920,12 @@ const VyliumProfile = (function() {
           <span>Only your Vylium Type and traits are shared. No personal info.</span>
         </div>
 
-        <button class="btn btn-secondary btn-block" onclick="VyliumProfile.reset(); location.reload();">Retake Assessment</button>
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <button class="btn btn-secondary btn-block" onclick="VyliumProfile.reset(); VyliumProfile.renderAssessment('${containerId}');" style="background: #f3f4f6; color: #6b7280; border: 2px solid #e5e7eb; padding: 12px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%;">
+            🔄 Retake Assessment
+          </button>
+          <div style="text-align: center; color: #9ca3af; font-size: 0.8rem; margin-top: 8px;">Start fresh with new answers</div>
+        </div>
       </div>
     `;
   }
