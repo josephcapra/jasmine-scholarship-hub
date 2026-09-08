@@ -21,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>8</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -79,5 +79,11 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Vylium needs access to your photo library to upload a profile photo.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Vylium needs permission to save images to your photo library.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Vylium needs access to your camera to take a profile photo.</string>
 </dict>
 </plist>
