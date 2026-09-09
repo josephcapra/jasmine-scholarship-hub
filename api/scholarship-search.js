@@ -69,7 +69,7 @@ Return your findings as a JSON array with this structure for each scholarship:
   "reusable_assets": ["Which application assets can be reused here"]
 }`;
 
-    const userPrompt = `Find ${TARGET_SCHOLARSHIP_COUNT || 30} scholarships for this student:
+    const userPrompt = `You MUST find and return AT LEAST ${TARGET_SCHOLARSHIP_COUNT || 50} scholarships for this student. Do not stop until you have ${TARGET_SCHOLARSHIP_COUNT || 50} results:
 
 STUDENT PROFILE:
 ${STUDENT_PROFILE}
