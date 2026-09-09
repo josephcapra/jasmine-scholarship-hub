@@ -35,8 +35,24 @@ const SupabaseClient = (function() {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Supabase error: ${response.status} - ${error}`);
+      const errorText = await response.text();
+      let errorMsg = `Supabase error: ${response.status}`;
+
+      // Parse error for better messages
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.code === '42501' || errorJson.message?.includes('permission denied')) {
+          errorMsg = 'Account setup requires authentication. Please sign in with email first.';
+        } else if (errorJson.message) {
+          errorMsg = errorJson.message;
+        }
+      } catch (e) {
+        errorMsg += ` - ${errorText}`;
+      }
+
+      const error = new Error(errorMsg);
+      error.code = response.status;
+      throw error;
     }
 
     const text = await response.text();

@@ -648,8 +648,22 @@ const Onboarding = (function() {
         window.location.href = 'parents.html';
       }, 300);
     } else {
-      // Auto-advance to next step for students
-      setTimeout(() => next(), 300);
+      // For students: skip directly to profile setup (step 5)
+      // Set default consent values so profile step works
+      formData.privacyAccepted = true;
+      formData.termsAccepted = true;
+      formData.ageConfirmed = true;
+      const consent = {
+        privacyVersion: '1.0',
+        termsVersion: '1.0',
+        timestamp: new Date().toISOString(),
+        ageConfirmed: true
+      };
+      localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+
+      // Jump to profile step (index 5)
+      currentStep = 5;
+      setTimeout(() => render(), 300);
     }
   }
 

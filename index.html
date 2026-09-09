@@ -1047,6 +1047,21 @@
     .btn-block { width: 100%; }
     /* Loading state for async buttons */
     .btn.loading { pointer-events: none; opacity: 0.7; }
+
+    /* SAFE AREA: Ensure buttons never get cut off on notched iPhones */
+    .modal-actions, .action-buttons, .ob-actions, .ss-actions, .popup-actions {
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    /* Ensure fixed bottom elements have safe area padding */
+    [style*="position: fixed"][style*="bottom: 0"],
+    .fixed-bottom {
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+    }
+    /* Prevent horizontal overflow of buttons */
+    .btn, button {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
     .btn.loading::after {
       content: '';
       width: 16px; height: 16px;
@@ -5785,9 +5800,9 @@
         <span class="icon" aria-hidden="true">📋</span>
         Plan
       </button>
-      <button class="nav-item" onclick="window.switchSection('scholarships')" aria-label="Discover scholarships">
-        <span class="icon" aria-hidden="true">🔍</span>
-        Discover
+      <button class="nav-item" onclick="window.switchSection('scholarships')" aria-label="Find scholarships">
+        <span class="icon" aria-hidden="true">🎓</span>
+        Scholarships
       </button>
       <button class="nav-item" onclick="window.switchSection('essays')" aria-label="Write essays">
         <span class="icon" aria-hidden="true">✍️</span>
@@ -6304,10 +6319,10 @@
 
       document.querySelectorAll('.nav-item').forEach(btn => {
         const btnText = btn.textContent.toLowerCase().trim();
-        if (sectionId === 'essays' && btnText.includes('essay')) btn.classList.add('active');
-        if (sectionId === 'scholarships' && btnText.includes('scholar')) btn.classList.add('active');
-        if (sectionId === 'documents' && btnText.includes('doc')) btn.classList.add('active');
-        if (sectionId === 'badges' && btnText.includes('badge')) btn.classList.add('active');
+        const btnSection = btn.getAttribute('onclick')?.match(/switchSection\(['"]([^'"]+)['"]\)/)?.[1];
+        if (btnSection === sectionId) {
+          btn.classList.add('active');
+        }
       });
 
       // Load section-specific content
@@ -10570,6 +10585,7 @@
     // ===========================================
     const tutorialSteps = [
       { icon: '🌟', title: 'Welcome!', text: 'Ready to find and win scholarships? Let\'s get started!' },
+      { icon: '📄', title: 'Save Time with Uploads', text: 'Upload your resume, transcripts, or report cards and we\'ll automatically extract your achievements, GPA, and activities - no typing needed!' },
       { icon: '🎤', title: 'Voice & Interview Mode', text: 'Speak your answers naturally - the app will transcribe for you. Or use Interview Mode to answer guided questions!' },
       { icon: '💜', title: 'You\'ve Got This!', text: 'Every scholarship you apply for is an investment in YOUR future! Keep going!' }
     ];

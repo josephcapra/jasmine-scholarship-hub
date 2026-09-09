@@ -108,6 +108,7 @@ const ParentAuth = (function() {
     modal.innerHTML = `
       <div class="pam-overlay">
         <div class="pam-box">
+          <button class="pam-close-btn" onclick="ParentAuth.closeModal()" aria-label="Close" style="position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 1.6rem; color: #9ca3af; cursor: pointer; padding: 4px 8px; line-height: 1; z-index: 10;">×</button>
           <h2>👋 Welcome, Parent!</h2>
           <p class="pam-subtitle">Connect with your child's scholarship journey</p>
 
@@ -941,7 +942,14 @@ const ParentAuth = (function() {
       }
     } catch (e) {
       console.error('Create child error:', e);
-      errorEl.textContent = e.message || 'Failed to create account';
+      // Provide user-friendly error messages
+      let errorMsg = e.message || 'Failed to create account';
+      if (errorMsg.includes('authentication') || errorMsg.includes('permission')) {
+        errorMsg = 'Please sign in with Google or email first, then try again.';
+      } else if (errorMsg.includes('already exists') || errorMsg.includes('duplicate')) {
+        errorMsg = 'An account with this email already exists. Try connecting with a code instead.';
+      }
+      errorEl.innerHTML = errorMsg;
     }
   }
 

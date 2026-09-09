@@ -384,7 +384,16 @@ const ScholarshipSearch = (function() {
     const status = document.getElementById('ss-search-status');
     if (!status) return;
 
-    status.innerHTML = '<div class="ss-loading">Searching for scholarships...</div>';
+    // Disable search button while searching
+    const searchBtn = document.querySelector('.ss-btn-primary');
+    if (searchBtn) {
+      searchBtn.disabled = true;
+      searchBtn.textContent = 'Searching...';
+      searchBtn.style.opacity = '0.6';
+      searchBtn.style.cursor = 'not-allowed';
+    }
+
+    status.innerHTML = '<div class="ss-loading">Searching for scholarships tailored to your profile...</div>';
 
     // Get selected pathway
     const pathwayInput = document.querySelector('input[name="ss-pathway"]:checked');
@@ -419,12 +428,26 @@ const ScholarshipSearch = (function() {
         importSearchResults(results.scholarships);
         status.innerHTML = `
           <div class="ss-success">
-            Found ${results.scholarships.length} scholarships!
+            🎉 Found ${results.scholarships.length} scholarships!<br>
             They've been added to your list.
           </div>
         `;
+
+        // Auto-close modal after 2 seconds so user can see results
+        setTimeout(() => {
+          closeModal();
+          // Refresh the scholarships display
+          if (typeof loadScholarships === 'function') loadScholarships();
+        }, 2000);
       } else {
-        status.innerHTML = '<div class="ss-warning">No new scholarships found. Try updating your profile.</div>';
+        status.innerHTML = '<div class="ss-warning">No new scholarships found. Try updating your profile with more details.</div>';
+        // Re-enable button
+        if (searchBtn) {
+          searchBtn.disabled = false;
+          searchBtn.textContent = 'Try Again';
+          searchBtn.style.opacity = '1';
+          searchBtn.style.cursor = 'pointer';
+        }
       }
 
     } catch (error) {
@@ -433,6 +456,13 @@ const ScholarshipSearch = (function() {
           Search unavailable right now. Try adding scholarships manually or check back later.
         </div>
       `;
+      // Re-enable button on error
+      if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.textContent = 'Try Again';
+        searchBtn.style.opacity = '1';
+        searchBtn.style.cursor = 'pointer';
+      }
     }
   }
 
