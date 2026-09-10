@@ -107,11 +107,27 @@ const DataSync = (function() {
 
         // Process any pending queue items
         processQueue();
+
+        // Process any pending syncs that queued before student ID was ready
+        if (typeof window.DataSyncProcessPending === 'function') {
+          await window.DataSyncProcessPending();
+        }
+
+        // Dispatch event so other components know sync is complete
+        window.dispatchEvent(new CustomEvent('dataSyncReady', {
+          detail: { studentId: student.id, email: userEmail }
+        }));
+
+        console.log('DataSync ready:', student.id);
       }
 
       return student;
     } catch (e) {
       console.error('DataSync initialization error:', e);
+      // Dispatch error event for UI to handle
+      window.dispatchEvent(new CustomEvent('dataSyncError', {
+        detail: { error: e.message, email: userEmail }
+      }));
       return null;
     }
   }
@@ -485,44 +501,104 @@ if (typeof window !== 'undefined') {
     'jasmine_scholarship_progress',
     'jasmine_custom_scholarships',
     'jasmine_badges',
-    'jasmine_knowledge_vault'
+    'jasmine_knowledge_vault',
+    'jasmine_documents',
+    'jasmine_onboarding_complete'
   ];
   const essayPattern = /^essay_/;
   const interviewPattern = /^interview_/;
 
+  // Pending syncs queue for when student_id isn't ready yet
+  let pendingSyncs = [];
   let syncDebounce = null;
+
+  // Process pending syncs once student ID is available
+  async function processPendingSyncs() {
+    const studentId = localStorage.getItem('jasmine_student_id');
+    if (!studentId || !navigator.onLine || pendingSyncs.length === 0) return;
+
+    const toProcess = [...pendingSyncs];
+    pendingSyncs = [];
+
+    for (const { key, value } of toProcess) {
+      try {
+        await syncKeyToCloud(studentId, key, value);
+      } catch (e) {
+        console.warn('Pending sync failed for', key, e);
+      }
+    }
+  }
+
+  // Sync a specific key to cloud
+  async function syncKeyToCloud(studentId, key, value) {
+    if (key === 'jasmine_student_profile') {
+      const profile = JSON.parse(value);
+      await SupabaseClient.updateStudent(studentId, profile);
+    } else if (key === 'jasmine_knowledge_vault') {
+      const vault = JSON.parse(value);
+      // Sync knowledge vault fields to student profile
+      const updates = {};
+      if (vault.skills) updates.skills = vault.skills;
+      if (vault.achievements) updates.achievements = vault.achievements;
+      if (vault.activities) updates.activities = vault.activities;
+      if (vault.communityService) updates.community_service = vault.communityService;
+      if (Object.keys(updates).length > 0) {
+        await SupabaseClient.updateStudent(studentId, updates);
+      }
+    } else if (essayPattern.test(key) || interviewPattern.test(key)) {
+      const essays = JSON.parse(localStorage.getItem('jasmine_essays_cloud') || '[]');
+      const existing = essays.find(e => e.title === key);
+      if (existing) {
+        await SupabaseClient.updateEssay(existing.id, { content: value });
+      } else {
+        const saved = await SupabaseClient.addEssay(studentId, { title: key, content: value, status: 'draft' });
+        if (saved) {
+          essays.push(saved);
+          originalSetItem('jasmine_essays_cloud', JSON.stringify(essays));
+        }
+      }
+    }
+  }
 
   localStorage.setItem = function(key, value) {
     originalSetItem(key, value);
 
-    // Auto-sync supported keys to cloud
+    // Skip non-syncable keys
+    if (!syncKeys.includes(key) && !essayPattern.test(key) && !interviewPattern.test(key)) {
+      return;
+    }
+
+    // Skip system/internal keys
+    if (key === 'jasmine_student_id' || key === 'jasmine_session_active') {
+      return;
+    }
+
     const studentId = localStorage.getItem('jasmine_student_id');
-    if (!studentId || !navigator.onLine) return;
+
+    // If no student ID yet, queue for later sync
+    if (!studentId) {
+      pendingSyncs.push({ key, value, timestamp: Date.now() });
+      return;
+    }
+
+    if (!navigator.onLine) {
+      // Add to offline queue (handled by existing queue system)
+      return;
+    }
 
     // Debounce sync to avoid too many requests
     clearTimeout(syncDebounce);
     syncDebounce = setTimeout(async () => {
       try {
-        if (key === 'jasmine_student_profile') {
-          const profile = JSON.parse(value);
-          await SupabaseClient.updateStudent(studentId, profile);
-        } else if (key === 'jasmine_scholarship_progress') {
-          // Progress is synced per-scholarship, handled separately
-        } else if (key === 'jasmine_badges') {
-          // Badges handled by addBadge method
-        } else if (essayPattern.test(key) || interviewPattern.test(key)) {
-          const essayKey = key.replace(/^(essay_|interview_)/, '');
-          const essays = JSON.parse(localStorage.getItem('jasmine_essays_cloud') || '[]');
-          const existing = essays.find(e => e.title === key);
-          if (existing) {
-            await SupabaseClient.updateEssay(existing.id, { content: value });
-          } else {
-            await SupabaseClient.addEssay(studentId, { title: key, content: value, status: 'draft' });
-          }
-        }
+        await syncKeyToCloud(studentId, key, value);
+        // Process any pending syncs while we're at it
+        await processPendingSyncs();
       } catch (e) {
         console.warn('Auto-sync failed for', key, e);
       }
     }, 2000); // 2 second debounce
   };
+
+  // Export for manual trigger
+  window.DataSyncProcessPending = processPendingSyncs;
 }
