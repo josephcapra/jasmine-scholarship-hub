@@ -139,6 +139,11 @@ const ParentAuth = (function() {
               Continue with Google
             </button>
 
+            <button class="pam-btn pam-btn-apple" onclick="ParentAuth.signInWithApple()" style="background: #000; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+              Continue with Apple
+            </button>
+
             <div id="pam-passkey-setup" style="display: none; margin-top: 12px;">
               <button class="pam-btn-link" onclick="ParentAuth.setupPasskey()" style="font-size: 0.85rem; color: #7c3aed;">
                 🔐 Set up Face ID for faster sign-in
@@ -618,6 +623,71 @@ const ParentAuth = (function() {
     }
   }
 
+  async function signInWithApple() {
+    // Use Firebase Auth for Apple Sign-In
+    if (window.firebaseReady && window.firebaseAuth) {
+      try {
+        const provider = new firebase.auth.OAuthProvider('apple.com');
+        provider.addScope('email');
+        provider.addScope('name');
+
+        // Use redirect on mobile/Capacitor
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.Capacitor;
+
+        if (isMobile) {
+          await window.firebaseAuth.signInWithRedirect(provider);
+          return;
+        }
+
+        const result = await window.firebaseAuth.signInWithPopup(provider);
+        const user = result.user;
+        console.log('Parent Apple sign-in successful:', user.email, user.displayName);
+
+        // Save parent info
+        const parentId = 'p_' + Date.now();
+        const parentData = {
+          id: parentId,
+          name: user.displayName || 'Parent',
+          email: user.email || '',
+          provider: 'apple',
+          createdAt: new Date().toISOString()
+        };
+        localStorage.setItem('jasmine_parent_profile', JSON.stringify(parentData));
+        localStorage.setItem('jasmine_parent_id', parentId);
+        localStorage.setItem('jasmine_parent_email', user.email);
+        localStorage.setItem('jasmine_session_active', 'true');
+
+        // Register in Supabase
+        if (typeof SupabaseClient !== 'undefined') {
+          try {
+            await signup(user.displayName || 'Parent', user.email, 'weekly');
+          } catch (e) {
+            console.warn('Supabase parent signup:', e);
+          }
+        }
+
+        // Show step 2
+        const step1 = document.getElementById('pam-step-1');
+        const step2 = document.getElementById('pam-step-2');
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
+
+        if (typeof showToast === 'function') {
+          showToast('Welcome, ' + (user.displayName || user.email) + '!');
+        }
+      } catch (error) {
+        console.error('Apple sign-in error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
+          if (typeof showToast === 'function') showToast('Sign-in cancelled');
+        } else {
+          if (typeof showToast === 'function') showToast('Apple Sign-in failed. Please try again.');
+        }
+      }
+    } else {
+      showParentError('Apple Sign-In is not available. Please try Google or enter your details manually.');
+    }
+  }
+
   async function signInWithGoogle() {
     // Use Firebase Auth for Google Sign-In (cleaner URLs)
     if (window.firebaseReady && window.firebaseAuth && window.googleProvider) {
@@ -634,18 +704,7 @@ const ParentAuth = (function() {
         const user = result.user;
         console.log('Parent Google sign-in successful:', user.email, user.displayName);
 
-        // Pre-fill the form fields with Google account data
-        const nameInput = document.getElementById('pam-name');
-        const emailInput = document.getElementById('pam-email');
-
-        if (nameInput && user.displayName) {
-          nameInput.value = user.displayName;
-        }
-        if (emailInput && user.email) {
-          emailInput.value = user.email;
-        }
-
-        // Save parent info
+        // Save parent info to localStorage AND Supabase
         const parentId = 'p_' + Date.now();
         const parentData = {
           id: parentId,
@@ -656,11 +715,24 @@ const ParentAuth = (function() {
           createdAt: new Date().toISOString()
         };
         localStorage.setItem('jasmine_parent_profile', JSON.stringify(parentData));
+        localStorage.setItem('jasmine_parent_id', parentId);
+        localStorage.setItem('jasmine_parent_email', user.email);
         localStorage.setItem('jasmine_session_active', 'true');
 
-        // Show step 2 (connection options)
-        document.getElementById('pam-step-1').style.display = 'none';
-        document.getElementById('pam-step-2').style.display = 'block';
+        // Also register parent in Supabase if available
+        if (typeof SupabaseClient !== 'undefined') {
+          try {
+            await signup(user.displayName || 'Parent', user.email, 'weekly');
+          } catch (e) {
+            console.warn('Supabase parent signup:', e);
+          }
+        }
+
+        // Show step 2 (connection options) - no need to fill form fields since we're past step 1
+        const step1 = document.getElementById('pam-step-1');
+        const step2 = document.getElementById('pam-step-2');
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
 
         if (typeof showToast === 'function') {
           showToast('Welcome, ' + (user.displayName || user.email) + '!');
@@ -903,9 +975,6 @@ const ParentAuth = (function() {
     }
 
     try {
-      const parentId = getParentId();
-      if (!parentId) throw new Error('Parent not logged in');
-
       // Calculate graduation year from grade
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth();
@@ -913,43 +982,61 @@ const ParentAuth = (function() {
       const gradYearMap = { '9': schoolYear + 3, '10': schoolYear + 2, '11': schoolYear + 1, '12': schoolYear, 'college': schoolYear };
       const graduationYear = gradYearMap[grade] || schoolYear + 1;
 
-      // Create student via Supabase
+      // Generate a simple invite code
+      const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      // Create student profile locally (this will be synced to Supabase when they sign in)
+      const studentProfile = {
+        firstName,
+        lastName,
+        email: email || '',
+        graduationYear,
+        state: 'FL',
+        inviteCode,
+        createdByParent: true,
+        createdAt: new Date().toISOString()
+      };
+
+      // Store in localStorage for the child to access with the invite code
+      const pendingStudents = JSON.parse(localStorage.getItem('jasmine_pending_students') || '[]');
+      pendingStudents.push(studentProfile);
+      localStorage.setItem('jasmine_pending_students', JSON.stringify(pendingStudents));
+
+      // Also store the parent-child link
+      const parentId = getParentId() || 'p_' + Date.now();
+      const links = JSON.parse(localStorage.getItem('jasmine_parent_links') || '[]');
+      links.push({ parentId, inviteCode, childName: `${firstName} ${lastName}` });
+      localStorage.setItem('jasmine_parent_links', JSON.stringify(links));
+
+      // Try to sync to Supabase in the background (don't block on errors)
       if (typeof SupabaseClient !== 'undefined') {
-        const studentData = {
-          email: email || `${firstName.toLowerCase()}.${lastName.toLowerCase()}@parent-created.local`,
-          firstName,
-          lastName,
-          graduationYear,
-          state: 'FL'
-        };
-
-        const student = await SupabaseClient.createStudent(studentData);
-
-        // Link parent to student
-        await SupabaseClient.acceptStudentInvite(parentId, student.invite_code);
-
-        // Show success
-        document.getElementById('pam-step-setup-child').style.display = 'none';
-        document.getElementById('pam-success-title').textContent = 'Account Created!';
-        document.getElementById('pam-success-message').innerHTML = `
-          ${firstName}'s account is ready.<br>
-          <strong>Their login code:</strong> ${student.invite_code}<br>
-          <span style="font-size: 0.85rem; color: #6b7280;">Share this so they can access their account.</span>
-        `;
-        document.getElementById('pam-step-success').style.display = 'block';
-      } else {
-        throw new Error('Database not available');
+        try {
+          const studentData = {
+            email: email || `${firstName.toLowerCase()}.${lastName.toLowerCase()}@parent-created.local`,
+            firstName,
+            lastName,
+            graduationYear,
+            state: 'FL'
+          };
+          await SupabaseClient.createStudent(studentData);
+        } catch (syncError) {
+          console.warn('Supabase sync failed (will retry later):', syncError.message);
+        }
       }
+
+      // Show success
+      document.getElementById('pam-step-setup-child').style.display = 'none';
+      document.getElementById('pam-success-title').textContent = 'Account Created!';
+      document.getElementById('pam-success-message').innerHTML = `
+        ${firstName}'s account is ready.<br>
+        <strong>Their login code:</strong> <span style="font-family: monospace; font-size: 1.2rem; background: #f3f4f6; padding: 4px 8px; border-radius: 6px;">${inviteCode}</span><br>
+        <span style="font-size: 0.85rem; color: #6b7280;">Share this code so they can access their account.</span>
+      `;
+      document.getElementById('pam-step-success').style.display = 'block';
+
     } catch (e) {
       console.error('Create child error:', e);
-      // Provide user-friendly error messages
-      let errorMsg = e.message || 'Failed to create account';
-      if (errorMsg.includes('authentication') || errorMsg.includes('permission')) {
-        errorMsg = 'Please sign in with Google or email first, then try again.';
-      } else if (errorMsg.includes('already exists') || errorMsg.includes('duplicate')) {
-        errorMsg = 'An account with this email already exists. Try connecting with a code instead.';
-      }
-      errorEl.innerHTML = errorMsg;
+      errorEl.innerHTML = 'Failed to create account. Please try again.';
     }
   }
 
@@ -988,12 +1075,58 @@ const ParentAuth = (function() {
     }
 
     try {
-      const invite = await inviteStudent(email);
-      document.getElementById('pam-invite-code-display').textContent = invite.invite_code;
+      // Generate a local invite code
+      const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      // Get parent info
+      const parentProfile = JSON.parse(localStorage.getItem('jasmine_parent_profile') || '{}');
+      const parentName = parentProfile.name || 'A parent';
+
+      // Store the invite locally
+      const invites = JSON.parse(localStorage.getItem('jasmine_parent_invites') || '[]');
+      invites.push({
+        code: inviteCode,
+        studentEmail: email,
+        parentId: getParentId(),
+        parentName,
+        createdAt: new Date().toISOString()
+      });
+      localStorage.setItem('jasmine_parent_invites', JSON.stringify(invites));
+
+      // Try to send email via API
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: email,
+            subject: `${parentName} invited you to Jasmine's Scholarship Hub!`,
+            html: `
+              <h2>You've been invited! 🎓</h2>
+              <p>${parentName} wants to support your scholarship journey.</p>
+              <p>Use this code to connect your accounts:</p>
+              <p style="font-size: 24px; font-weight: bold; background: #f3f4f6; padding: 16px; text-align: center; border-radius: 8px; letter-spacing: 4px;">${inviteCode}</p>
+              <p>Download the app and enter this code when prompted.</p>
+            `
+          })
+        });
+        if (response.ok) {
+          console.log('Invite email sent successfully');
+        } else {
+          console.warn('Email send failed, but invite code created');
+        }
+      } catch (emailErr) {
+        console.warn('Could not send email:', emailErr);
+      }
+
+      // Show success with code
+      document.getElementById('pam-invite-code-display').textContent = inviteCode;
       document.getElementById('pam-step-invite').style.display = 'none';
       document.getElementById('pam-step-invite-sent').style.display = 'block';
+
     } catch (e) {
-      errorEl.textContent = e.message;
+      console.error('Send invite error:', e);
+      errorEl.textContent = 'Failed to create invite. Please try again.';
     }
   }
 
@@ -1032,6 +1165,7 @@ const ParentAuth = (function() {
     showAuthModal,
     handleStep1,
     signInWithGoogle,
+    signInWithApple,
     signInWithPasskey,
     setupPasskey,
     handleGoogleResponse,

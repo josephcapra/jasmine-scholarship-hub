@@ -173,8 +173,23 @@
         console.log('Firebase user signed in:', user.email, user.displayName);
         window.firebaseUser = user;
 
-        // Store user profile data from Google
-        const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+        // Check if this is a different user than before - if so, clear old profile
+        const existingProfile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+        const previousEmail = existingProfile.email;
+
+        // If logging in with a different email, reset the profile to avoid data mixing
+        let profile = {};
+        if (previousEmail && previousEmail !== user.email) {
+          console.log('Different user detected, clearing old profile. Old:', previousEmail, 'New:', user.email);
+          // Clear old user data
+          localStorage.removeItem('jasmine_student_profile');
+          localStorage.removeItem('jasmine_knowledge_vault');
+          localStorage.removeItem('jasmine_onboarding_complete');
+          localStorage.removeItem('jasmine_documents');
+          localStorage.removeItem('jasmine_student_id');
+        } else {
+          profile = existingProfile;
+        }
 
         if (user.displayName) {
           const names = user.displayName.split(' ');
@@ -12987,7 +13002,8 @@
         return;
       }
 
-      if (!ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
+      // Skip email allowlist check if ALLOWED_EMAILS is null (open registration)
+      if (ALLOWED_EMAILS && !ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email)) {
         showToast('This email is not authorized');
         return;
       }
