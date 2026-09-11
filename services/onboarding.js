@@ -641,12 +641,27 @@ const Onboarding = (function() {
     });
     if (btnElement) btnElement.classList.add('selected');
 
-    // If parent, redirect to parent page after a short delay
+    // If parent, stay in-app and go to parent login step
     if (role === 'parent') {
+      // Set flag for parent flow
+      localStorage.setItem('jasmine_user_role', 'parent');
+      // Jump to login step (handled by completing onboarding and showing login)
+      formData.privacyAccepted = true;
+      formData.termsAccepted = true;
+      formData.ageConfirmed = true;
+      const consent = {
+        privacyVersion: '1.0',
+        termsVersion: '1.0',
+        timestamp: new Date().toISOString(),
+        ageConfirmed: true
+      };
+      localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+      localStorage.setItem(STORAGE_KEY, 'true');
+      // Close onboarding and show login screen with parent mode
+      hideOnboarding();
       setTimeout(() => {
-        localStorage.setItem('jasmine_wizard_seen', 'true');
-        window.location.href = 'parents.html';
-      }, 300);
+        showParentLoginMode();
+      }, 100);
     } else {
       // For students: skip directly to profile setup (step 5)
       // Set default consent values so profile step works
@@ -887,6 +902,40 @@ const Onboarding = (function() {
   function close() {
     const overlay = document.getElementById('onboarding-overlay');
     if (overlay) overlay.remove();
+  }
+
+  function hideOnboarding() {
+    close();
+  }
+
+  function showParentLoginMode() {
+    // Show the main login screen with parent mode indicator
+    const loginScreen = document.getElementById('login-screen');
+    if (loginScreen) {
+      loginScreen.style.display = 'flex';
+
+      // Add parent mode indicator if not already present
+      if (!document.getElementById('parent-mode-indicator')) {
+        const indicator = document.createElement('div');
+        indicator.id = 'parent-mode-indicator';
+        indicator.style.cssText = 'background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid #bae6fd; color: #0c4a6e; padding: 16px; border-radius: 12px; margin: 0 20px 16px; text-align: center;';
+        indicator.innerHTML = `
+          <div style="font-size: 1.5rem; margin-bottom: 4px;">👨‍👩‍👧</div>
+          <div style="font-weight: 700; font-size: 1rem;">Parent/Guardian Sign In</div>
+          <div style="font-size: 0.85rem; color: #0369a1; margin-top: 4px;">Track your child's scholarship progress</div>
+        `;
+        const loginBox = loginScreen.querySelector('.login-box');
+        if (loginBox) {
+          loginBox.insertBefore(indicator, loginBox.firstChild);
+        }
+      }
+
+      // Update the hint text
+      const hint = loginScreen.querySelector('.hint');
+      if (hint) {
+        hint.textContent = 'Sign in to connect with your child\'s account';
+      }
+    }
   }
 
   function handleMultiUpload(event, fieldId, category) {
@@ -1132,6 +1181,8 @@ const Onboarding = (function() {
     handleMultiUpload,
     removeUploadedFile,
     getProfile,
-    close
+    close,
+    hideOnboarding,
+    showParentLoginMode
   };
 })();

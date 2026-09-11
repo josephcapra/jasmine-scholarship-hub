@@ -297,6 +297,10 @@
       100% { background-position: 0% 50%; }
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
@@ -4539,10 +4543,10 @@
         <div class="card-title" style="margin-bottom: 12px; color: #be185d;">👨‍👩‍👧 Connect Parents</div>
         <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;">Let your parents track your progress and send encouragement (up to 2 parents).</p>
 
-        <div id="parent-invite-code" style="background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 12px;">
+        <div id="parent-invite-code" style="background: white; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 12px; max-width: 100%; overflow: hidden;">
           <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px;">Your parent invite code:</div>
-          <div id="my-invite-code" style="font-size: 1.8rem; font-weight: 800; letter-spacing: 4px; color: #be185d;">--------</div>
-          <button onclick="copyInviteCode()" style="margin-top: 12px; padding: 10px 20px; background: #be185d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📋 Copy Invite Link</button>
+          <div id="my-invite-code" style="font-size: 1.5rem; font-weight: 800; letter-spacing: 3px; color: #be185d; word-break: break-all;">--------</div>
+          <button onclick="copyInviteCode()" style="margin-top: 12px; padding: 10px 20px; background: #be185d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; max-width: 100%;">📋 Copy Invite Link</button>
           <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 8px;">Copies a message with link - just paste and send!</div>
         </div>
 
@@ -13418,6 +13422,13 @@
     }
 
     function showApp() {
+      // Check if this is a parent login - show child connection instead of main app
+      const userRole = localStorage.getItem('jasmine_user_role');
+      if (userRole === 'parent') {
+        showParentChildConnection();
+        return;
+      }
+
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('main-app').classList.add('visible');
 
@@ -13432,6 +13443,133 @@
       loadRewards();
       loadGoalData();
     }
+
+    function showParentChildConnection() {
+      document.getElementById('login-screen').classList.add('hidden');
+
+      // Create child connection modal if not exists
+      let modal = document.getElementById('parent-child-connect-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'parent-child-connect-modal';
+        modal.style.cssText = 'position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; padding: 20px; overflow-y: auto;';
+        modal.innerHTML = `
+          <div style="max-width: 400px; margin: auto; width: 100%;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="font-size: 3rem; margin-bottom: 12px;">👨‍👩‍👧</div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; color: var(--text);">Connect With Your Child</h2>
+              <p style="color: var(--muted); font-size: 0.9rem;">Enter the invite code your child shared with you</p>
+            </div>
+
+            <div id="parent-connect-error" style="display: none; background: #fef2f2; border: 2px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 10px; margin-bottom: 16px; text-align: center;"></div>
+            <div id="parent-connect-success" style="display: none; background: #d1fae5; border: 2px solid #6ee7b7; color: #065f46; padding: 12px; border-radius: 10px; margin-bottom: 16px; text-align: center;"></div>
+
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Invite Code</label>
+              <input type="text" id="parent-invite-code-input" placeholder="ABCD1234" maxlength="8" style="width: 100%; padding: 16px; font-size: 1.5rem; text-align: center; letter-spacing: 4px; text-transform: uppercase; border: 2px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text);">
+            </div>
+
+            <button onclick="connectWithChildCode()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;">
+              Connect
+            </button>
+
+            <div style="text-align: center; margin-top: 20px;">
+              <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 12px;">Don't have a code?</p>
+              <button onclick="skipParentConnection()" style="background: none; border: none; color: #8b5cf6; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                Skip for now
+              </button>
+            </div>
+
+            <div style="margin-top: 32px; padding: 16px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px; border: 1px solid #bae6fd;">
+              <p style="font-size: 0.85rem; color: #0369a1; text-align: center;">
+                <strong>How to get a code:</strong><br>
+                Your child can find their invite code in the app under<br>
+                Profile → Invite Parents
+              </p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      } else {
+        modal.style.display = 'flex';
+      }
+    }
+
+    async function connectWithChildCode() {
+      const code = document.getElementById('parent-invite-code-input')?.value?.trim()?.toUpperCase();
+      const errorEl = document.getElementById('parent-connect-error');
+      const successEl = document.getElementById('parent-connect-success');
+
+      if (!code || code.length < 6) {
+        errorEl.textContent = 'Please enter a valid invite code';
+        errorEl.style.display = 'block';
+        successEl.style.display = 'none';
+        return;
+      }
+
+      try {
+        errorEl.style.display = 'none';
+
+        // Try to link with child using the code
+        if (typeof SupabaseClient !== 'undefined' && SupabaseClient.acceptStudentInvite) {
+          const parentEmail = localStorage.getItem('jasmine_student_email') || currentUserEmail;
+          if (!parentEmail) {
+            errorEl.textContent = 'Login session not found. Please try again.';
+            errorEl.style.display = 'block';
+            return;
+          }
+
+          // First get or create parent record
+          let parent = await SupabaseClient.getParentByEmail(parentEmail);
+          if (!parent) {
+            parent = await SupabaseClient.createParent({ email: parentEmail, name: parentEmail.split('@')[0] });
+          }
+
+          localStorage.setItem('jasmine_parent_id', parent.id);
+          localStorage.setItem('jasmine_parent_email', parentEmail);
+
+          const result = await SupabaseClient.acceptStudentInvite(parent.id, code);
+
+          if (result && result.success) {
+            successEl.textContent = 'Connected! Redirecting to dashboard...';
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+
+            setTimeout(() => {
+              completeParentSetup();
+            }, 1500);
+          } else {
+            errorEl.textContent = result?.error || 'Invalid invite code. Please check and try again.';
+            errorEl.style.display = 'block';
+          }
+        } else {
+          errorEl.textContent = 'Connection service unavailable. Please try again later.';
+          errorEl.style.display = 'block';
+        }
+      } catch (e) {
+        console.error('Parent connect error:', e);
+        errorEl.textContent = e.message || 'Connection failed. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    }
+
+    function skipParentConnection() {
+      completeParentSetup();
+    }
+
+    function completeParentSetup() {
+      // Clear parent mode flag
+      localStorage.removeItem('jasmine_user_role');
+
+      // Hide the connection modal
+      const modal = document.getElementById('parent-child-connect-modal');
+      if (modal) modal.remove();
+
+      // Redirect to parent dashboard (in-app)
+      window.location.href = 'parents.html';
+    }
+    window.connectWithChildCode = connectWithChildCode;
+    window.skipParentConnection = skipParentConnection;
 
     function showLogin() {
       document.getElementById('main-app').classList.remove('visible');
