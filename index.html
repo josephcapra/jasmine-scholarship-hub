@@ -241,43 +241,52 @@
   <script src="services/error-tracking.js"></script>
   <script src="services/error-ui.js"></script>
   <script src="services/trust-banner.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --jazz-purple: #7c3aed;
-      --jazz-purple-dark: #5b21b6;
+      --jazz-purple: #8b5cf6;
+      --jazz-purple-dark: #7c3aed;
       --jazz-pink: #ec4899;
-      --jazz-gold: #f59e0b;
+      --jazz-gold: #ca8a04;
       --jazz-teal: #14b8a6;
-      --jazz-green: #10b981;
-      --bg: #faf5ff;
+      --jazz-green: #16a34a;
+      --bg: #f5f3ff;
       --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --success: #10b981;
-      --shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+      --text: #18122b;
+      --muted: #6e6789;
+      --border: #e8e4f3;
+      --success: #16a34a;
+      --shadow: 0 8px 40px rgba(139, 92, 246, 0.15);
       --danger: #ef4444;
-      --warning: #f59e0b;
+      --warning: #ca8a04;
+      --purple-soft: #ede9fe;
+      --pink-soft: #fce7f3;
+      --accent-soft: #dcfce7;
     }
     /* Dark mode support */
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg: #1a1025;
-        --card: #2d2235;
-        --text: #f3e8ff;
-        --muted: #a78bfa;
-        --border: #4c1d95;
-        --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        --bg: #0c0a14;
+        --card: #18122b;
+        --text: #f5f3ff;
+        --muted: #a099b8;
+        --border: #2d2248;
+        --shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        --purple-soft: #3b2f5b;
+        --pink-soft: #4a1f3d;
+        --accent-soft: #14532d;
       }
     }
     :root[data-theme="dark"] {
-      --bg: #1a1025;
-      --card: #2d2235;
-      --text: #f3e8ff;
-      --muted: #a78bfa;
-      --border: #4c1d95;
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      --bg: #0c0a14;
+      --card: #18122b;
+      --text: #f5f3ff;
+      --muted: #a099b8;
+      --border: #2d2248;
+      --shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+      --purple-soft: #3b2f5b;
+      --pink-soft: #4a1f3d;
+      --accent-soft: #14532d;
     }
     /* Evolving gradient animation - like pool LED lights */
     @keyframes gradientShift {
@@ -289,32 +298,11 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(-45deg, 
-        #faf5ff, #f3e8ff, #ede9fe, #e9d5ff, 
-        #fce7f3, #fbcfe8, #f5d0fe, #faf5ff);
-      background-size: 400% 400%;
-      animation: gradientShift 30s ease infinite;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       padding-bottom: 80px;
-    }
-    /* Dark mode animated gradient */
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) body {
-        background: linear-gradient(-45deg,
-          #1a1025, #2d1f3d, #1e1b4b, #312e81,
-          #4c1d95, #3b0764, #581c87, #1a1025);
-        background-size: 400% 400%;
-        animation: gradientShift 30s ease infinite;
-      }
-    }
-    :root[data-theme="dark"] body {
-      background: linear-gradient(-45deg,
-        #1a1025, #2d1f3d, #1e1b4b, #312e81,
-        #4c1d95, #3b0764, #581c87, #1a1025);
-      background-size: 400% 400%;
-      animation: gradientShift 30s ease infinite;
     }
 
     /* Header - Clean Modern Design */
@@ -1761,23 +1749,23 @@
     }
 
     .scholarship-card {
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      border: 1px solid #e5e7eb;
+      background: var(--card);
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
       transition: all 0.2s;
     }
     .scholarship-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transform: translateY(-1px);
+      box-shadow: 0 12px 48px rgba(139, 92, 246, 0.2);
+      transform: translateY(-2px);
     }
     .scholarship-card.urgent {
-      border-left: 4px solid #dc2626;
+      border-left: 4px solid var(--danger);
     }
     .scholarship-card.strong-match {
-      border-left: 4px solid #7c3aed;
+      border-left: 4px solid var(--jazz-purple);
     }
     .scholarship-card.quick-win {
       border-left: 4px solid #22c55e;
@@ -1787,12 +1775,12 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
-    .match-score.high { background: #d1fae5; color: #065f46; }
+    .match-score.high { background: var(--accent-soft); color: var(--jazz-green); }
     .match-score.medium { background: #fef3c7; color: #92400e; }
     .match-score.low { background: #fee2e2; color: #991b1b; }
 
@@ -1828,21 +1816,22 @@
     }
 
     .why-match {
-      background: #f0fdf4;
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-top: 10px;
-      font-size: 0.85rem;
+      background: var(--purple-soft);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 12px;
+      font-size: 0.9rem;
     }
     .why-match-title {
       font-weight: 600;
-      color: #166534;
-      margin-bottom: 4px;
-      font-size: 0.8rem;
+      color: var(--jazz-purple);
+      margin-bottom: 6px;
+      font-size: 0.85rem;
     }
     .why-match-reasons {
-      color: #15803d;
-      font-size: 0.8rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      line-height: 1.5;
     }
 
     .unlocked-badge {
