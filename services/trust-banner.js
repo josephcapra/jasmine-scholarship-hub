@@ -46,9 +46,6 @@ const TrustBanner = (function() {
           <span class="trust-icon">${MESSAGES[0].icon}</span>
           <span class="trust-text">${MESSAGES[0].text}</span>
         </div>
-        <div class="trust-dots">
-          ${MESSAGES.map((_, i) => `<span class="trust-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`).join('')}
-        </div>
       </div>
     `;
 
@@ -107,30 +104,6 @@ const TrustBanner = (function() {
           opacity: 1;
           transform: translateY(0);
         }
-        .trust-dots {
-          display: flex;
-          justify-content: center;
-          gap: 6px;
-          margin-top: 10px;
-        }
-        .trust-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: rgba(0,0,0,0.2);
-          cursor: pointer;
-          transition: background 0.3s, transform 0.3s;
-        }
-        .trust-dot.active {
-          background: #10b981;
-          transform: scale(1.3);
-        }
-        .trust-banner-dark .trust-dot {
-          background: rgba(255,255,255,0.3);
-        }
-        .trust-banner-dark .trust-dot.active {
-          background: #10b981;
-        }
         @keyframes trustPulse {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.1); }
@@ -153,7 +126,6 @@ const TrustBanner = (function() {
     // Set up rotation
     const iconEl = container.querySelector('.trust-icon');
     const textEl = container.querySelector('.trust-text');
-    const dots = container.querySelectorAll('.trust-dot');
 
     function showMessage(index) {
       currentIndex = index;
@@ -174,22 +146,8 @@ const TrustBanner = (function() {
         iconEl.classList.add('fade-in');
         textEl.classList.remove('fade-out');
         textEl.classList.add('fade-in');
-
-        // Update dots
-        dots.forEach((dot, i) => {
-          dot.classList.toggle('active', i === index);
-        });
       }, 500);
     }
-
-    // Click handlers for dots
-    dots.forEach(dot => {
-      dot.addEventListener('click', () => {
-        const index = parseInt(dot.dataset.index);
-        showMessage(index);
-        restartInterval();
-      });
-    });
 
     function restartInterval() {
       if (intervalId) clearInterval(intervalId);

@@ -240,7 +240,7 @@
   <script src="services/auth-flow.js"></script>
   <script src="services/error-tracking.js"></script>
   <script src="services/error-ui.js"></script>
-  <script src="services/trust-banner.js"></script>
+  <script src="services/trust-banner.js?v=3"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -12974,6 +12974,11 @@
     async function checkAuth() {
       // Developer mode bypass - add ?dev=true to URL to skip login
       const urlParams = new URLSearchParams(window.location.search);
+      // "Open Student App" from the parent dashboard
+      if (urlParams.get('role') === 'student') {
+        localStorage.setItem('jasmine_user_role', 'student');
+        history.replaceState(null, '', window.location.pathname);
+      }
       if (urlParams.get('dev') === 'true') {
         console.log('Developer mode enabled - bypassing login');
         localStorage.setItem('jasmine_dev_mode', 'true');

@@ -42,8 +42,9 @@
   <script src="services/supabase.js?v=3"></script>
   <script src="services/passkey-auth.js"></script>
   <script src="services/parent-auth.js?v=3"></script>
+  <script src="scholarships-data.js"></script>
   <script src="services/error-tracking.js"></script>
-  <script src="services/trust-banner.js"></script>
+  <script src="services/trust-banner.js?v=3"></script>
   <style>
     :root {
       --jazz-purple: #7c3aed;
@@ -649,7 +650,7 @@
       </div>
     </div>
 
-    <button class="btn btn-secondary" onclick="window.location.href='/'">
+    <button class="btn btn-secondary" onclick="window.location.href='/?role=student'">
       📱 Open Student App
     </button>
 
@@ -742,7 +743,7 @@
     <div id="content-documents" style="display: none;">
       <div class="card" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 2px solid #6ee7b7;">
         <div class="card-title" style="color: #065f46;">📁 Family Documents</div>
-        <p style="color: #059669; font-size: 0.9rem; margin-bottom: 16px;">Upload documents to help with scholarship applications</p>
+        <p style="color: #059669; font-size: 0.9rem; margin-bottom: 16px;">Upload a résumé and we'll build their profile from it. Add other documents to help with applications.</p>
       </div>
 
       <div class="card">
@@ -750,6 +751,7 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <select id="doc-type" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; color: #000;">
             <option value="">Select document type...</option>
+            <option value="resume">📄 Résumé (builds their profile automatically)</option>
             <option value="financial">📊 Financial Documents (FAFSA, Tax Info)</option>
             <option value="recommendation">📝 Recommendation Letters</option>
             <option value="transcript">📋 Transcripts / Report Cards</option>
@@ -759,7 +761,8 @@
           </select>
           <input type="file" id="doc-file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem;">
           <textarea id="doc-notes" placeholder="Notes about this document (optional)" style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; min-height: 80px; color: #000;"></textarea>
-          <button class="btn btn-primary" onclick="uploadDocument()">Upload Document</button>
+          <button class="btn btn-primary" id="upload-doc-btn" onclick="uploadDocument()">Upload Document</button>
+          <div id="resume-parse-result" style="display: none; background: #d1fae5; border: 2px solid #6ee7b7; color: #065f46; padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; line-height: 1.5;"></div>
         </div>
       </div>
 
@@ -786,6 +789,7 @@
 
   <script>
     let currentStudentId = null;
+    let currentStudent = null;
     let linkedStudents = [];
 
     // Toast notification
@@ -902,6 +906,7 @@
 
       const student = link.students;
       currentStudentId = student.id;
+      currentStudent = student;
 
       // Update tabs
       document.querySelectorAll('.student-tab').forEach((tab, i) => {
@@ -1268,6 +1273,50 @@
     }
 
     // Scholarship search
+    function searchLocalScholarships(query) {
+      if (typeof SCHOLARSHIPS === 'undefined') return [];
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+      return SCHOLARSHIPS.filter(s => {
+        const hay = [s.name, s.title, s.organization, s.notes, s.note, ...(s.fit || []), ...(s.supports || [])].join(' ').toLowerCase();
+        return terms.some(t => hay.includes(t));
+      }).map(s => ({
+        name: s.name || s.title,
+        amount: s.amount,
+        deadline: s.deadline,
+        description: s.notes || s.note || '',
+        url: s.url
+      }));
+    }
+
+    // The AI search API returns its own field names; flatten to what the cards expect
+    function normalizeAiScholarship(s) {
+      return {
+        name: s.scholarship_name || s.name || s.title,
+        sponsor: s.sponsor,
+        amount: (s.award && s.award.amount) || s.amount || 'Varies',
+        deadline: s.deadline,
+        description: Array.isArray(s.why_this_student_matches) ? s.why_this_student_matches.join(' ') : (s.description || ''),
+        url: s.official_url || s.url
+      };
+    }
+
+    function renderScholarshipCards(list) {
+      return list.map(s => `
+        <div class="progress-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: start; gap: 8px;">
+            <div class="name">${s.name || ''}</div>
+            <span class="status status-progress" style="white-space: nowrap;">${s.amount || 'Varies'}</span>
+          </div>
+          ${s.deadline ? `<div style="font-size: 0.8rem; color: var(--muted);">Deadline: ${s.deadline}</div>` : ''}
+          ${s.description ? `<p style="font-size: 0.85rem; color: var(--muted); margin: 0;">${String(s.description).slice(0, 160)}</p>` : ''}
+          <div style="display: flex; gap: 8px;">
+            ${s.url ? `<a href="${s.url}" target="_blank" rel="noopener" style="flex: 1; padding: 8px; text-align: center; background: #f3f4f6; color: #374151; border-radius: 8px; text-decoration: none; font-weight: 600;">🔗 View</a>` : ''}
+            <button onclick="saveScholarship('${encodeURIComponent(JSON.stringify(s))}')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink)); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">⭐ Save</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
     async function searchScholarships(query) {
       if (!query) {
         query = document.getElementById('parent-scholarship-search').value.trim();
@@ -1276,44 +1325,59 @@
         showToast('Please enter a search term');
         return;
       }
+      document.getElementById('parent-scholarship-search').value = query;
 
       const resultsEl = document.getElementById('parent-search-results');
-      resultsEl.innerHTML = '<p style="text-align: center; padding: 20px;">🔍 Searching...</p>';
+      const local = searchLocalScholarships(query);
+      const localHtml = local.length
+        ? `<div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">From our scholarship list (${local.length})</div>${renderScholarshipCards(local)}`
+        : '';
+      resultsEl.innerHTML = localHtml + '<p id="ai-search-status" style="text-align: center; padding: 20px; color: var(--muted);">🔍 Searching the web for scholarships that match ' + (currentStudent?.first_name || 'your student') + '...</p><div id="ai-search-results"></div>';
 
+      const st = currentStudent || {};
+      const studentName = [st.first_name, st.last_name].filter(Boolean).join(' ') || 'Student';
       try {
         const response = await fetch('/api/scholarship-search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query, limit: 10 })
+          body: JSON.stringify({
+            CURRENT_DATE: new Date().toDateString(),
+            CITY: st.location_city || '',
+            COUNTY: '',
+            STATE: st.location_state || 'Florida',
+            ZIP_CODE: st.location_zip || '',
+            GRADE_LEVEL: st.graduation_year ? `Class of ${st.graduation_year}` : 'High school',
+            GRADUATION_YEAR: st.graduation_year || '',
+            STUDENT_PROFILE: `${studentName}. GPA: ${st.gpa || 'not provided'}. School: ${st.school || 'not provided'}. Interests: ${(st.interests || []).join(', ') || query}.`,
+            RESUME_TEXT: [...(st.achievements || []), ...(st.activities || []), ...(st.skills || [])].join('; ') || 'Not provided',
+            ADDITIONAL_BACKGROUND: `Parent is looking for scholarships related to: ${query}`,
+            INTENDED_MAJOR_OR_CAREER: query,
+            FINANCIAL_INFORMATION: 'Not provided',
+            TARGET_SCHOLARSHIP_COUNT: 10
+          })
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          const scholarships = data.scholarships || data.results || [];
+        const statusEl = document.getElementById('ai-search-status');
+        const aiEl = document.getElementById('ai-search-results');
+        if (!statusEl || !aiEl) return;
 
-          if (scholarships.length === 0) {
-            resultsEl.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No scholarships found. Try different keywords.</p>';
-          } else {
-            resultsEl.innerHTML = scholarships.map(s => `
-              <div class="progress-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                  <div class="name">${s.name || s.title}</div>
-                  <span class="status status-progress">${s.amount || 'Varies'}</span>
-                </div>
-                <p style="font-size: 0.85rem; color: var(--muted); margin: 0;">${(s.description || '').slice(0, 100)}...</p>
-                <div style="display: flex; gap: 8px;">
-                  <button onclick="saveScholarship('${encodeURIComponent(JSON.stringify(s))}')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, var(--jazz-purple), var(--jazz-pink)); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">⭐ Save</button>
-                  <button onclick="recommendScholarship('${encodeURIComponent(JSON.stringify(s))}')" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #78350f; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">📤 Send to Student</button>
-                </div>
-              </div>
-            `).join('');
-          }
-        } else {
-          resultsEl.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px;">Search failed. Please try again.</p>';
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          statusEl.innerHTML = `<span style="color: #ef4444;">Web search unavailable${err.error ? ': ' + err.error : ''}.</span>`;
+          return;
         }
+        const data = await response.json();
+        const ai = (data.scholarships || []).map(normalizeAiScholarship).filter(s => s.name);
+        if (ai.length === 0) {
+          statusEl.textContent = local.length ? 'No additional web results.' : 'No scholarships found. Try different keywords.';
+          return;
+        }
+        statusEl.outerHTML = `<div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin: 16px 0 8px;">Web search results (${ai.length})</div>`;
+        aiEl.innerHTML = renderScholarshipCards(ai);
       } catch (e) {
         console.error('Search error:', e);
-        resultsEl.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px;">Search failed. Please try again.</p>';
+        const statusEl = document.getElementById('ai-search-status');
+        if (statusEl) statusEl.innerHTML = '<span style="color: #ef4444;">Web search failed. Please try again.</span>';
       }
     }
 
@@ -1376,26 +1440,98 @@
         showToast('Please select a file');
         return;
       }
+      if (!currentStudentId) {
+        showToast('Connect with your student first');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File is too large (max 10MB)');
+        return;
+      }
 
-      const doc = {
-        id: Date.now(),
-        type: docType,
-        fileName: file.name,
-        fileSize: file.size,
-        notes,
-        studentId: currentStudentId,
-        uploadedAt: new Date().toISOString()
-      };
+      const btn = document.getElementById('upload-doc-btn');
+      btn.disabled = true;
+      btn.textContent = docType === 'resume' ? 'Reading résumé...' : 'Uploading...';
 
-      uploadedDocs.push(doc);
-      localStorage.setItem('parent_documents', JSON.stringify(uploadedDocs));
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
-      typeEl.value = '';
-      fileEl.value = '';
-      notesEl.value = '';
+        const doc = {
+          id: Date.now(),
+          type: docType,
+          fileName: file.name,
+          fileSize: file.size,
+          notes,
+          studentId: currentStudentId,
+          uploadedAt: new Date().toISOString(),
+          dataUrl
+        };
+        uploadedDocs.push(doc);
+        try {
+          localStorage.setItem('parent_documents', JSON.stringify(uploadedDocs));
+        } catch (quotaErr) {
+          delete doc.dataUrl;
+          localStorage.setItem('parent_documents', JSON.stringify(uploadedDocs));
+        }
 
-      renderUploadedDocs();
-      showToast('Document uploaded! 📁');
+        if (docType === 'resume') {
+          await parseResumeIntoProfile(file, dataUrl);
+        } else {
+          showToast('Document uploaded! 📁');
+        }
+
+        typeEl.value = '';
+        fileEl.value = '';
+        notesEl.value = '';
+        renderUploadedDocs();
+      } catch (e) {
+        console.error('Upload error:', e);
+        showToast('Upload failed: ' + (e.message || 'please try again'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Upload Document';
+      }
+    }
+
+    // Extract profile details from the résumé and save them to the student's record
+    async function parseResumeIntoProfile(file, dataUrl) {
+      const resultEl = document.getElementById('resume-parse-result');
+      const response = await fetch('/api/extract-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, fileType: file.type, fileData: dataUrl })
+      });
+      if (!response.ok) throw new Error('Could not read the résumé');
+
+      const data = await response.json();
+      const p = data.profile || {};
+      if (Object.keys(p).length === 0) {
+        resultEl.style.display = 'block';
+        resultEl.textContent = 'Résumé saved, but no profile details could be read from it.';
+        return;
+      }
+
+      await SupabaseClient.updateStudent(currentStudentId, p);
+
+      const found = [
+        p.school && `School: ${p.school}`,
+        p.gpa && `GPA: ${p.gpa}`,
+        p.graduationYear && `Graduates: ${p.graduationYear}`,
+        p.achievements?.length && `${p.achievements.length} achievements`,
+        p.activities?.length && `${p.activities.length} activities`,
+        p.skills?.length && `${p.skills.length} skills`,
+        p.interests?.length && `${p.interests.length} interests`
+      ].filter(Boolean);
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = `<strong>✓ Profile updated from résumé</strong><br>${found.join('<br>') || 'Basic details saved.'}`;
+      showToast('Profile built from résumé! ✨');
+
+      await loadParentDashboard();
     }
 
     function renderUploadedDocs() {
@@ -1420,6 +1556,7 @@
 
     function getDocTypeLabel(type) {
       const labels = {
+        'resume': '📄 Résumé',
         'financial': '📊 Financial',
         'recommendation': '📝 Recommendation',
         'transcript': '📋 Transcript',
