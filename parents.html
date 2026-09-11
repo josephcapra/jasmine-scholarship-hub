@@ -1509,7 +1509,11 @@
       if (!response.ok) throw new Error('Could not read the résumé');
 
       const data = await response.json();
-      const p = data.profile || {};
+      const p = { ...(data.profile || {}) };
+      // The parent already named the student; a résumé may use a legal/full name, so never overwrite identity fields
+      if (currentStudent?.first_name) delete p.firstName;
+      if (currentStudent?.last_name) delete p.lastName;
+      delete p.email;
       if (Object.keys(p).length === 0) {
         resultEl.style.display = 'block';
         resultEl.textContent = 'Résumé saved, but no profile details could be read from it.';
