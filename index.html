@@ -232,10 +232,10 @@
     setupAuthStateListener();
   </script>
   <script src="scholarships-data.js"></script>
-  <script src="services/onboarding.js?v=2"></script>
+  <script src="services/onboarding.js?v=3"></script>
   <script src="services/encrypted-storage.js"></script>
   <script src="services/supabase-auth.js"></script>
-  <script src="services/supabase.js"></script>
+  <script src="services/supabase.js?v=3"></script>
   <script src="services/data-sync.js"></script>
   <script src="services/auth-flow.js"></script>
   <script src="services/error-tracking.js"></script>
@@ -4153,6 +4153,27 @@
       font-size: 0.85rem;
       cursor: pointer;
     }
+    .role-toggle {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0 8px;
+    }
+    .role-opt {
+      flex: 1;
+      padding: 12px 8px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .role-opt.selected {
+      border-color: var(--jazz-purple);
+      background: var(--purple-soft);
+      color: var(--jazz-purple);
+    }
   </style>
 </head>
 <body>
@@ -4169,7 +4190,13 @@
     <div class="login-box">
       <div class="logo">🌟</div>
       <h1>Jasmine's Scholarship Hub</h1>
-      <div class="sub">Sign in to track your scholarships!</div>
+      <div class="sub">Find scholarships. Track progress. Win money for college.</div>
+
+      <div class="role-toggle" id="login-role-toggle">
+        <button type="button" class="role-opt selected" data-role="student" onclick="setLoginRole('student')">🎓 I'm a Student</button>
+        <button type="button" class="role-opt" data-role="parent" onclick="setLoginRole('parent')">👨‍👩‍👧 I'm a Parent</button>
+      </div>
+      <div class="sub" id="login-role-hint">Sign in to start finding scholarships</div>
 
       <!-- Email/Password Login -->
       <div id="login-form">
@@ -13425,7 +13452,7 @@
       // Check if this is a parent login - show child connection instead of main app
       const userRole = localStorage.getItem('jasmine_user_role');
       if (userRole === 'parent') {
-        showParentChildConnection();
+        routeParent();
         return;
       }
 
@@ -13444,136 +13471,52 @@
       loadGoalData();
     }
 
-    function showParentChildConnection() {
-      document.getElementById('login-screen').classList.add('hidden');
 
-      // Create child connection modal if not exists
-      let modal = document.getElementById('parent-child-connect-modal');
-      if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'parent-child-connect-modal';
-        modal.style.cssText = 'position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; padding: 20px; overflow-y: auto;';
-        modal.innerHTML = `
-          <div style="max-width: 400px; margin: auto; width: 100%;">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <div style="font-size: 3rem; margin-bottom: 12px;">👨‍👩‍👧</div>
-              <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; color: var(--text);">Connect With Your Child</h2>
-              <p style="color: var(--muted); font-size: 0.9rem;">Enter the invite code your child shared with you</p>
-            </div>
-
-            <div id="parent-connect-error" style="display: none; background: #fef2f2; border: 2px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 10px; margin-bottom: 16px; text-align: center;"></div>
-            <div id="parent-connect-success" style="display: none; background: #d1fae5; border: 2px solid #6ee7b7; color: #065f46; padding: 12px; border-radius: 10px; margin-bottom: 16px; text-align: center;"></div>
-
-            <div style="margin-bottom: 20px;">
-              <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Invite Code</label>
-              <input type="text" id="parent-invite-code-input" placeholder="ABCD1234" maxlength="8" style="width: 100%; padding: 16px; font-size: 1.5rem; text-align: center; letter-spacing: 4px; text-transform: uppercase; border: 2px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text);">
-            </div>
-
-            <button onclick="connectWithChildCode()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;">
-              Connect
-            </button>
-
-            <div style="text-align: center; margin-top: 20px;">
-              <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 12px;">Don't have a code?</p>
-              <button onclick="skipParentConnection()" style="background: none; border: none; color: #8b5cf6; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
-                Skip for now
-              </button>
-            </div>
-
-            <div style="margin-top: 32px; padding: 16px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px; border: 1px solid #bae6fd;">
-              <p style="font-size: 0.85rem; color: #0369a1; text-align: center;">
-                <strong>How to get a code:</strong><br>
-                Your child can find their invite code in the app under<br>
-                Profile → Invite Parents
-              </p>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(modal);
-      } else {
-        modal.style.display = 'flex';
+    function setLoginRole(role) {
+      localStorage.setItem('jasmine_user_role', role);
+      document.querySelectorAll('#login-role-toggle .role-opt').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.role === role);
+      });
+      const hint = document.getElementById('login-role-hint');
+      if (hint) {
+        hint.textContent = role === 'parent'
+          ? "Sign in to follow your child's scholarship journey"
+          : 'Sign in to start finding scholarships';
       }
     }
+    window.setLoginRole = setLoginRole;
 
-    async function connectWithChildCode() {
-      const code = document.getElementById('parent-invite-code-input')?.value?.trim()?.toUpperCase();
-      const errorEl = document.getElementById('parent-connect-error');
-      const successEl = document.getElementById('parent-connect-success');
-
-      if (!code || code.length < 6) {
-        errorEl.textContent = 'Please enter a valid invite code';
-        errorEl.style.display = 'block';
-        successEl.style.display = 'none';
+    // Parent login: make sure a parent record exists, then open the parent dashboard in-app
+    async function routeParent() {
+      const profile = JSON.parse(localStorage.getItem('jasmine_student_profile') || '{}');
+      const email = (currentUserEmail || profile.email || localStorage.getItem('jasmine_student_email') || '').toLowerCase();
+      if (!email) {
+        showToast('We could not read your email. Please sign in again.');
+        showLogin();
         return;
       }
-
+      const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || email.split('@')[0];
       try {
-        errorEl.style.display = 'none';
-
-        // Try to link with child using the code
-        if (typeof SupabaseClient !== 'undefined' && SupabaseClient.acceptStudentInvite) {
-          const parentEmail = localStorage.getItem('jasmine_student_email') || currentUserEmail;
-          if (!parentEmail) {
-            errorEl.textContent = 'Login session not found. Please try again.';
-            errorEl.style.display = 'block';
-            return;
-          }
-
-          // First get or create parent record
-          let parent = await SupabaseClient.getParentByEmail(parentEmail);
-          if (!parent) {
-            parent = await SupabaseClient.createParent({ email: parentEmail, name: parentEmail.split('@')[0] });
-          }
-
-          localStorage.setItem('jasmine_parent_id', parent.id);
-          localStorage.setItem('jasmine_parent_email', parentEmail);
-
-          const result = await SupabaseClient.acceptStudentInvite(parent.id, code);
-
-          if (result && result.success) {
-            successEl.textContent = 'Connected! Redirecting to dashboard...';
-            successEl.style.display = 'block';
-            errorEl.style.display = 'none';
-
-            setTimeout(() => {
-              completeParentSetup();
-            }, 1500);
-          } else {
-            errorEl.textContent = result?.error || 'Invalid invite code. Please check and try again.';
-            errorEl.style.display = 'block';
-          }
-        } else {
-          errorEl.textContent = 'Connection service unavailable. Please try again later.';
-          errorEl.style.display = 'block';
-        }
+        let parent = await SupabaseClient.getParentByEmail(email);
+        if (!parent) parent = await SupabaseClient.createParent({ name, email, reportFrequency: 'weekly' });
+        localStorage.setItem('jasmine_parent_id', parent.id);
+        localStorage.setItem('jasmine_parent_email', email);
+        localStorage.setItem('jasmine_parent_profile', JSON.stringify({ id: parent.id, name: parent.name || name, email }));
       } catch (e) {
-        console.error('Parent connect error:', e);
-        errorEl.textContent = e.message || 'Connection failed. Please try again.';
-        errorEl.style.display = 'block';
+        console.error('Parent setup error:', e);
+        showToast('Could not set up your parent account. Please try again.');
+        showLogin();
+        return;
       }
-    }
-
-    function skipParentConnection() {
-      completeParentSetup();
-    }
-
-    function completeParentSetup() {
-      // Clear parent mode flag
-      localStorage.removeItem('jasmine_user_role');
-
-      // Hide the connection modal
-      const modal = document.getElementById('parent-child-connect-modal');
-      if (modal) modal.remove();
-
-      // Redirect to parent dashboard (in-app)
+      localStorage.setItem('jasmine_onboarding_complete', 'true');
       window.location.href = 'parents.html';
     }
-    window.connectWithChildCode = connectWithChildCode;
-    window.skipParentConnection = skipParentConnection;
+    window.routeParent = routeParent;
 
     function showLogin() {
       document.getElementById('main-app').classList.remove('visible');
       document.getElementById('login-screen').classList.remove('hidden');
+      setLoginRole(localStorage.getItem('jasmine_user_role') === 'parent' ? 'parent' : 'student');
       // Clear password field for security
       const passwordField = document.getElementById('login-password');
       if (passwordField) passwordField.value = '';

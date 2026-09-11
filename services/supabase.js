@@ -324,6 +324,39 @@ const SupabaseClient = (function() {
     return data && data[0] ? data[0] : null;
   }
 
+  // Parent creates the child's profile and is linked to it immediately
+  async function createChildForParent(parentId, profile) {
+    const email = profile.email || `${profile.firstName}.${profile.lastName}.${Date.now()}@parent-created.local`.toLowerCase();
+
+    // createStudent stores the new id as this device's student; keep the parent device's value intact
+    const previousLocalStudentId = getLocalStudentId();
+    let student = await getStudentByEmail(email);
+    if (!student) {
+      student = await createStudent({ ...profile, email });
+      if (previousLocalStudentId) localStorage.setItem(LOCAL_STUDENT_ID_KEY, previousLocalStudentId);
+      else localStorage.removeItem(LOCAL_STUDENT_ID_KEY);
+    }
+
+    const existing = await request(`parent_student_links?parent_id=eq.${parentId}&student_id=eq.${student.id}&status=eq.active`);
+    if (!existing || !existing[0]) {
+      const link = await request('parent_student_links', {
+        method: 'POST',
+        body: {
+          parent_id: parentId,
+          student_id: student.id,
+          invite_code: student.invite_code || generateInviteCode(),
+          invite_email: profile.email || null,
+          invited_by: 'parent',
+          status: 'active',
+          confirmed_at: new Date().toISOString()
+        }
+      });
+      if (!link || !link[0]) throw new Error('Failed to link student to parent');
+    }
+
+    return { student, inviteCode: student.invite_code };
+  }
+
   // Get linked students for a parent
   async function getLinkedStudents(parentId) {
     const links = await request(`parent_student_links?parent_id=eq.${parentId}&status=eq.active&select=*,students(*)`);
@@ -511,6 +544,7 @@ const SupabaseClient = (function() {
     acceptParentInvite,
     createStudentInvite,
     acceptStudentInvite,
+    createChildForParent,
     getLinkedStudents,
     getLinkedParents,
     generateInviteCode,

@@ -623,133 +623,88 @@ const ParentAuth = (function() {
     }
   }
 
-  async function signInWithApple() {
-    // Use Firebase Auth for Apple Sign-In
-    if (window.firebaseReady && window.firebaseAuth) {
-      try {
-        const provider = new firebase.auth.OAuthProvider('apple.com');
-        provider.addScope('email');
-        provider.addScope('name');
+  function isNativeApp() {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  }
 
-        // Use redirect on mobile/Capacitor
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.Capacitor;
+  // Shared completion for Google/Apple: register the parent in Supabase (real id), then show connection options
+  async function finishSocialSignIn(user, providerName) {
+    const email = (user.email || '').toLowerCase();
+    if (!email) {
+      showParentError(`We could not read your email from ${providerName}. Please enter your details manually.`);
+      return;
+    }
+    const name = user.displayName || 'Parent';
+    try {
+      await signup(name, email, 'weekly');
+    } catch (e) {
+      console.error('Parent signup error:', e);
+      showParentError('Could not save your account: ' + e.message);
+      return;
+    }
+    localStorage.setItem('jasmine_session_active', 'true');
+    localStorage.setItem('jasmine_parent_profile', JSON.stringify({
+      id: getParentId(),
+      name,
+      email,
+      photoURL: user.photoURL || '',
+      provider: providerName.toLowerCase(),
+      createdAt: new Date().toISOString()
+    }));
 
-        if (isMobile) {
-          await window.firebaseAuth.signInWithRedirect(provider);
-          return;
-        }
+    const step1 = document.getElementById('pam-step-1');
+    const step2 = document.getElementById('pam-step-2');
+    if (step1) step1.style.display = 'none';
+    if (step2) step2.style.display = 'block';
+    if (typeof showToast === 'function') showToast('Welcome, ' + name + '!');
+  }
 
-        const result = await window.firebaseAuth.signInWithPopup(provider);
-        const user = result.user;
-        console.log('Parent Apple sign-in successful:', user.email, user.displayName);
-
-        // Save parent info
-        const parentId = 'p_' + Date.now();
-        const parentData = {
-          id: parentId,
-          name: user.displayName || 'Parent',
-          email: user.email || '',
-          provider: 'apple',
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem('jasmine_parent_profile', JSON.stringify(parentData));
-        localStorage.setItem('jasmine_parent_id', parentId);
-        localStorage.setItem('jasmine_parent_email', user.email);
-        localStorage.setItem('jasmine_session_active', 'true');
-
-        // Register in Supabase
-        if (typeof SupabaseClient !== 'undefined') {
-          try {
-            await signup(user.displayName || 'Parent', user.email, 'weekly');
-          } catch (e) {
-            console.warn('Supabase parent signup:', e);
-          }
-        }
-
-        // Show step 2
-        const step1 = document.getElementById('pam-step-1');
-        const step2 = document.getElementById('pam-step-2');
-        if (step1) step1.style.display = 'none';
-        if (step2) step2.style.display = 'block';
-
-        if (typeof showToast === 'function') {
-          showToast('Welcome, ' + (user.displayName || user.email) + '!');
-        }
-      } catch (error) {
-        console.error('Apple sign-in error:', error);
-        if (error.code === 'auth/popup-closed-by-user') {
-          if (typeof showToast === 'function') showToast('Sign-in cancelled');
-        } else {
-          if (typeof showToast === 'function') showToast('Apple Sign-in failed. Please try again.');
-        }
+  async function socialSignIn(providerName, nativeMethod, webProvider) {
+    // Native app: stay in-app via the Capacitor plugin (a web redirect would open Safari/Chrome)
+    if (isNativeApp()) {
+      const plugin = window.Capacitor.Plugins && window.Capacitor.Plugins.FirebaseAuthentication;
+      if (!plugin) {
+        showParentError(`${providerName} Sign-In is not available in this build. Please enter your details manually.`);
+        return;
       }
-    } else {
-      showParentError('Apple Sign-In is not available. Please try Google or enter your details manually.');
+      try {
+        const result = await plugin[nativeMethod]();
+        if (result && result.user) await finishSocialSignIn(result.user, providerName);
+      } catch (error) {
+        console.error(`Native ${providerName} sign-in error:`, error);
+        if (!/cancel/i.test(error.message || '')) showParentError(`${providerName} sign-in failed. Please try again.`);
+      }
+      return;
+    }
+
+    if (!window.firebaseReady || !window.firebaseAuth) {
+      showParentError(`${providerName} Sign-In is still loading. Please try again in a moment or enter your details manually.`);
+      return;
+    }
+    try {
+      const result = await window.firebaseAuth.signInWithPopup(webProvider());
+      await finishSocialSignIn(result.user, providerName);
+    } catch (error) {
+      console.error(`${providerName} sign-in error:`, error);
+      if (error.code === 'auth/popup-closed-by-user') {
+        if (typeof showToast === 'function') showToast('Sign-in cancelled');
+      } else {
+        showParentError(`${providerName} sign-in failed. Please try again.`);
+      }
     }
   }
 
-  async function signInWithGoogle() {
-    // Use Firebase Auth for Google Sign-In (cleaner URLs)
-    if (window.firebaseReady && window.firebaseAuth && window.googleProvider) {
-      try {
-        // Use redirect on mobile/Capacitor (popups don't work in WebViews)
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.Capacitor;
+  function signInWithApple() {
+    return socialSignIn('Apple', 'signInWithApple', () => {
+      const provider = new firebase.auth.OAuthProvider('apple.com');
+      provider.addScope('email');
+      provider.addScope('name');
+      return provider;
+    });
+  }
 
-        if (isMobile) {
-          await window.firebaseAuth.signInWithRedirect(window.googleProvider);
-          return; // Page redirects, auth state listener handles the rest
-        }
-
-        const result = await window.firebaseAuth.signInWithPopup(window.googleProvider);
-        const user = result.user;
-        console.log('Parent Google sign-in successful:', user.email, user.displayName);
-
-        // Save parent info to localStorage AND Supabase
-        const parentId = 'p_' + Date.now();
-        const parentData = {
-          id: parentId,
-          name: user.displayName || '',
-          email: user.email || '',
-          photoURL: user.photoURL || '',
-          provider: 'google',
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem('jasmine_parent_profile', JSON.stringify(parentData));
-        localStorage.setItem('jasmine_parent_id', parentId);
-        localStorage.setItem('jasmine_parent_email', user.email);
-        localStorage.setItem('jasmine_session_active', 'true');
-
-        // Also register parent in Supabase if available
-        if (typeof SupabaseClient !== 'undefined') {
-          try {
-            await signup(user.displayName || 'Parent', user.email, 'weekly');
-          } catch (e) {
-            console.warn('Supabase parent signup:', e);
-          }
-        }
-
-        // Show step 2 (connection options) - no need to fill form fields since we're past step 1
-        const step1 = document.getElementById('pam-step-1');
-        const step2 = document.getElementById('pam-step-2');
-        if (step1) step1.style.display = 'none';
-        if (step2) step2.style.display = 'block';
-
-        if (typeof showToast === 'function') {
-          showToast('Welcome, ' + (user.displayName || user.email) + '!');
-        }
-      } catch (error) {
-        console.error('Google sign-in error:', error);
-        if (error.code === 'auth/popup-closed-by-user') {
-          if (typeof showToast === 'function') showToast('Sign-in cancelled');
-        } else {
-          if (typeof showToast === 'function') showToast('Sign-in failed. Please try again.');
-        }
-      }
-    } else {
-      // Fallback to redirect OAuth if Firebase not ready
-      console.log('Firebase not ready, using redirect OAuth');
-      redirectToGoogleOAuth();
-    }
+  function signInWithGoogle() {
+    return socialSignIn('Google', 'signInWithGoogle', () => window.googleProvider);
   }
 
   function showGoogleButton() {
@@ -974,69 +929,38 @@ const ParentAuth = (function() {
       return;
     }
 
+    const parentId = getParentId();
+    if (!parentId) {
+      errorEl.textContent = 'Please sign in first';
+      return;
+    }
+
     try {
-      // Calculate graduation year from grade
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth();
       const schoolYear = currentMonth >= 8 ? currentYear + 1 : currentYear;
       const gradYearMap = { '9': schoolYear + 3, '10': schoolYear + 2, '11': schoolYear + 1, '12': schoolYear, 'college': schoolYear };
       const graduationYear = gradYearMap[grade] || schoolYear + 1;
 
-      // Generate a simple invite code
-      const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      // Create student profile locally (this will be synced to Supabase when they sign in)
-      const studentProfile = {
+      const { inviteCode } = await SupabaseClient.createChildForParent(parentId, {
         firstName,
         lastName,
         email: email || '',
         graduationYear,
-        state: 'FL',
-        inviteCode,
-        createdByParent: true,
-        createdAt: new Date().toISOString()
-      };
+        state: 'FL'
+      });
 
-      // Store in localStorage for the child to access with the invite code
-      const pendingStudents = JSON.parse(localStorage.getItem('jasmine_pending_students') || '[]');
-      pendingStudents.push(studentProfile);
-      localStorage.setItem('jasmine_pending_students', JSON.stringify(pendingStudents));
-
-      // Also store the parent-child link
-      const parentId = getParentId() || 'p_' + Date.now();
-      const links = JSON.parse(localStorage.getItem('jasmine_parent_links') || '[]');
-      links.push({ parentId, inviteCode, childName: `${firstName} ${lastName}` });
-      localStorage.setItem('jasmine_parent_links', JSON.stringify(links));
-
-      // Try to sync to Supabase in the background (don't block on errors)
-      if (typeof SupabaseClient !== 'undefined') {
-        try {
-          const studentData = {
-            email: email || `${firstName.toLowerCase()}.${lastName.toLowerCase()}@parent-created.local`,
-            firstName,
-            lastName,
-            graduationYear,
-            state: 'FL'
-          };
-          await SupabaseClient.createStudent(studentData);
-        } catch (syncError) {
-          console.warn('Supabase sync failed (will retry later):', syncError.message);
-        }
-      }
-
-      // Show success
       document.getElementById('pam-step-setup-child').style.display = 'none';
       document.getElementById('pam-success-title').textContent = 'Account Created!';
       document.getElementById('pam-success-message').innerHTML = `
-        ${firstName}'s account is ready.<br>
+        ${firstName}'s account is ready and linked to you.<br>
         <strong>Their login code:</strong> <span style="font-family: monospace; font-size: 1.2rem; background: #f3f4f6; padding: 4px 8px; border-radius: 6px;">${inviteCode}</span><br>
         <span style="font-size: 0.85rem; color: #6b7280;">Share this code so they can access their account.</span>
       `;
       document.getElementById('pam-step-success').style.display = 'block';
-
     } catch (e) {
       console.error('Create child error:', e);
-      errorEl.innerHTML = 'Failed to create account. Please try again.';
+      errorEl.textContent = 'Failed to create account: ' + (e.message || 'please try again');
     }
   }
 
